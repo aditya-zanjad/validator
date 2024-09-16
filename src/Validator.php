@@ -131,7 +131,7 @@ class Validator
     public function validate(): static
     {
         // Loop through each set of rules.
-        foreach ($this->rules as $path => $rules) {
+        foreach ($this->rules as $field => $rules) {
             /**
              * Convert the string of rules to an array of rules.
              * For example, 'required|string|min:1' to '['required', 'string', 'min:1']'
@@ -141,33 +141,26 @@ class Validator
             }
 
             if (!is_array($rules)) {
-                throw new Exception("[Developer][Exception]: The validation rules for the field [{$path}] must be specified either in a STRING or ARRAY format.");
+                throw new Exception("[Developer][Exception]: The validation rules for the field [{$field}] must be specified either in a STRING or ARRAY format.");
             }
 
             // Validate the value at the given array path against the given set of validation rules.
             foreach ($rules as $rule) {
-                if ($rule instanceof ValidationRule) {
-                    $this->assertInstanceRule($rule, $path);
+                $result = match (gettype($rule)) {
+                    'string'    =>  $this->evaluateStrRule($rule, $field),
+                    'object'    =>  $rule instanceof ValidationRule ? $rule->check($field, $this->data[$field]) : call_user_func($rule, $field, $this->data[$field]),
+                    default     =>  throw new Exception("[Developer][Exception]: The validation rules for the field [{$field}] should be either [String] / [ValidationRule Instance] / [Callback].")
+                };
+                
+                if ($result === true) {
+                    continue;
                 }
 
-                if (is_callable($rule)) {
-                    $this->assertCallbackRule($path, $rule);
+                if ($result === false) {
+                    $result = 'The attribute :{attribute} is invalid';
                 }
 
-                if (!is_string($rule)) {
-                    throw new Exception("[Developer][Exception]: The validation rules for the field [{$path}] should be either in STRING, OBJECT or CALLABLE format.");
-                }
-
-                $rule       =   explode(':', $rule);
-                $rule[0]    =   strtoupper($rule[0]);
-                $rule[0]    =   Rule::tryFromName($rule[0]);   
-
-                if (is_null($rule[0])) {
-                    throw new Exception("[Developer][Exception]: The validation rule [{$rule[0]}] is invalid");
-                }
-
-                $rule[1] = explode(',', $rule[1] ?? '');
-                $this->assertInstanceRule(new ($rule[0])(...$rule[1]), $path);
+                $this->addError($field, $result);
 
                 if ($this->abortOnFailure) {
                     break 2;
@@ -206,51 +199,28 @@ class Validator
     }
 
     /**
-     * Validate the given attribute against the given validation rule instance.
+     * Validate the array field against the given stringified rule.
      *
-     * @param   \AdityaZanjad\Validator\Interfaces\ValidationRule $rule
-     * @param   string                                                  $attribute
-     *
-     * @return  void
+     * @param   string  $rule
+     * @param   string  $field
+     * 
+     * @throws  \Exception
+     * 
+     * @return  bool|string
      */
-    protected function assertInstanceRule(ValidationRule $rule, string $attribute): void
+    protected function evaluateStrRule(string $rule, string $field): bool|string
     {
-        $result = $rule->check($attribute, $this->data[$attribute] ?? null);
+        $rule       =   explode(':', $rule);
+        $rule[0]    =   Rule::tryFromName($rule[0]);
 
-        if ($result === true) {
-            return;
+        if (is_null($rule[0])) {
+            throw new Exception("[Developer][Exception]: The validation rules for the field [{$field}] should be either in STRING, OBJECT or CALLABLE format.");
         }
 
-        if (is_string($result)) {
-            $this->addError($attribute, $result);
-            return;
-        }
+        $rule[1]    =   explode(',', $rule[1] ?? '');
+        $rule[0]    =   new $rule[0](...$rule[1]);
 
-        $this->addError($attribute);
-    }
-
-    /**
-     * Validate the given attribute against the given callback rule.
-     *
-     * @param   callable(string $attribute, mixed $value): bool|string  $callback
-     * @param   string                                                  $attribute
-     *
-     * @return  void
-     */
-    protected function assertCallbackRule(callable $callback, string $attribute): void
-    {
-        $result = call_user_func($callback, $attribute, $this->data[$attribute]);
-
-        if ($result === true) {
-            return;
-        }
-
-        if (is_string($result)) {
-            $this->addError($attribute, $result);
-            return;
-        }
-
-        $this->addError($attribute);
+        return $rule[0]->check($field, $this->data[$field] ?? null);
     }
 
     /**
@@ -271,9 +241,9 @@ class Validator
      * 
      * @return  void
      */
-    public function addError(string $attribute, string $error = 'The field {:attribute} is invalid.'): void
+    public function addError(string $attribute, string $error): void
     {
-        $this->errors[$attribute][] = str_replace('{:attribute}', $attribute, $error);
+        $this->errors[$attribute][] = str_replace(':{attribute}', $attribute, $error);
     }
 
     /**

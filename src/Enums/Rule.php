@@ -15,16 +15,16 @@ use AdityaZanjad\Validator\Rules\Required\RequiredWithout;
 
 enum Rule: string
 {
-    case ARRAY              =   TypeArr::class;
-    case EMAIL              =   Email::class;
-    case FLOAT              =   TypeFloat::class;
-    case STRING             =   TypeStr::class;
-    case BOOLEAN            =   TypeBool::class;
-    case INTEGER            =   TypeInt::class;
-    case REQUIRED           =   Required::class;
-    case REQUIRED_IF        =   RequiredIf::class;
-    case REQUIRED_WITH      =   RequiredWith::class;
-    case REQUIRED_WITHOUT   =   RequiredWithout::class;
+    case array              =   TypeArr::class;
+    case email              =   Email::class;
+    case float              =   TypeFloat::class;
+    case string             =   TypeStr::class;
+    case boolean            =   TypeBool::class;
+    case integer            =   TypeInt::class;
+    case required           =   Required::class;
+    case required_if        =   RequiredIf::class;
+    case required_with      =   RequiredWith::class;
+    case required_without   =   RequiredWithout::class;
 
 
     /**
@@ -34,7 +34,7 @@ enum Rule: string
      * 
      * @return string
      */
-    public static function tryFromName(string $name): string
+    public static function tryFromName(string $name): null|string
     {
         if (!defined("self::{$name}")) {
             return null;
