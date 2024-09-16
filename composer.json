@@ -1,0 +1,24 @@
+{
+    "name": "aditya-zanjad/validator",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "aditya-zanjad",
+            "email": "adityazanjad474@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "AdityaZanjad\\Validator\\": "src/"
+        },
+        "files": [
+            "src/Utils/Arr.php",
+            "src/Utils/Str.php"
+        ]
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11"
+    }
+}
