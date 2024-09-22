@@ -38,6 +38,28 @@ function array_to_dot(array $arr): array
     return $result;
 }
 
+/**
+ * Fetch the element from the array based on the given array dot notation path.
+ *
+ * @param   array<int|string, mixed>    &$arr
+ * @param   string                      $path
+ *
+ * @return  bool
+ */
+function array_value_exists(array &$arr, string $path): bool
+{
+    $path = explode('.', $path);
+
+    foreach ($path as $param) {
+        if (!isset($arr[$param])) {
+            return false;
+        }
+
+        $arr = &$arr[$param];
+    }
+
+    return true;
+}
 
 /**
  * Fetch the element from the array based on the given array dot notation path.

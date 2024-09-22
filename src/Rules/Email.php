@@ -15,7 +15,7 @@ class Email implements ValidationRule
     public function check(string $attribute, mixed $value): bool|string
     {
         if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-            return 'The field {:attribute} must be a valid email address.';
+            return "The field {$attribute} must be a valid email address.";
         }
 
         return true;

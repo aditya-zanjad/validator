@@ -1,6 +1,6 @@
 <?php
 
-namespace AdityaZanjad\Validator\Rules;
+namespace AdityaZanjad\Validator\Rules\Primitives;
 
 use AdityaZanjad\Validator\Interfaces\ValidationRule;
 
@@ -15,7 +15,7 @@ class TypeInt implements ValidationRule
     public function check(string $attribute, mixed $value): bool|string
     {
         if (!filter_var($value, FILTER_VALIDATE_INT)) {
-            return 'The field {:attribute} must be a string.';
+            return "The field {$attribute} must be a string.";
         }
 
         return true;

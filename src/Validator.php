@@ -5,8 +5,10 @@ namespace AdityaZanjad\Validator;
 use Exception;
 use InvalidArgumentException;
 use AdityaZanjad\Validator\Enums\Rule;
-use AdityaZanjad\Validator\Exception\ValidationFailed;
 use AdityaZanjad\Validator\Interfaces\ValidationRule;
+use AdityaZanjad\Validator\Exception\ValidationFailed;
+
+use function AdityaZanjad\Validator\Utils\{str_after};
 use function AdityaZanjad\Validator\Utils\{array_value_first, array_to_dot};
 
 /**
@@ -48,14 +50,14 @@ class Validator
      *
      * @var array<string, array> $errors
      */
-    protected array $errors;
+    protected array $errors = [];
 
     /**
      * Decide whether or not to stop on the first validation failure.
-     * 
+     *
      * Setting this option to true will stop the validation process immediately on the
      * first validation failure.
-     * 
+     *
      * @var bool $abortOnFailure
      */
     protected bool $abortOnFailure = false;
@@ -73,15 +75,11 @@ class Validator
      * @param   array<int|string, mixed>      $data
      * @param   array<string, string|array>   $rules
      * @param   array<string, string>         $messages
-     * 
+     *
      * @throws  \InvalidArgumentException
      */
     public function __construct(array $data, array $rules, array $messages = [])
     {
-        if (empty($data)) {
-            throw new InvalidArgumentException("[Developer][Exception]: The parameter [data] is empty. There is nothing to validate.");
-        }
-
         if (empty($rules)) {
             throw new InvalidArgumentException("[Developer][Exception]: The parameter [rules] is empty. How am I supposed to validate the parameter [data].");
         }
@@ -90,11 +88,10 @@ class Validator
         $this->paths    =   array_keys($this->data);
         $this->rules    =   $rules;
         $this->messages =   $messages;
-        $this->errors   =   [];
     }
 
     /**
-     * Executing this method will cause the validation process to stop 
+     * Executing this method will cause the validation process to stop
      *
      * @return static
      */
@@ -151,16 +148,12 @@ class Validator
                     'object'    =>  $rule instanceof ValidationRule ? $rule->check($field, $this->data[$field]) : call_user_func($rule, $field, $this->data[$field]),
                     default     =>  throw new Exception("[Developer][Exception]: The validation rules for the field [{$field}] should be either [String] / [ValidationRule Instance] / [Callback].")
                 };
-                
+
                 if ($result === true) {
                     continue;
                 }
 
-                if ($result === false) {
-                    $result = 'The attribute :{attribute} is invalid';
-                }
-
-                $this->addError($field, $result);
+                $this->addError($field, $result ?: 'The attribute :{attribute} is invalid');
 
                 if ($this->abortOnFailure) {
                     break 2;
@@ -203,9 +196,9 @@ class Validator
      *
      * @param   string  $rule
      * @param   string  $field
-     * 
+     *
      * @throws  \Exception
-     * 
+     *
      * @return  bool|string
      */
     protected function evaluateStrRule(string $rule, string $field): bool|string
@@ -217,10 +210,10 @@ class Validator
             throw new Exception("[Developer][Exception]: The validation rules for the field [{$field}] should be either in STRING, OBJECT or CALLABLE format.");
         }
 
-        $rule[1]    =   explode(',', $rule[1] ?? '');
-        $rule[0]    =   new $rule[0](...$rule[1]);
+        $rule[1]    =   str_after($rule[1] ?? '', ':');
+        $rule[0]    =   new $rule[0](...explode(',', $rule[1]));
 
-        return $rule[0]->check($field, $this->data[$field] ?? null);
+        return $rule[0]->check($field, $this->data[$field]);
     }
 
     /**
@@ -238,7 +231,7 @@ class Validator
      *
      * @param   string  $attribute
      * @param   string  $error
-     * 
+     *
      * @return  void
      */
     public function addError(string $attribute, string $error): void
@@ -248,7 +241,7 @@ class Validator
 
     /**
      * Get the first error message of the first field from the errors array.
-     * 
+     *
      * @return mixed
      */
     public function firstError(): mixed
@@ -264,9 +257,9 @@ class Validator
 
     /**
      * Get the first error message for the given field from the errors array.
-     * 
+     *
      * @param string $key
-     * 
+     *
      * @return mixed
      */
     public function firstErrorOf(string $key): mixed
@@ -290,7 +283,7 @@ class Validator
 
     /**
      * Check if any validation error has occurred so far.
-     * 
+     *
      * @return bool
      */
     public function anyError(): bool

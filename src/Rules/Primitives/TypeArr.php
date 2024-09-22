@@ -1,6 +1,6 @@
 <?php
 
-namespace AdityaZanjad\Validator\Rules;
+namespace AdityaZanjad\Validator\Rules\Primitives;
 
 use AdityaZanjad\Validator\Interfaces\ValidationRule;
 
@@ -15,7 +15,7 @@ class TypeArr implements ValidationRule
     public function check(string $attribute, mixed $value): bool|string
     {
         if (!is_array($value)) {
-            return 'The field {:attribute} must be an array.';
+            return "The field {$attribute} must be an array.";
         }
 
         return true;

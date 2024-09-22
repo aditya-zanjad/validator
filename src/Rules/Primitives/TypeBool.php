@@ -1,6 +1,6 @@
 <?php
 
-namespace AdityaZanjad\Validator\Rules;
+namespace AdityaZanjad\Validator\Rules\Primitives;
 
 use AdityaZanjad\Validator\Interfaces\ValidationRule;
 
@@ -15,7 +15,7 @@ class TypeBool implements ValidationRule
     public function check(string $attribute, mixed $value): bool|string
     {
         if (!filter_var($value, FILTER_VALIDATE_BOOL)) {
-            return 'The field {:attribute} must be a boolean value.';
+            return "The field {$attribute} must be a boolean value.";
         }
 
         return true;
