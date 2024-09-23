@@ -204,16 +204,16 @@ class Validator
     protected function evaluateStrRule(string $rule, string $field): bool|string
     {
         $rule       =   explode(':', $rule);
-        $rule[0]    =   Rule::tryFromName($rule[0]);
+        $ruleClass  =   Rule::tryFromName($rule[0]);
 
-        if (is_null($rule[0])) {
-            throw new Exception("[Developer][Exception]: The validation rules for the field [{$field}] should be either in STRING, OBJECT or CALLABLE format.");
+        if (is_null($ruleClass)) {
+            throw new Exception("[Developer][Exception]: The validation rule [{$rule[0]}] is either invalid OR does not exist.");
         }
 
-        $rule[1]    =   str_after($rule[1] ?? '', ':');
-        $rule[0]    =   new $rule[0](...explode(',', $rule[1]));
+        $ruleParams = str_after($rule[1] ?? '', ':');
+        $ruleParams = explode(',', $ruleParams);
 
-        return $rule[0]->check($field, $this->data[$field]);
+        return (new $ruleClass(...$ruleParams))->check($field, $this->data[$field]);
     }
 
     /**

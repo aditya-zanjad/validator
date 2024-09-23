@@ -5,66 +5,47 @@ namespace AdityaZanjad\Validator\Tests;
 use AdityaZanjad\Validator\Rules\RequiredIf;
 use PHPUnit\Framework\TestCase;
 use AdityaZanjad\Validator\Validator;
-
+use InvalidArgumentException;
+use Throwable;
 
 final class ValidatorTest extends TestCase
 {
-    // public function testEmptyInputData(): void
-    // {
-    //     try {
-    //         $validator = new Validator([], [
-    //             'email' => 'required|email'
-    //         ]);
-    //     } catch (Throwable $e) {
-    //         $this->assertInstanceOf(InvalidArgumentException::class, $e);
-    //     }
-    // }
+    protected Validator $validator;
 
-    // public function testEmptyRules(): void
-    // {
-    //     try {
-    //         $validator = new Validator([
-    //             'email' => 'abc@example.com'
-    //         ], []);        
-    //     } catch (Throwable $e) {
-    //         $this->assertInstanceOf(InvalidArgumentException::class, $e);
-    //     }
-    // }
-
-    // public function testEmailValidation()
-    // {
-    //     $validator = new Validator([
-    //         'email' => 'abc.com'
-    //     ], [
-    //         'email' => 'required|email'
-    //     ]);
-
-    //     $newValidator = new Validator([
-    //         'email' => 'abc@email.com'
-    //     ], [
-    //         'email' => 'required|email'
-    //     ]);
-
-    //     $validator->validate();
-    //     $this->assertTrue($validator->failed());
-    //     $this->assertNotEmpty($validator->allErrors());
-
-    //     $newValidator->validate();
-    //     $this->assertFalse($newValidator->failed());
-    //     $this->assertEmpty($newValidator->allErrors());
-    // }
-
-    public function testRequiredValidation()
+    public function setUp(): void
     {
-        $validator = new Validator([
-            'abc' => '',
-            'xyz' => 123
-        ], [
-            'abc' => [new RequiredIf(fn ($attribute, $value) => 'xyz' === 123), 'string']
-        ]);
+        $this->validator = new Validator(
+            $this->makeInputData(),
+            $this->makeValidationRules()
+        );
+    }
 
-        $validator->validate();
-        $this->assertTrue($validator->failed());
-        $this->assertNotEmpty($validator->allErrors());
+    protected function makeInputData()
+    {
+        return [
+            'valid_email'                   =>  'abc@email.com',
+            'invalid_email'                 =>  'abc.com',
+            'required_attribute_missing'    =>  '',
+            'required_attribute_present'    =>  'present',
+            'min_rule_value'                =>  100,
+        ];
+    }
+
+    protected function makeValidationRules()
+    {
+        return [
+            'valid_email' => 'required|email',
+            'invalid_email' => 'required|email',
+            'required_attribute_missing' => 'required',
+            'required_attribute_present' => 'required',
+            'min_rule_value' => 'min:1000'
+        ];
+    }
+
+    public function testValidationFails()
+    {
+        $this->validator->validate();
+        $this->assertTrue($this->validator->failed());
+        $this->assertNotEmpty($this->validator->allErrors());
     }
 }
