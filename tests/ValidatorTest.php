@@ -52,12 +52,12 @@ final class ValidatorTest extends TestCase
         ], [
             'abc' => 'string',
             'xyz' => 'required|string',
-            'pqr' => 'string'
+            'pqr' => 'optional|string'
         ]);
 
         $validator->validate();
         $this->assertTrue($validator->failed());
         $this->assertNotEmpty($validator->allErrors());
-        $this->assertNotEmpty($validator->firstErrorOf('pqr'));
+        $this->assertEmpty($validator->firstErrorOf('pqr'));
     }
 }

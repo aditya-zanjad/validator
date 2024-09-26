@@ -31,6 +31,7 @@ enum Rule: string
     case string             =   TypeStr::class;
     case boolean            =   TypeBool::class;
     case integer            =   TypeInt::class;
+    case optional           =   'optional';
     case required           =   Required::class;
     case required_if        =   RequiredIf::class;
     case required_with      =   RequiredWith::class;

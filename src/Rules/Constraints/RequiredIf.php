@@ -3,8 +3,8 @@
 namespace AdityaZanjad\Validator\Rules\Constraints;
 
 use Closure;
-use AdityaZanjad\Validator\Interfaces\ConstraintRule;
 use Exception;
+use AdityaZanjad\Validator\Interfaces\ConstraintRule;
 
 /**
  * Check whether the given attribute is a valid string or not.

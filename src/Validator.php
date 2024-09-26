@@ -9,9 +9,6 @@ use AdityaZanjad\Validator\Interfaces\ConstraintRule;
 use AdityaZanjad\Validator\Interfaces\ValidationRule;
 use AdityaZanjad\Validator\Exception\ValidationFailed;
 use AdityaZanjad\Validator\Rules\Constraints\RequiredIf;
-use AdityaZanjad\Validator\Rules\Constraints\RequiredWith;
-use AdityaZanjad\Validator\Rules\Constraints\RequiredUnless;
-use AdityaZanjad\Validator\Rules\Constraints\RequiredWithout;
 
 use function AdityaZanjad\Validator\Utils\{str_after};
 use function AdityaZanjad\Validator\Utils\{array_value_first, array_to_dot};
@@ -143,7 +140,18 @@ class Validator
             }
 
             if (!is_array($rules)) {
-                throw new Exception("[Developer][Exception]: The validation rules for the field [{$field}] must be specified either in a STRING or ARRAY format.");
+                throw new Exception("[Developer][Exception]: The validation rules for the field [{$field}] must be specified either in a [STRING] or [ARRAY] format.");
+            }
+
+            if (empty($rules)) {
+                throw new Exception("[Developer][Exception]: There are no validation rules specified for the field [{$field}].");
+            }
+
+            // If the field is declared optional and is not present in the
+            // input, then skip the validation of the current field in
+            // its entirety.
+            if (in_array(Rule::optional->value, $rules) && !isset($this->data[$field])) {
+                continue;
             }
 
             // Validate the value at the given array path against the given set of validation rules.
@@ -202,8 +210,6 @@ class Validator
      * @param   string  $fieldPath
      * @param   string  $rule
      *
-     * @throws  \Exception
-     *
      * @return  bool|string
      */
     protected function evaluateStrRule(string $fieldPath, string $rule): bool|string
@@ -234,8 +240,7 @@ class Validator
             RequiredIf::class => $this->makeRequiredIfRuleObject($ruleClass, $ruleParams),
         };
 
-        // Set the constrained data specific to the rule & perform the validation.
-        $ruleObject->setConstraintData($constrainedData);
+        $ruleObject->setConstraintData($constrainedData);  // Set the constrained data specific to the rule & perform the validation.
         return $ruleObject->check($fieldPath, $fieldValue);
     }
 
@@ -244,6 +249,8 @@ class Validator
      *
      * @param   string                  $ruleClass
      * @param   array<string, string>   $ruleParams
+     *
+     * @throws  \Exception
      *
      * @return  array<string, array<string, mixed>|\AdityaZanjad\Validator\Rules\Constraints\RequiredIf>
      */
