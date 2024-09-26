@@ -98,6 +98,5 @@ function array_value_first(array &$arr): mixed
         null;
     }
 
-    $firstKey = array_key_first($arr);
-    return $arr[$firstKey];
+    return $arr[array_key_first($arr)];
 }

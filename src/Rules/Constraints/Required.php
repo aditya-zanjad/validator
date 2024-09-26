@@ -1,18 +1,20 @@
 <?php
 
-namespace AdityaZanjad\Validator\Rules;
+namespace AdityaZanjad\Validator\Rules\Constraints;
+
+use AdityaZanjad\Validator\Interfaces\ValidationRule;
 
 /**
  * Check whether the given attribute is a valid string or not.
  */
-class Required
+class Required implements ValidationRule
 {
     /**
      * @inheritDoc
      */
     public function check(string $attribute, mixed $value): bool|string
     {
-        if (in_array($value, ['', [], null])) {
+        if (is_null($value)) {
             return "The field {$attribute} is required";
         }
 

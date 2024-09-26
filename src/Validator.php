@@ -5,8 +5,13 @@ namespace AdityaZanjad\Validator;
 use Exception;
 use InvalidArgumentException;
 use AdityaZanjad\Validator\Enums\Rule;
+use AdityaZanjad\Validator\Interfaces\ConstraintRule;
 use AdityaZanjad\Validator\Interfaces\ValidationRule;
 use AdityaZanjad\Validator\Exception\ValidationFailed;
+use AdityaZanjad\Validator\Rules\Constraints\RequiredIf;
+use AdityaZanjad\Validator\Rules\Constraints\RequiredWith;
+use AdityaZanjad\Validator\Rules\Constraints\RequiredUnless;
+use AdityaZanjad\Validator\Rules\Constraints\RequiredWithout;
 
 use function AdityaZanjad\Validator\Utils\{str_after};
 use function AdityaZanjad\Validator\Utils\{array_value_first, array_to_dot};
@@ -144,7 +149,7 @@ class Validator
             // Validate the value at the given array path against the given set of validation rules.
             foreach ($rules as $rule) {
                 $result = match (gettype($rule)) {
-                    'string'    =>  $this->evaluateStrRule($rule, $field),
+                    'string'    =>  $this->evaluateStrRule($field, $rule),
                     'object'    =>  $rule instanceof ValidationRule ? $rule->check($field, $this->data[$field]) : call_user_func($rule, $field, $this->data[$field]),
                     default     =>  throw new Exception("[Developer][Exception]: The validation rules for the field [{$field}] should be either [String] / [ValidationRule Instance] / [Callback].")
                 };
@@ -194,15 +199,16 @@ class Validator
     /**
      * Validate the array field against the given stringified rule.
      *
+     * @param   string  $fieldPath
      * @param   string  $rule
-     * @param   string  $field
      *
      * @throws  \Exception
      *
      * @return  bool|string
      */
-    protected function evaluateStrRule(string $rule, string $field): bool|string
+    protected function evaluateStrRule(string $fieldPath, string $rule): bool|string
     {
+        $fieldValue =   $this->data[$fieldPath] ?? null;  // Set default value if not set already.
         $rule       =   explode(':', $rule);
         $ruleClass  =   Rule::tryFromName($rule[0]);
 
@@ -210,10 +216,54 @@ class Validator
             throw new Exception("[Developer][Exception]: The validation rule [{$rule[0]}] is either invalid OR does not exist.");
         }
 
-        $ruleParams = str_after($rule[1] ?? '', ':');
-        $ruleParams = explode(',', $ruleParams);
+        // Extract the parameters that need to passed to the
+        // constructor/method of the rule class.
+        $ruleParams =   str_after($rule[1] ?? '', ':');
+        $ruleParams =   explode(',', $ruleParams);
 
-        return (new $ruleClass(...$ruleParams))->check($field, $this->data[$field]);
+        // For rules that are not constrained rules. i.e. the rules
+        // that are not dependent on the other input fields.
+        if (!in_array(ConstraintRule::class, class_implements($ruleClass, true))) {
+            $ruleObject = new $ruleClass(...$ruleParams);
+            return $ruleObject->check($fieldPath, $fieldValue);
+        }
+
+        // For rules, that are constrained to other fields as well
+        // along with the fields they are validating.
+        [$ruleObject, $constrainedData] = match ($ruleClass) {
+            RequiredIf::class => $this->makeRequiredIfRuleObject($ruleClass, $ruleParams),
+        };
+
+        // Set the constrained data specific to the rule & perform the validation.
+        $ruleObject->setConstraintData($constrainedData);
+        return $ruleObject->check($fieldPath, $fieldValue);
+    }
+
+    /**
+     * Make the object for the rule 'RequiredIf'
+     *
+     * @param   string                  $ruleClass
+     * @param   array<string, string>   $ruleParams
+     *
+     * @return  array<string, array<string, mixed>|\AdityaZanjad\Validator\Rules\Constraints\RequiredIf>
+     */
+    public function makeRequiredIfRuleObject(string $ruleClass, array $ruleParams): array
+    {
+        if (count($ruleParams) < 2) {
+            throw new Exception('[Developer][Exception]: The rule [required_if] requires at least two parameters.');
+        }
+
+        $otherFieldName =   array_splice($ruleParams, 0, 1)[0];
+        $ruleObject     =   new $ruleClass(null);
+
+        return [
+            $ruleObject,
+            [
+                'other_field'   =>  $otherFieldName,
+                'given_values'  =>  $ruleParams,
+                'actual_value'  =>  $this->data[$otherFieldName] ?? null
+            ]
+        ];
     }
 
     /**

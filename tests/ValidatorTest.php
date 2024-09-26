@@ -2,50 +2,62 @@
 
 namespace AdityaZanjad\Validator\Tests;
 
-use AdityaZanjad\Validator\Rules\RequiredIf;
 use PHPUnit\Framework\TestCase;
 use AdityaZanjad\Validator\Validator;
-use InvalidArgumentException;
-use Throwable;
+use PHPUnit\Framework\Attributes\UsesClass;
+use PHPUnit\Framework\Attributes\CoversClass;
+use AdityaZanjad\Validator\Rules\Primitives\TypeStr;
+use AdityaZanjad\Validator\Rules\Constraints\Required;
+use AdityaZanjad\Validator\Rules\Constraints\RequiredIf;
 
+#[CoversClass(TypeStr::class)]
+#[UsesClass(Validator::class)]
+#[CoversClass(Required::class)]
+#[CoversClass(Validator::class)]
+#[CoversClass(RequiredIf::class)]
 final class ValidatorTest extends TestCase
 {
-    protected Validator $validator;
-
-    public function setUp(): void
+    public function testRequiredRule()
     {
-        $this->validator = new Validator(
-            $this->makeInputData(),
-            $this->makeValidationRules()
-        );
+        $validator = new Validator([], [
+            'abc' => 'required'
+        ]);
+
+        $validator->validate();
+        $this->assertTrue($validator->failed());
+        $this->assertNotEmpty($validator->allErrors());
     }
 
-    protected function makeInputData()
+    public function testRequiredIfRule()
     {
-        return [
-            'valid_email'                   =>  'abc@email.com',
-            'invalid_email'                 =>  'abc.com',
-            'required_attribute_missing'    =>  '',
-            'required_attribute_present'    =>  'present',
-            'min_rule_value'                =>  100,
-        ];
+        $validator = new Validator([
+            'abc' => '123',
+            'xyz' => '',
+            'pqr' => null
+        ], [
+            'xyz' => 'required_if:abc,123',
+            'pqr' => 'required_if:abc,468,479,1234'
+        ]);
+
+        $validator->validate();
+        $this->assertTrue($validator->failed());
+        $this->assertNotEmpty($validator->allErrors());
     }
 
-    protected function makeValidationRules()
+    public function testStringRule()
     {
-        return [
-            'valid_email' => 'required|email',
-            'invalid_email' => 'required|email',
-            'required_attribute_missing' => 'required',
-            'required_attribute_present' => 'required',
-            'min_rule_value' => 'min:1000'
-        ];
-    }
+        $validator = new Validator([
+            'abc' => [],
+            'xyz' => []
+        ], [
+            'abc' => 'string',
+            'xyz' => 'required|string',
+            'pqr' => 'string'
+        ]);
 
-    public function testValidationFails()
-    {
-        $this->validator->validate();
-        $this->assertTrue($this->validator->failed());
-        $this->assertNotEmpty($this->validator->allErrors());
+        $validator->validate();
+        $this->assertTrue($validator->failed());
+        $this->assertNotEmpty($validator->allErrors());
+        $this->assertNotEmpty($validator->firstErrorOf('pqr'));
     }
 }
