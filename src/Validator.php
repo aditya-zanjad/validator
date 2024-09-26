@@ -7,7 +7,7 @@ use InvalidArgumentException;
 use AdityaZanjad\Validator\Enums\Rule;
 use AdityaZanjad\Validator\Interfaces\ConstraintRule;
 use AdityaZanjad\Validator\Interfaces\ValidationRule;
-use AdityaZanjad\Validator\Exception\ValidationFailed;
+use AdityaZanjad\Validator\Exceptions\ValidationFailed;
 use AdityaZanjad\Validator\Rules\Constraints\RequiredIf;
 
 use function AdityaZanjad\Validator\Utils\{str_after};
@@ -125,6 +125,8 @@ class Validator
     /**
      * Perform the validation process.
      *
+     * @throws \AdityaZanjad\Validator\Exceptions\ValidationFailed
+     *
      * @return static
      */
     public function validate(): static
@@ -139,6 +141,10 @@ class Validator
                 $rules = explode('|', $rules);
             }
 
+            /**
+             * The validation rules specified for each field must ultimately
+             * end up in the array format.
+             */
             if (!is_array($rules)) {
                 throw new Exception("[Developer][Exception]: The validation rules for the field [{$field}] must be specified either in a [STRING] or [ARRAY] format.");
             }
@@ -147,14 +153,19 @@ class Validator
                 throw new Exception("[Developer][Exception]: There are no validation rules specified for the field [{$field}].");
             }
 
-            // If the field is declared optional and is not present in the
-            // input, then skip the validation of the current field in
-            // its entirety.
+            /**
+             * If the field is declared optional and is not present in the
+             * input, then skip the validation of the current field in
+             * its entirety.
+             */
             if (in_array(Rule::optional->value, $rules) && !isset($this->data[$field])) {
                 continue;
             }
 
-            // Validate the value at the given array path against the given set of validation rules.
+            /**
+             * Validate the value at the given array path against the given
+             * set of validation rules.
+             */
             foreach ($rules as $rule) {
                 $result = match (gettype($rule)) {
                     'string'    =>  $this->evaluateStrRule($field, $rule),
@@ -162,6 +173,7 @@ class Validator
                     default     =>  throw new Exception("[Developer][Exception]: The validation rules for the field [{$field}] should be either [String] / [ValidationRule Instance] / [Callback].")
                 };
 
+                // If the validation succeeds skip the current iteration.
                 if ($result === true) {
                     continue;
                 }
@@ -254,7 +266,7 @@ class Validator
      *
      * @return  array<string, array<string, mixed>|\AdityaZanjad\Validator\Rules\Constraints\RequiredIf>
      */
-    public function makeRequiredIfRuleObject(string $ruleClass, array $ruleParams): array
+    protected function makeRequiredIfRuleObject(string $ruleClass, array $ruleParams): array
     {
         if (count($ruleParams) < 2) {
             throw new Exception('[Developer][Exception]: The rule [required_if] requires at least two parameters.');

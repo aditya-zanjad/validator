@@ -1,6 +1,6 @@
 <?php
 
-namespace AdityaZanjad\Validator\Exception;
+namespace AdityaZanjad\Validator\Exceptions;
 
 use Exception;
 
