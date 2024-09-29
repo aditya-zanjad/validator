@@ -31,7 +31,6 @@ enum Rule: string
     case string             =   TypeStr::class;
     case boolean            =   TypeBool::class;
     case integer            =   TypeInt::class;
-    case optional           =   'optional';
     case required           =   Required::class;
     case required_if        =   RequiredIf::class;
     case required_with      =   RequiredWith::class;
@@ -52,5 +51,15 @@ enum Rule: string
         }
 
         return constant("self::{$name}")->value;
+    }
+
+    /**
+     * Get the names of the cases that point to the constraint rules.
+     *
+     * @return array<int, string>
+     */
+    public static function getConstraintRulesCases(): array
+    {
+        return ['required'];
     }
 }

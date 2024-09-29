@@ -20,7 +20,8 @@ final class ValidatorTest extends TestCase
     public function testRequiredRule()
     {
         $validator = new Validator([], [
-            'abc' => 'required'
+            'abc' => 'required',
+            'xyz' => 'string'
         ]);
 
         $validator->validate();
@@ -47,12 +48,10 @@ final class ValidatorTest extends TestCase
     public function testStringRule()
     {
         $validator = new Validator([
-            'abc' => [],
-            'xyz' => []
+            'abc'   =>  [],
         ], [
-            'abc' => 'string',
-            'xyz' => 'required|string',
-            'pqr' => 'optional|string'
+            'abc'   =>  'string',
+            'xyz'   =>  'required|string',
         ]);
 
         $validator->validate();

@@ -2,6 +2,7 @@
 
 namespace AdityaZanjad\Validator;
 
+use Closure;
 use Exception;
 use InvalidArgumentException;
 use AdityaZanjad\Validator\Enums\Rule;
@@ -20,32 +21,11 @@ use function AdityaZanjad\Validator\Utils\{array_value_first, array_to_dot};
 class Validator
 {
     /**
-     * The input data that we want to validate.
+     * The array paths to the values from the input data array.
      *
-     * @var array<int|string, mixed> $data
+     * @var array<int|string, mixed>
      */
-    protected array $data;
-
-    /**
-     * The validation rules that we want to apply against the given input data.
-     *
-     * @var array<string, string|array> $rules
-     */
-    protected array $rules;
-
-    /**
-     * Custom validation error messages to override the default validation error messages.
-     *
-     * @var array<string, string>
-     */
-    protected array $messages;
-
-    /**
-     * Paths in dot notation format to each element of the array.
-     *
-     * @var array<int|string, mixed> $path
-     */
-    protected array $paths;
+    protected array $paths = [];
 
     /**
      * To manage the validation errors.
@@ -53,6 +33,11 @@ class Validator
      * @var array<string, array> $errors
      */
     protected array $errors = [];
+
+    /**
+     * A list of rules that extend the 'ConstraintRule' interface.
+     */
+    protected array $constraintRules = [];
 
     /**
      * Decide whether or not to stop on the first validation failure.
@@ -80,16 +65,16 @@ class Validator
      *
      * @throws  \InvalidArgumentException
      */
-    public function __construct(array $data, array $rules, array $messages = [])
+    public function __construct(protected array $data, protected array $rules, protected array $messages = [])
     {
-        if (empty($rules)) {
+        if (empty($this->rules)) {
             throw new InvalidArgumentException("[Developer][Exception]: The parameter [rules] is empty. How am I supposed to validate the parameter [data].");
         }
 
-        $this->data     =   array_to_dot($data);
-        $this->paths    =   array_keys($this->data);
-        $this->rules    =   $rules;
-        $this->messages =   $messages;
+        $this->data             =   array_to_dot($this->data);
+        $this->paths            =   array_keys($this->data);
+        $this->messages         =   $messages;
+        $this->constraintRules  =   Rule::getConstraintRulesCases();
     }
 
     /**
@@ -154,19 +139,20 @@ class Validator
             }
 
             /**
-             * If the field is declared optional and is not present in the
-             * input, then skip the validation of the current field in
-             * its entirety.
+             * Make some necessary modifications to the rules array.
+             *
+             * [1] Remove all the duplicated values from the array.
+             * [2] Sort rules array so that we can decide whether OR not to skip current field's validation.
              */
-            if (in_array(Rule::optional->value, $rules) && !isset($this->data[$field])) {
-                continue;
-            }
+            $rules = array_unique($rules);
+            usort($rules, fn ($a) => ((is_string($a) && str_contains($a, 'required')) || $a instanceof ConstraintRule) ? -1 : 1);
 
-            /**
-             * Validate the value at the given array path against the given
-             * set of validation rules.
-             */
+            // Validate the given array path value against the given set of validation rules.
             foreach ($rules as $rule) {
+                if ($this->fieldValidationShouldBeSkipped($field, $rule)) {
+                    continue 2;
+                }
+
                 $result = match (gettype($rule)) {
                     'string'    =>  $this->evaluateStrRule($field, $rule),
                     'object'    =>  $rule instanceof ValidationRule ? $rule->check($field, $this->data[$field]) : call_user_func($rule, $field, $this->data[$field]),
@@ -214,6 +200,34 @@ class Validator
         }
 
         unset($this->rules[$path]);
+    }
+
+    /**
+     * Check if the given field path is constrained to be required.
+     *
+     * @param   string                                                              $fieldPath
+     * @param   string|\Closure|\AdityaZanjad\Validator\Interfaces\ValidationRule   $rules
+     *
+     * @return  bool
+     */
+    protected function fieldValidationShouldBeSkipped(string $fieldPath, string|ValidationRule|Closure $rule): bool
+    {
+        // If the field present in the data & not is NULL, it should be validated.
+        if (isset($this->data[$fieldPath])) {
+            return false;
+        }
+
+        // If the field is being applied one of the 'required/required_*' rules, it must be validated.
+        if (is_string($rule) && str_contains($rule, 'required')) {
+            return false;
+        }
+
+        // If the rule is an instance of one of the Constrained Rules, the field must be validated.
+        if ($rule instanceof ConstraintRule) {
+            return false;
+        }
+
+        return true;
     }
 
     /**

@@ -27,7 +27,7 @@ function array_to_dot(array $arr): array
     foreach ($arr as $key => $value) {
         $nestedKeys[$arr->getDepth()] = $key;
 
-        if (is_array($value)) {
+        if (is_array($value) && !empty($value)) {
             continue;
         }
 
