@@ -95,7 +95,7 @@ function array_value_get(array &$arr, string $path): mixed
 function array_value_first(array &$arr): mixed
 {
     if (empty($arr)) {
-        null;
+        return null;
     }
 
     return $arr[array_key_first($arr)];

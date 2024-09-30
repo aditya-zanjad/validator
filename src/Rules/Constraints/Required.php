@@ -15,7 +15,7 @@ class Required implements ValidationRule
     public function check(string $attribute, mixed $value): bool|string
     {
         if (is_null($value)) {
-            return "The field {$attribute} is required";
+            return "The field {$attribute} is required.";
         }
 
         return true;
