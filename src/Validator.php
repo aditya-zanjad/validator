@@ -363,14 +363,4 @@ class Validator
     {
         return $this->errors;
     }
-
-    /**
-     * Check if any validation error has occurred so far.
-     *
-     * @return bool
-     */
-    public function anyError(): bool
-    {
-        return !empty($this->errors);
-    }
 }
