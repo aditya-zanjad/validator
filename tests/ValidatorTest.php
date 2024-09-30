@@ -59,4 +59,21 @@ final class ValidatorTest extends TestCase
         $this->assertNotEmpty($validator->allErrors());
         $this->assertEmpty($validator->firstErrorOf('pqr'));
     }
+
+    public function testInValidationRule()
+    {
+        $validator = new Validator([
+            'abc' => 123,
+            'xyz' => 'abc'
+        ], [
+            'abc' => 'numeric|integer|in:123,456',
+            'xyz' => 'numeric|integer|in:456'
+        ]);
+
+        $validator->validate();
+        $this->assertTrue($validator->failed());
+        $this->assertNotEmpty($validator->allErrors());
+        $this->assertEmpty($validator->firstErrorOf('abc'));
+        $this->assertNotEmpty($validator->firstErrorOf('xyz'));
+    }
 }
