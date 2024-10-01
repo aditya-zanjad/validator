@@ -11,8 +11,7 @@ use AdityaZanjad\Validator\Interfaces\ValidationRule;
 use AdityaZanjad\Validator\Exceptions\ValidationFailed;
 use AdityaZanjad\Validator\Rules\Constraints\RequiredIf;
 
-use function AdityaZanjad\Validator\Utils\{array_value_exists, array_value_get, str_after};
-use function AdityaZanjad\Validator\Utils\{array_value_first, array_to_dot};
+use function AdityaZanjad\Validator\Utils\{array_value_first, array_value_exists, array_value_get, str_after};
 
 /**
  * @author  Aditya Zanjad <adityazanjad474@gmail.com>
@@ -20,13 +19,6 @@ use function AdityaZanjad\Validator\Utils\{array_value_first, array_to_dot};
  */
 class Validator
 {
-    /**
-     * The array paths to the values from the input data array.
-     *
-     * @var array<int|string, mixed>
-     */
-    protected array $paths = [];
-
     /**
      * To manage the validation errors.
      *
@@ -127,7 +119,7 @@ class Validator
             }
 
             /**
-             * The validation rules specified for each field must 
+             * The validation rules specified for each field must
              * ultimately end up in the array format.
              */
             if (!is_array($rules)) {
@@ -180,26 +172,32 @@ class Validator
     }
 
     /**
+     * TODO => Complete this functionality in the next commit.
+     * 
      * Expand the given wildcard path to the actual corresponding array path(s).
-     *
-     * @param string $path
      *
      * @return void
      */
-    protected function resolveWildCardPath(string $path): void
+    protected function resolveWildCardPaths(): void
     {
-        $matchedPaths = preg_grep("/[$path]/", $this->paths);
+        /**
+         * !!!!!!!!!!!!!!!!!!!!!!!!!!!! TODO !!!!!!!!!!!!!!!!!!!!!!! 
+         *  Resolve the wildcard paths to their actual input array 
+         * paths & apply their validation rules to these paths.
+         * !!!!!!!!!!!!!!!!!!!!!!!!!!!! TODO !!!!!!!!!!!!!!!!!!!!!!! 
+         */
+        // $matchedPaths = preg_grep("/[$path]/", $this->paths);
 
-        // If any of the array paths matches with the 'wild card path' pattern.
-        if (is_array($matchedPaths)) {
-            $matchedPaths   =   array_fill_keys($matchedPaths, $this->rules[$path]);
-            $this->rules    =   array_merge($this->rules, $matchedPaths);
+        // // If any of the array paths matches with the 'wild card path' pattern.
+        // if (is_array($matchedPaths)) {
+        //     $matchedPaths   =   array_fill_keys($matchedPaths, $this->rules[$path]);
+        //     $this->rules    =   array_merge($this->rules, $matchedPaths);
 
-            unset($this->rules[$path]);
-            return;
-        }
+        //     unset($this->rules[$path]);
+        //     return;
+        // }
 
-        unset($this->rules[$path]);
+        // unset($this->rules[$path]);
     }
 
     /**
