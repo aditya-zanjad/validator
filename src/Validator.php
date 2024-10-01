@@ -11,7 +11,7 @@ use AdityaZanjad\Validator\Interfaces\ValidationRule;
 use AdityaZanjad\Validator\Exceptions\ValidationFailed;
 use AdityaZanjad\Validator\Rules\Constraints\RequiredIf;
 
-use function AdityaZanjad\Validator\Utils\{str_after};
+use function AdityaZanjad\Validator\Utils\{array_value_exists, array_value_get, str_after};
 use function AdityaZanjad\Validator\Utils\{array_value_first, array_to_dot};
 
 /**
@@ -71,8 +71,8 @@ class Validator
             throw new InvalidArgumentException("[Developer][Exception]: The parameter [rules] is empty. How am I supposed to validate the parameter [data].");
         }
 
-        $this->data             =   array_to_dot($this->data);
-        $this->paths            =   array_keys($this->data);
+        $this->data             =   $this->data;
+        // $this->paths            =   array_keys($this->data);
         $this->messages         =   $messages;
         $this->constraintRules  =   Rule::getConstraintRulesCases();
     }
@@ -127,8 +127,8 @@ class Validator
             }
 
             /**
-             * The validation rules specified for each field must ultimately
-             * end up in the array format.
+             * The validation rules specified for each field must 
+             * ultimately end up in the array format.
              */
             if (!is_array($rules)) {
                 throw new Exception("[Developer][Exception]: The validation rules for the field [{$field}] must be specified either in a [STRING] or [ARRAY] format.");
@@ -213,7 +213,7 @@ class Validator
     protected function fieldValidationShouldBeSkipped(string $fieldPath, string|ValidationRule|Closure $rule): bool
     {
         // If the field present in the data & not is NULL, it should be validated.
-        if (isset($this->data[$fieldPath])) {
+        if (array_value_exists($this->data, $fieldPath)) {
             return false;
         }
 
@@ -240,7 +240,7 @@ class Validator
      */
     protected function evaluateStrRule(string $fieldPath, string $rule): bool|string
     {
-        $fieldValue =   $this->data[$fieldPath] ?? null;  // Set default value if not set already.
+        $fieldValue =   array_value_get($this->data, $fieldPath);
         $rule       =   explode(':', $rule);
         $ruleClass  =   Rule::tryFromName($rule[0]);
 
