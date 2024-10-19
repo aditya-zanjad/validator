@@ -16,7 +16,7 @@
         "files": [
             "src/Utils/Arr.php",
             "src/Utils/Str.php",
-            "src/Utils/Validator.php"
+            "src/Utils/Validation.php"
         ]
     },
     "require-dev": {

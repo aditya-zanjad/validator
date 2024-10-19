@@ -3,7 +3,6 @@
 namespace AdityaZanjad\Validator\Rules\Constraints;
 
 use Closure;
-use Exception;
 use AdityaZanjad\Validator\Rules\Rule;
 use AdityaZanjad\Validator\Interfaces\RequiredConstraint;
 
@@ -13,25 +12,13 @@ use AdityaZanjad\Validator\Interfaces\RequiredConstraint;
 class RequiredIf extends Rule implements RequiredConstraint
 {
     /**
-     * To decide whether or not to execute certain code based on the value of this variable.
-     *
-     * @var bool $callbackIsNull
-     */
-    protected bool $callbackIsNull;
-
-    /**
-     * @var array<int|string, mixed> $data
-     */
-    protected array $data;
-
-    /**
      * This constructor can be initialized to construct.
      *
-     * @param null|\Closure $callback
+     * @param array<int, mixed>|\Closure $entity
      */
-    public function __construct(protected ?Closure $callback)
+    public function __construct(protected array|Closure $entity)
     {
-        $this->callbackIsNull = is_null($callback);
+        //
     }
 
     /**
@@ -39,20 +26,46 @@ class RequiredIf extends Rule implements RequiredConstraint
      */
     public function check(string $attribute, mixed $value): bool|string
     {
-        if (!is_null($this->callback)) {
-            return call_user_func($this->callback, $attribute, $value);
+        if (is_callable($this->entity)) {
+            return call_user_func($this->entity, $attribute, $value);
         }
 
-        // If the other constrained field is not present OR is set to NULL.
-        if (!in_array($this->data['actual_value'], $this->data['given_values'])) {
-            return true;
-        }
+        [$dependentFieldValue, $this->entity] = $this->filterGivenValues($this->entity);
 
-        // If the other field is present, but the field currently being validated is not present OR is an empty value.
-        if (empty($value) && !in_array($value, [0, false, '0', 'false'], true)) {
-            return "The field {$attribute} is required when the field {$this->data['other_field']} is set to {$this->data['actual_value']}";
+        // If the current field is not present or is NULL, but the other dependent field is present.
+        if (is_null($value)) {
+            return "The field {$attribute} is required when the field {$this->entity[0]} is set to {$dependentFieldValue}";
         }
 
         return true;
+    }
+
+    /**
+     * Filter the given values of the field to their appropriate data types on which the validation of current field is dependent.
+     *
+     * @param array<int, string> $entity
+     *
+     * @return array<int, string|array<int, mixed>>
+     */
+    protected function filterGivenValues(array $entity)
+    {
+        // Get value of the field on which the validation of the current field is dependent.
+        $dependentFieldValue    =   array_splice($entity, 0, 1);
+        $dependentFieldValue    =   $this->input->get($dependentFieldValue[0]);
+
+        return [
+            $dependentFieldValue,
+            array_map(function ($givenValue) {
+                $givenValue = filter_var($givenValue, FILTER_DEFAULT, [
+                    FILTER_VALIDATE_BOOL | FILTER_VALIDATE_INT | FILTER_VALIDATE_FLOAT
+                ]);
+
+                if ($givenValue === 'null') {
+                    return null;
+                }
+
+                return $givenValue;
+            }, $entity)
+        ];
     }
 }

@@ -12,8 +12,7 @@ use function AdityaZanjad\Validator\Utils\validate;
 #[UsesClass(Validator::class)]
 #[CoversClass(Required::class)]
 #[CoversClass(Validator::class)]
-#[CoversFunction('validator')]
-#[CoversFunction('validate')]
+#[CoversFunction('\AdityaZanjad\Validator\Utils\validate')]
 final class RequiredRuleTest extends TestCase
 {
     /**

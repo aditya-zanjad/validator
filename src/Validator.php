@@ -4,8 +4,8 @@ namespace AdityaZanjad\Validator;
 
 use Exception;
 use InvalidArgumentException;
-use AdityaZanjad\Validator\Enums\Rule;
-use AdityaZanjad\Validator\Rules\Rule as BaseRule;
+use AdityaZanjad\Validator\Rules\Rule;
+use AdityaZanjad\Validator\Enums\ValidStringifiedRule;
 use AdityaZanjad\Validator\Rules\Constraints\RequiredIf;
 use AdityaZanjad\Validator\Interfaces\RequiredConstraint;
 
@@ -94,14 +94,18 @@ class Validator
             // Validate the given array path value against the given set of validation rules.
             foreach ($rules as $rule) {
                 // If the input field NULL OR not given & the current rule is not 'RequiredConstraint' one, then skip its execution.
-                if ($valueIsNotSet && !($rule instanceof RequiredConstraint || str_contains((string) $rule, 'required'))) {
+                $shouldSkipThisRule = $valueIsNotSet 
+                    && !$rule instanceof RequiredConstraint 
+                    && is_string($rule) && !empty($rule) && !str_contains($rule, 'required');
+
+                if ($shouldSkipThisRule) {
                     continue;
                 }
 
                 $result = match (gettype($rule)) {
                     'string'    =>  $this->evaluateStringifiedRule($rule, $field, $value),
-                    'object'    =>  $rule instanceof BaseRule ? $rule->setInputInstance($this->data)->check($field, $value) : call_user_func($rule, $field, $value),
-                    default     =>  throw new Exception("[Developer][Exception]: The validation rules must be specified in either [STRING] OR [" . BaseRule::class . "] OR [callable] formats.")
+                    'object'    =>  $rule instanceof Rule ? $rule->setInputInstance($this->data)->check($field, $value) : call_user_func($rule, $field, $value),
+                    default     =>  throw new Exception("[Developer][Exception]: The validation rules must be specified in either [STRING] OR [" . Rule::class . "] OR [callable] formats.")
                 };
 
                 if ($result !== true) {
@@ -158,7 +162,7 @@ class Validator
     protected function evaluateStringifiedRule(string $rule, string $field, mixed $value): bool|string
     {
         $rule       =   explode(':', $rule);
-        $rule[0]    =   Rule::tryFromName($rule[0]);
+        $rule[0]    =   ValidStringifiedRule::tryFromName($rule[0]);
 
         if (is_null($rule[0])) {
             throw new Exception("[Developer][Exception]: The validation rule [{$rule[0]}] is either invalid OR does not exist.");
@@ -191,7 +195,7 @@ class Validator
             throw new Exception('[Developer][Exception]: The rule [required_if] requires at least two parameters.');
         }
 
-        return new RequiredIf(null);
+        return new RequiredIf($ruleParams);
     }
 
     /**
