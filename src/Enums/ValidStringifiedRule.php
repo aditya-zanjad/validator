@@ -7,10 +7,10 @@ use AdityaZanjad\Validator\Rules\Comparators\In;
 use AdityaZanjad\Validator\Rules\Comparators\Max;
 use AdityaZanjad\Validator\Rules\Comparators\Min;
 use AdityaZanjad\Validator\Rules\Comparators\Size;
-use AdityaZanjad\Validator\Rules\Primitives\TypeInt;
-use AdityaZanjad\Validator\Rules\Primitives\TypeStr;
 use AdityaZanjad\Validator\Rules\Primitives\TypeArr;
+use AdityaZanjad\Validator\Rules\Primitives\TypeInt;
 use AdityaZanjad\Validator\Rules\Primitives\TypeNum;
+use AdityaZanjad\Validator\Rules\Primitives\TypeStr;
 use AdityaZanjad\Validator\Rules\Primitives\TypeBool;
 use AdityaZanjad\Validator\Rules\Constraints\Required;
 use AdityaZanjad\Validator\Rules\Constraints\RequiredIf;
@@ -18,8 +18,7 @@ use AdityaZanjad\Validator\Rules\Constraints\RequiredWith;
 use AdityaZanjad\Validator\Rules\Constraints\RequiredUnless;
 use AdityaZanjad\Validator\Rules\Constraints\RequiredWithout;
 
-
-enum Rule: string
+enum ValidStringifiedRule: string
 {
     case in                 =   In::class;
     case max                =   Max::class;

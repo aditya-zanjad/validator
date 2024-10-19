@@ -3,12 +3,12 @@
 namespace AdityaZanjad\Validator\Rules\Comparators;
 
 use InvalidArgumentException;
-use AdityaZanjad\Validator\Interfaces\ValidationRule;
+use AdityaZanjad\Validator\Rules\Rule;
 
 /**
  * Check whether the given attribute is a valid string or not.
  */
-class In implements ValidationRule
+class In extends Rule
 {
     /**
      * To contain the variable level of arguments.

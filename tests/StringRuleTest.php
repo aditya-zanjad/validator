@@ -6,6 +6,8 @@ use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\Attributes\CoversClass;
 use AdityaZanjad\Validator\Rules\Primitives\TypeStr;
 
+use function AdityaZanjad\Validator\Utils\validate;
+
 #[CoversClass(TypeStr::class)]
 #[UsesClass(Validator::class)]
 #[CoversClass(Validator::class)]
@@ -18,7 +20,7 @@ final class StringRuleTest extends TestCase
      */
     public function testGivenFieldIsAnInvalidString(): void
     {
-        $validator = new Validator([
+        $validator = validate([
             'abc'       =>  ['this is a string.'],
             'xyz'       =>  ['this is a string!' => 'this is a string !'],
             'array'     =>  [1, 2, 3, 4, 5, 6],
@@ -36,13 +38,13 @@ final class StringRuleTest extends TestCase
 
         $validator->validate();
         $this->assertTrue($validator->failed());
-        $this->assertNotEmpty($validator->allErrors());
-        $this->assertNotEmpty($validator->firstErrorOf('abc'));
-        $this->assertNotEmpty($validator->firstErrorOf('xyz'));
-        $this->assertNotEmpty($validator->firstErrorOf('array'));
-        $this->assertNotEmpty($validator->firstErrorOf('int'));
-        $this->assertNotEmpty($validator->firstErrorOf('float'));
-        $this->assertNotEmpty($validator->firstErrorOf('object'));
+        $this->assertNotEmpty($validator->errors()->all());
+        $this->assertNotEmpty($validator->errors()->firstOf('abc'));
+        $this->assertNotEmpty($validator->errors()->firstOf('xyz'));
+        $this->assertNotEmpty($validator->errors()->firstOf('array'));
+        $this->assertNotEmpty($validator->errors()->firstOf('int'));
+        $this->assertNotEmpty($validator->errors()->firstOf('float'));
+        $this->assertNotEmpty($validator->errors()->firstOf('object'));
 
     }
 
@@ -53,7 +55,7 @@ final class StringRuleTest extends TestCase
      */
     public function testGivenFieldsAreValidString(): void
     {
-        $validator = new Validator([
+        $validator = validate([
             'english'   =>  '1234! Get on the dance floor!',
             'hindi'     =>  "हो। गए, उनका एक समय में बड़ा नाम था। पूरे देश में तालाब बनते थे बनाने वाले भी पूरे देश में थे। कहीं यह विद्या जाति के विद्यालय | सिखाई जाती थी तो कहीं यह जात से हट कर एक विशेष पांत भी जाती थी। बनाने वाले लोग कहीं एक जगह बसे मिलते थे तो कहीं -घूम कर इस काम को करते थे। I 국 घम गजधर एक सुन्दर शब्द है, तालाब बनाने वालों को आदर के साथ याद करने के लिए। राजस्थान के कुछ भागों में यह शब्द आज भी बाकी है। गजधर यानी जो गज को धारण करता है। और गज वही जो नापने के काम आता है। लेकिन फिर भी समाज ने इन्हें तीन हाथ की लोहे की छड़ लेकर घूमने वाला मिस्त्री नहीं माना। गजधर जो समाज को गहराई को नाप ले - उसे ऐसा दर्जा दिया गया है। गजधर वास्तुकार थे। गांव-समाज हो या नगर-समाज - उसके नव निर्माण की, रख-रखाव की ज़िम्मेदारी गजधर निभाते थे। नगर नियोजन से लेकर छोटे से छोटे निर्माण के काम गजधर के कधों पर टिके थे। वे योजना बनाते थे, कुल काम की लागत निकालते थे, काम में लगने वाली सारी सामग्री जुटाते थे और इस सबके बदले वे अपने जजमान से ऐसा कुछ नहीं मांग बैठते थे, जो वे दे न पाएं। लोग भी ऐसे थे कि उनसे जो कुछ बनता, वे गजधर को भेंट कर देते। काम पूरा होने पर पारिश्रमिक के अलावा गजधर को सम्मान ' भी मिलता था। सरोपा भेंट करना अब शायद सिर्फ सिख परंपरा में ही बचा समाज की गहराई नापते रहे हैं गुणाधर",
             'japanese'  =>  '転ツ築転でぱクス制中れぼ併題だち東未城ク物九ユウ際同ヒヲク蔓一ラスエ年日ホヘク円果進ドげルょ行使少描際ぜれゅ。飯くっぶこ堀住き神挙びく文半レム後仲社処ラヤ員方タワ機細だくぞが険味ニミオ能皇じごフく式渡キエク予仁ッわこ。解へやど緊永新53漢画時4院ぼたるわ議広トき断価選イレ摘福ゆろぶ期公瑞ナメネリ上並よい。
@@ -83,9 +85,49 @@ final class StringRuleTest extends TestCase
 
         $validator->validate();
         $this->assertFalse($validator->failed());
-        $this->assertEmpty($validator->allErrors());
-        $this->assertNull($validator->firstErrorOf('english'));
-        $this->assertNull($validator->firstErrorOf('hindi'));
-        $this->assertNull($validator->firstErrorOf('japanese'));
+        $this->assertEmpty($validator->errors()->all());
+        $this->assertNull($validator->errors()->firstOf('english'));
+        $this->assertNull($validator->errors()->firstOf('hindi'));
+        $this->assertNull($validator->errors()->firstOf('japanese'));
+    }
+
+    /**
+     * Assert that the validation rule is skipped when given field is missing or is set to null.
+     *
+     * @return void
+     */
+    public function testGivenFieldValidationShouldBeSkipped()
+    {
+        $validator = validate([
+            'xyz' => null
+        ], [
+            'abc'   =>  'string',
+            'xyz'   =>  'string'
+        ]);
+
+        $this->assertFalse($validator->failed());
+        $this->assertEmpty($validator->errors()->all());
+        $this->assertNull($validator->errors()->firstOf('abc'));
+        $this->assertNull($validator->errors()->firstOf('xyz'));
+    }
+
+    /**
+     * Assert that the validation rule is skipped when given field is missing or is set to null.
+     *
+     * @return void
+     */
+    public function testGivenFieldValidationIsNotMissed()
+    {
+        $validator = validate([
+            'xyz' => null
+        ], [
+            'abc' => 'string|required',
+            'xyz' => 'string|required'
+        ]);
+
+        $this->assertTrue($validator->failed());
+        $this->assertNotEmpty($validator->errors()->all());
+        $this->assertNotNull($validator->errors()->firstOf('abc'));
+        $this->assertNotNull($validator->errors()->firstOf('xyz'));
     }
 }

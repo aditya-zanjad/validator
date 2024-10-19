@@ -2,12 +2,13 @@
 
 namespace AdityaZanjad\Validator\Rules\Constraints;
 
-use AdityaZanjad\Validator\Interfaces\ValidationRule;
+use AdityaZanjad\Validator\Rules\Rule;
+use AdityaZanjad\Validator\Interfaces\RequiredConstraint;
 
 /**
  * Check whether the given attribute is a valid string or not.
  */
-class Required implements ValidationRule
+class Required extends Rule implements RequiredConstraint
 {
     /**
      * @inheritDoc
