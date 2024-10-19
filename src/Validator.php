@@ -96,7 +96,9 @@ class Validator
                 // If the input field NULL OR not given & the current rule is not 'RequiredConstraint' one, then skip its execution.
                 $shouldSkipThisRule = $valueIsNotSet 
                     && !$rule instanceof RequiredConstraint 
-                    && is_string($rule) && !empty($rule) && !str_contains($rule, 'required');
+                    && is_string($rule) 
+                    && !empty($rule) 
+                    && !str_contains($rule, 'required');
 
                 if ($shouldSkipThisRule) {
                     continue;
@@ -165,7 +167,7 @@ class Validator
         $rule[0]    =   ValidStringifiedRule::tryFromName($rule[0]);
 
         if (is_null($rule[0])) {
-            throw new Exception("[Developer][Exception]: The validation rule [{$rule[0]}] is either invalid OR does not exist.");
+            throw new Exception("[Developer][Exception]: The field [{$field}] has validation rules which are either invalid OR do not exist.");
         }
 
         // Extract the rule arguments if they are provided.
