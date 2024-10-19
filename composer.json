@@ -15,7 +15,8 @@
         },
         "files": [
             "src/Utils/Arr.php",
-            "src/Utils/Str.php"
+            "src/Utils/Str.php",
+            "src/Utils/Validator.php"
         ]
     },
     "require-dev": {

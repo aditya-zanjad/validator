@@ -4,11 +4,16 @@ use PHPUnit\Framework\TestCase;
 use AdityaZanjad\Validator\Validator;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversFunction;
 use AdityaZanjad\Validator\Rules\Constraints\Required;
+
+use function AdityaZanjad\Validator\Utils\validate;
 
 #[UsesClass(Validator::class)]
 #[CoversClass(Required::class)]
 #[CoversClass(Validator::class)]
+#[CoversFunction('validator')]
+#[CoversFunction('validate')]
 final class RequiredRuleTest extends TestCase
 {
     /**
@@ -18,16 +23,10 @@ final class RequiredRuleTest extends TestCase
      */
     public function testRequiredFieldMissing(): void
     {
-        $validator = new Validator([
-            // No Input provided.
-        ], [
-            'abc' => 'required'
-        ]);
-
-        $validator->validate();
+        $validator = validate([], ['abc' => 'required']);
         $this->assertTrue($validator->failed());
-        $this->assertNotEmpty($validator->firstErrorOf('abc'));
-        $this->assertNotEmpty($validator->allErrors());
+        $this->assertNotEmpty($validator->errors()->firstOf('abc'));
+        $this->assertNotEmpty($validator->errors()->all());
     }
 
     /**
@@ -37,16 +36,10 @@ final class RequiredRuleTest extends TestCase
      */
     public function testRequiredFieldIsNull(): void
     {
-        $validator = new Validator([
-            'abc' => null
-        ], [
-            'abc' => 'required'
-        ]);
-
-        $validator->validate();
+        $validator = validate(['abc' => null,], ['abc' => 'required']);
         $this->assertTrue($validator->failed());
-        $this->assertNotEmpty($validator->firstErrorOf('abc'));
-        $this->assertNotEmpty($validator->allErrors());
+        $this->assertNotEmpty($validator->errors()->firstOf('abc'));
+        $this->assertNotEmpty($validator->errors()->all());
     }
 
     /**
@@ -56,13 +49,13 @@ final class RequiredRuleTest extends TestCase
      */
     public function testRequiredFieldsArePresent(): void
     {
-        $validator = new Validator([
+        $validator = validate([
             'abc'   =>  [],
             'xyz'   =>  '',
             'pqr'   =>  false,
             123     =>  0,
             456     =>  '0',
-            789     =>  'false'
+            789     =>  'false',
         ], [
             'abc'   =>  'required',
             'xyz'   =>  'required',
@@ -74,13 +67,13 @@ final class RequiredRuleTest extends TestCase
 
         $validator->validate();
         $this->assertFalse($validator->failed());
-        $this->assertEmpty($validator->allErrors());
-        $this->assertNull($validator->firstError('abc'));
-        $this->assertNull($validator->firstError('xyz'));
-        $this->assertNull($validator->firstError('123'));
-        $this->assertNull($validator->firstError('456'));
-        $this->assertNull($validator->firstError('abc'));
-        $this->assertNull($validator->firstError('abc'));
+        $this->assertEmpty($validator->errors()->all());
+        $this->assertNull($validator->errors()->first('abc'));
+        $this->assertNull($validator->errors()->first('xyz'));
+        $this->assertNull($validator->errors()->first('123'));
+        $this->assertNull($validator->errors()->first('456'));
+        $this->assertNull($validator->errors()->first('abc'));
+        $this->assertNull($validator->errors()->first('abc'));
     }
 
     /**
@@ -90,7 +83,7 @@ final class RequiredRuleTest extends TestCase
      */
     public function testDeepNestedRequiredFieldsAreMissing(): void
     {
-        $validator = new Validator([
+        $validator = validate([
             'abc' => [
                 'pqr' => [
                     //
@@ -110,9 +103,9 @@ final class RequiredRuleTest extends TestCase
 
         $validator->validate();
         $this->assertTrue($validator->failed());
-        $this->assertNotNull($validator->firstErrorOf('abc.pqr.xyz'));
-        $this->assertNotNull($validator->firstErrorOf('123.456.789.0'));
-        $this->assertNotEmpty($validator->allErrors());
+        $this->assertNotNull($validator->errors()->firstOf('abc.pqr.xyz'));
+        $this->assertNotNull($validator->errors()->firstOf('123.456.789.0'));
+        $this->assertNotEmpty($validator->errors()->all());
     }
 
     /**
@@ -122,7 +115,7 @@ final class RequiredRuleTest extends TestCase
      */
     public function testDeepNestedRequiredFieldsArePresent(): void
     {
-        $validator = new Validator([
+        $validator = validate([
             'abc' => [
                 'def' => [
                     'ghi' => [
@@ -152,8 +145,8 @@ final class RequiredRuleTest extends TestCase
 
         $validator->validate();
         $this->assertFalse($validator->failed());
-        $this->assertEmpty($validator->allErrors());
-        $this->assertNull($validator->firstErrorOf('123.456.789.0'));
-        $this->assertNull($validator->firstErrorOf('abc.def.ghi.jkl.mno.pqr.uvw.xyz'));
+        $this->assertEmpty($validator->errors()->all());
+        $this->assertNull($validator->errors()->firstOf('123.456.789.0'));
+        $this->assertNull($validator->errors()->firstOf('abc.def.ghi.jkl.mno.pqr.uvw.xyz'));
     }
 }

@@ -12,7 +12,7 @@ use RecursiveIteratorIterator;
  *
  * @return  array<int|string, mixed>
  */
-function array_to_dot(array $arr): array
+function array_multi_to_dot(array $arr): array
 {
     if (empty($arr)) {
         return $arr;
@@ -39,14 +39,14 @@ function array_to_dot(array $arr): array
 }
 
 /**
- * Fetch the element from the array based on the given array dot notation path.
+ * Check if the given dot notation array exists or not OR is equal to Null or not in the given array.
  *
  * @param   array<int|string, mixed>    &$arr
  * @param   string                      $path
  *
  * @return  bool
  */
-function array_value_exists(array &$arr, string $path): bool
+function array_path_exists(array &$arr, string $path): bool
 {
     $path = explode('.', $path);
 
@@ -69,7 +69,7 @@ function array_value_exists(array &$arr, string $path): bool
  *
  * @return  mixed
  */
-function array_value_get(array &$arr, string $path): mixed
+function array_path_value(array &$arr, string $path): mixed
 {
     $path = explode('.', $path);
 

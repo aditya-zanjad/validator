@@ -4,12 +4,13 @@ namespace AdityaZanjad\Validator\Rules\Constraints;
 
 use Closure;
 use Exception;
-use AdityaZanjad\Validator\Interfaces\ConstraintRule;
+use AdityaZanjad\Validator\Rules\Rule;
+use AdityaZanjad\Validator\Interfaces\RequiredConstraint;
 
 /**
  * Check whether the given attribute is a valid string or not.
  */
-class RequiredIf implements ConstraintRule
+class RequiredIf extends Rule implements RequiredConstraint
 {
     /**
      * To decide whether or not to execute certain code based on the value of this variable.
@@ -31,19 +32,6 @@ class RequiredIf implements ConstraintRule
     public function __construct(protected ?Closure $callback)
     {
         $this->callbackIsNull = is_null($callback);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function setConstraintData(array $data): static
-    {
-        if (!$this->callbackIsNull) {
-            throw new Exception("[Developer][Exception]: You cannot call the [" . __METHOD__ . "] when using the Closure-based validation.");
-        }
-
-        $this->data = $data;
-        return $this;
     }
 
     /**

@@ -2,12 +2,12 @@
 
 namespace AdityaZanjad\Validator\Rules;
 
-use AdityaZanjad\Validator\Interfaces\ValidationRule;
+use AdityaZanjad\Validator\Rules\Rule;
 
 /**
  * Check whether the given attribute is a valid string or not.
  */
-class Email implements ValidationRule
+class Email extends Rule
 {
     /**
      * @inheritDoc

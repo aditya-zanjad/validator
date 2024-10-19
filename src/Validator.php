@@ -2,16 +2,14 @@
 
 namespace AdityaZanjad\Validator;
 
-use Closure;
 use Exception;
 use InvalidArgumentException;
 use AdityaZanjad\Validator\Enums\Rule;
-use AdityaZanjad\Validator\Interfaces\ConstraintRule;
-use AdityaZanjad\Validator\Interfaces\ValidationRule;
-use AdityaZanjad\Validator\Exceptions\ValidationFailed;
+use AdityaZanjad\Validator\Rules\Rule as BaseRule;
 use AdityaZanjad\Validator\Rules\Constraints\RequiredIf;
+use AdityaZanjad\Validator\Interfaces\RequiredConstraint;
 
-use function AdityaZanjad\Validator\Utils\{array_value_first, array_value_exists, array_value_get, str_after};
+use function AdityaZanjad\Validator\Utils\{str_after};
 
 /**
  * @author  Aditya Zanjad <adityazanjad474@gmail.com>
@@ -20,53 +18,33 @@ use function AdityaZanjad\Validator\Utils\{array_value_first, array_value_exists
 class Validator
 {
     /**
-     * To manage the validation errors.
-     *
-     * @var array<string, array> $errors
-     */
-    protected array $errors = [];
-
-    /**
-     * A list of rules that extend the 'ConstraintRule' interface.
-     */
-    protected array $constraintRules = [];
-
-    /**
      * Decide whether or not to stop on the first validation failure.
      *
      * Setting this option to true will stop the validation process immediately on the
      * first validation failure.
      *
-     * @var bool $abortOnFailure
+     * @var bool $stopOnFirstFailure
      */
-    protected bool $abortOnFailure = false;
-
-    /**
-     * Indicates whether an exception should be thrown on the validation failure.
-     *
-     * @var bool $throwExceptionOnFailure
-     */
-    protected bool $throwExceptionOnFailure = false;
+    protected bool $stopOnFirstFailure = false;
 
     /**
      * Inject necessary data into the class.
      *
-     * @param   array<int|string, mixed>      $data
-     * @param   array<string, string|array>   $rules
-     * @param   array<string, string>         $messages
+     * @param   \AdityaZanjad\Validator\Input   $data
+     * @param   array<string, string|array>     $rules
+     * @param   array<string, string>           $messages
+     * @param   \AdityaZanjad\Validator\Error   $errors
      *
      * @throws  \InvalidArgumentException
      */
-    public function __construct(protected array $data, protected array $rules, protected array $messages = [])
+    public function __construct(protected Input $data, protected array $rules, protected array $messages, protected Error $errors)
     {
         if (empty($this->rules)) {
             throw new InvalidArgumentException("[Developer][Exception]: The parameter [rules] is empty. How am I supposed to validate the parameter [data].");
         }
 
-        $this->data             =   $this->data;
-        // $this->paths            =   array_keys($this->data);
-        $this->messages         =   $messages;
-        $this->constraintRules  =   Rule::getConstraintRulesCases();
+        $this->data     =   $this->data;
+        $this->messages =   $messages;
     }
 
     /**
@@ -74,28 +52,13 @@ class Validator
      *
      * @return static
      */
-    public function shouldAbortOnFailure(): static
+    public function stopOnFirstFailure(): static
     {
-        if ($this->abortOnFailure) {
-            return $this;
+        if ($this->stopOnFirstFailure) {
+            throw new Exception("[Developer][Exception]: The validator is is already set to stop on the first validation failure.");
         }
 
-        $this->abortOnFailure = true;
-        return $this;
-    }
-
-    /**
-     * Indicates that a validation exception will be thrown on the validation failure.
-     *
-     * @return static
-     */
-    public function shouldThrowValidationException(): static
-    {
-        if ($this->throwExceptionOnFailure) {
-            return $this;
-        }
-
-        $this->throwExceptionOnFailure = true;
+        $this->stopOnFirstFailure = true;
         return $this;
     }
 
@@ -110,18 +73,12 @@ class Validator
     {
         // Loop through each set of rules.
         foreach ($this->rules as $field => $rules) {
-            /**
-             * Convert the string of rules to an array of rules.
-             * For example, 'required|string|min:1' to '['required', 'string', 'min:1']'
-             */
+            // Convert the string of rules to an array of rules. For example, 'required|string|min:1' to '['required', 'string', 'min:1']'
             if (is_string($rules)) {
                 $rules = explode('|', $rules);
             }
 
-            /**
-             * The validation rules specified for each field must
-             * ultimately end up in the array format.
-             */
+            // The validation rules specified for each field must ultimately end up in the array format.
             if (!is_array($rules)) {
                 throw new Exception("[Developer][Exception]: The validation rules for the field [{$field}] must be specified either in a [STRING] or [ARRAY] format.");
             }
@@ -130,40 +87,29 @@ class Validator
                 throw new Exception("[Developer][Exception]: There are no validation rules specified for the field [{$field}].");
             }
 
-            /**
-             * Make some necessary modifications to the rules array.
-             *
-             * [1] Remove all the duplicated values from the array.
-             * [2] Sort rules array so that we can decide whether OR not to skip current field's validation.
-             */
-            $rules = array_unique($rules);
-            usort($rules, fn ($a) => ((is_string($a) && str_contains($a, 'required')) || $a instanceof ConstraintRule) ? -1 : 1);
+            // Get value of the field being currently validated.
+            $value          =   $this->data->get($field);
+            $valueIsNotSet  =   is_null($value);
 
             // Validate the given array path value against the given set of validation rules.
             foreach ($rules as $rule) {
-                if ($this->fieldValidationShouldBeSkipped($field, $rule)) {
-                    continue 2;
-                }
-
-                $result = match (gettype($rule)) {
-                    'string'    =>  $this->evaluateStrRule($field, $rule),
-                    'object'    =>  $rule instanceof ValidationRule ? $rule->check($field, $this->data[$field]) : call_user_func($rule, $field, $this->data[$field]),
-                    default     =>  throw new Exception("[Developer][Exception]: The validation rules for the field [{$field}] should be either [String] / [ValidationRule Instance] / [Callback].")
-                };
-
-                // If the validation succeeds skip the current iteration.
-                if ($result === true) {
+                // If the input field NULL OR not given & the current rule is not 'RequiredConstraint' one, then skip its execution.
+                if ($valueIsNotSet && !($rule instanceof RequiredConstraint || str_contains((string) $rule, 'required'))) {
                     continue;
                 }
 
-                $this->addError($field, $result ?: 'The attribute :{attribute} is invalid');
+                $result = match (gettype($rule)) {
+                    'string'    =>  $this->evaluateStringifiedRule($rule, $field, $value),
+                    'object'    =>  $rule instanceof BaseRule ? $rule->setInputInstance($this->data)->check($field, $value) : call_user_func($rule, $field, $value),
+                    default     =>  throw new Exception("[Developer][Exception]: The validation rules must be specified in either [STRING] OR [" . BaseRule::class . "] OR [callable] formats.")
+                };
 
-                if ($this->abortOnFailure) {
-                    break 2;
+                if ($result !== true) {
+                    $this->errors->add($field, $result);
                 }
 
-                if ($this->throwExceptionOnFailure) {
-                    throw new ValidationFailed($this->firstError(), $this->errors);
+                if ($this->stopOnFirstFailure) {
+                    break 2;
                 }
             }
         }
@@ -173,7 +119,7 @@ class Validator
 
     /**
      * TODO => Complete this functionality in the next commit.
-     * 
+     *
      * Expand the given wildcard path to the actual corresponding array path(s).
      *
      * @return void
@@ -181,10 +127,10 @@ class Validator
     protected function resolveWildCardPaths(): void
     {
         /**
-         * !!!!!!!!!!!!!!!!!!!!!!!!!!!! TODO !!!!!!!!!!!!!!!!!!!!!!! 
-         *  Resolve the wildcard paths to their actual input array 
+         * !!!!!!!!!!!!!!!!!!!!!!!!!!!! TODO !!!!!!!!!!!!!!!!!!!!!!!
+         *  Resolve the wildcard paths to their actual input array
          * paths & apply their validation rules to these paths.
-         * !!!!!!!!!!!!!!!!!!!!!!!!!!!! TODO !!!!!!!!!!!!!!!!!!!!!!! 
+         * !!!!!!!!!!!!!!!!!!!!!!!!!!!! TODO !!!!!!!!!!!!!!!!!!!!!!!
          */
         // $matchedPaths = preg_grep("/[$path]/", $this->paths);
 
@@ -201,71 +147,32 @@ class Validator
     }
 
     /**
-     * Check if the given field path is constrained to be required.
-     *
-     * @param   string                                                              $fieldPath
-     * @param   string|\Closure|\AdityaZanjad\Validator\Interfaces\ValidationRule   $rules
-     *
-     * @return  bool
-     */
-    protected function fieldValidationShouldBeSkipped(string $fieldPath, string|ValidationRule|Closure $rule): bool
-    {
-        // If the field present in the data & not is NULL, it should be validated.
-        if (array_value_exists($this->data, $fieldPath)) {
-            return false;
-        }
-
-        // If the field is being applied one of the 'required/required_*' rules, it must be validated.
-        if (is_string($rule) && str_contains($rule, 'required')) {
-            return false;
-        }
-
-        // If the rule is an instance of one of the Constrained Rules, the field must be validated.
-        if ($rule instanceof ConstraintRule) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
      * Validate the array field against the given stringified rule.
      *
-     * @param   string  $fieldPath
-     * @param   string  $rule
+     * @param   string  $rule   =>  Name of the validation rule.
+     * @param   string  $field  =>  The dot notation path to the field inside the array.
+     * @param   mixed   $value  =>  The value of the field being applied the validation rule.
      *
      * @return  bool|string
      */
-    protected function evaluateStrRule(string $fieldPath, string $rule): bool|string
+    protected function evaluateStringifiedRule(string $rule, string $field, mixed $value): bool|string
     {
-        $fieldValue =   array_value_get($this->data, $fieldPath);
         $rule       =   explode(':', $rule);
-        $ruleClass  =   Rule::tryFromName($rule[0]);
+        $rule[0]    =   Rule::tryFromName($rule[0]);
 
-        if (is_null($ruleClass)) {
+        if (is_null($rule[0])) {
             throw new Exception("[Developer][Exception]: The validation rule [{$rule[0]}] is either invalid OR does not exist.");
         }
 
-        // Extract the parameters that need to passed to the
-        // constructor/method of the rule class.
-        $ruleParams =   str_after($rule[1] ?? '', ':');
-        $ruleParams =   explode(',', $ruleParams);
+        // Extract the rule arguments if they are provided.
+        $rule[1] = isset($rule[1]) ? explode(',', str_after($rule[1], ':')) : [];
 
-        // For rules that are not constrained rules. i.e. the rules
-        // that are not dependent on the other input fields.
-        if (!in_array(ConstraintRule::class, class_implements($ruleClass, true))) {
-            $ruleObject = new $ruleClass(...$ruleParams);
-            return $ruleObject->check($fieldPath, $fieldValue);
-        }
-
-        // For rules, that are constrained to other fields as well
-        // along with the fields they are validating.
-        [$ruleObject, $constrainedData] = match ($ruleClass) {
-            RequiredIf::class => $this->makeRequiredIfRuleObject($ruleClass, $ruleParams),
+        $instance = match ($rule[0]) {
+            RequiredIf::class   =>  $this->makeInstanceForRequiredIfRule($rule[1]),
+            default             =>  new $rule[0](...$rule[1]),
         };
 
-        $ruleObject->setConstraintData($constrainedData);  // Set the constrained data specific to the rule & perform the validation.
-        return $ruleObject->check($fieldPath, $fieldValue);
+        return $instance->setInputInstance($this->data)->check($field, $value);
     }
 
     /**
@@ -276,25 +183,15 @@ class Validator
      *
      * @throws  \Exception
      *
-     * @return  array<string, array<string, mixed>|\AdityaZanjad\Validator\Rules\Constraints\RequiredIf>
+     * @return  \AdityaZanjad\Validator\Rules\Constraints\RequiredIf
      */
-    protected function makeRequiredIfRuleObject(string $ruleClass, array $ruleParams): array
+    protected function makeInstanceForRequiredIfRule(array $ruleParams): RequiredIf
     {
         if (count($ruleParams) < 2) {
             throw new Exception('[Developer][Exception]: The rule [required_if] requires at least two parameters.');
         }
 
-        $otherFieldName =   array_splice($ruleParams, 0, 1)[0];
-        $ruleObject     =   new $ruleClass(null);
-
-        return [
-            $ruleObject,
-            [
-                'other_field'   =>  $otherFieldName,
-                'given_values'  =>  $ruleParams,
-                'actual_value'  =>  $this->data[$otherFieldName] ?? null
-            ]
-        ];
+        return new RequiredIf(null);
     }
 
     /**
@@ -304,60 +201,15 @@ class Validator
      */
     public function failed(): bool
     {
-        return !empty($this->errors);
+        return !$this->errors->isEmpty();
     }
 
     /**
-     * Add a new validation error to the errors array.
+     * Get an instance to manage the validation errors.
      *
-     * @param   string  $attribute
-     * @param   string  $error
-     *
-     * @return  void
+     * @return \AdityaZanjad\Validator\Error
      */
-    public function addError(string $attribute, string $error): void
-    {
-        $this->errors[$attribute][] = str_replace(':{attribute}', $attribute, $error);
-    }
-
-    /**
-     * Get the first error message of the first field from the errors array.
-     *
-     * @return mixed
-     */
-    public function firstError(): mixed
-    {
-        $firstField = array_value_first($this->errors);
-
-        if (is_null($firstField)) {
-            return null;
-        }
-
-        return array_value_first($firstField);
-    }
-
-    /**
-     * Get the first error message for the given field from the errors array.
-     *
-     * @param string $key
-     *
-     * @return mixed
-     */
-    public function firstErrorOf(string $key): mixed
-    {
-        if (!array_key_exists($key, $this->errors)) {
-            return null;
-        }
-
-        return array_value_first($this->errors[$key]);
-    }
-
-    /**
-     * Return all of the validation errors at once as an array.
-     *
-     * @return array<string, array>
-     */
-    public function allErrors(): array
+    public function errors(): Error
     {
         return $this->errors;
     }
