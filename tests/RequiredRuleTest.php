@@ -1,6 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
+use AdityaZanjad\Validator\Input;
 use AdityaZanjad\Validator\Validator;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -10,8 +11,9 @@ use AdityaZanjad\Validator\Rules\Constraints\Required;
 use function AdityaZanjad\Validator\Utils\validate;
 
 #[UsesClass(Validator::class)]
+#[CoversClass(Error::class)]
+#[CoversClass(Input::class)]
 #[CoversClass(Required::class)]
-#[CoversClass(Validator::class)]
 #[CoversFunction('\AdityaZanjad\Validator\Utils\validate')]
 final class RequiredRuleTest extends TestCase
 {
