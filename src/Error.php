@@ -61,6 +61,22 @@ class Error
     }
 
     /**
+     * Get all of the validation errors for a certain field.
+     *
+     * @param string $key
+     * 
+     * @return array<string, string>
+     */
+    public function of(string $key): array
+    {
+        if (!array_key_exists($key, $this->errors)) {
+            return null;
+        }
+
+        return $this->errors[$key];
+    }
+
+    /**
      * Return all of the validation errors at once as an array.
      *
      * @return array<string, array>

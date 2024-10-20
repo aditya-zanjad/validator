@@ -11,10 +11,9 @@ use AdityaZanjad\Validator\Rules\Constraints\RequiredIf;
 use function AdityaZanjad\Validator\Utils\validate;
 
 #[UsesClass(Validator::class)]
-#[CoversClass(RequiredIf::class)]
-#[CoversClass(Validator::class)]
 #[CoversClass(Error::class)]
 #[CoversClass(Input::class)]
+#[CoversClass(RequiredIf::class)]
 #[CoversFunction('\AdityaZanjad\Validator\Utils\validate')]
 class RequiredIfRuleTest extends TestCase
 {

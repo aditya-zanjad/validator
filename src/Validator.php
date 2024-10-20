@@ -9,8 +9,6 @@ use AdityaZanjad\Validator\Enums\ValidStringifiedRule;
 use AdityaZanjad\Validator\Rules\Constraints\RequiredIf;
 use AdityaZanjad\Validator\Interfaces\RequiredConstraint;
 
-use function AdityaZanjad\Validator\Utils\{str_after};
-
 /**
  * @author  Aditya Zanjad <adityazanjad474@gmail.com>
  * @version 1.0
@@ -84,7 +82,7 @@ class Validator
             }
 
             if (empty($rules)) {
-                throw new Exception("[Developer][Exception]: There are no validation rules specified for the field [{$field}].");
+                throw new Exception("[Developer][Exception]: The field [{$field}] must have at least one validation rule specified for it.");
             }
 
             // Get value of the field being currently validated.
@@ -94,13 +92,7 @@ class Validator
             // Validate the given array path value against the given set of validation rules.
             foreach ($rules as $rule) {
                 // If the input field NULL OR not given & the current rule is not 'RequiredConstraint' one, then skip its execution.
-                $shouldSkipThisRule = $valueIsNotSet 
-                    && !$rule instanceof RequiredConstraint 
-                    && is_string($rule) 
-                    && !empty($rule) 
-                    && !str_contains($rule, 'required');
-
-                if ($shouldSkipThisRule) {
+                if ($valueIsNotSet && !$rule instanceof RequiredConstraint && is_string($rule) && !empty($rule) && !str_contains($rule, 'required')) {
                     continue;
                 }
 
@@ -170,8 +162,8 @@ class Validator
             throw new Exception("[Developer][Exception]: The field [{$field}] has validation rules which are either invalid OR do not exist.");
         }
 
-        // Extract the rule arguments if they are provided.
-        $rule[1] = isset($rule[1]) ? explode(',', str_after($rule[1], ':')) : [];
+        // Extract the rule arguments if they are provided. Also, filter them so as to avoid any side-effects.
+        $rule[1] = isset($rule[1]) ? explode(',', $rule[1]) : [];
 
         $instance = match ($rule[0]) {
             RequiredIf::class   =>  $this->makeInstanceForRequiredIfRule($rule[1]),

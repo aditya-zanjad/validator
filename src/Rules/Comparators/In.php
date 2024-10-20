@@ -5,6 +5,8 @@ namespace AdityaZanjad\Validator\Rules\Comparators;
 use InvalidArgumentException;
 use AdityaZanjad\Validator\Rules\Rule;
 
+use function AdityaZanjad\Validator\Utils\filter_values;
+
 /**
  * Check whether the given attribute is a valid string or not.
  */
@@ -36,14 +38,12 @@ class In extends Rule
      */
     public function check(string $attribute, mixed $value): bool|string
     {
-        if (in_array($value, $this->allowedValues)) {
+        if (in_array($value, filter_values(...$this->allowedValues), true)) {
             return true;
         }
 
-        if (count($this->allowedValues) > 1) {
-            return "The field {$attribute} must be equal to either of the [" . implode(', ', $this->allowedValues) . "].";
-        }
-        
-        return "The field {$attribute} must be equal to {$this->allowedValues[0]}.";
+        return count($this->allowedValues) > 1
+            ? "The field {$attribute} must be equal to either of the [" . implode(', ', $this->allowedValues) . "]."
+            : "The field {$attribute} must be equal to {$this->allowedValues[0]}.";
     }
 }
