@@ -3,8 +3,6 @@
 use PHPUnit\Framework\TestCase;
 use AdityaZanjad\Validator\Input;
 use AdityaZanjad\Validator\Validator;
-use AdityaZanjad\Validator\Rules\Max;
-use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversFunction;
 use AdityaZanjad\Validator\Rules\TypeString as TypeStr;
