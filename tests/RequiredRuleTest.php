@@ -3,10 +3,10 @@
 use PHPUnit\Framework\TestCase;
 use AdityaZanjad\Validator\Input;
 use AdityaZanjad\Validator\Validator;
+use AdityaZanjad\Validator\Rules\Required;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversFunction;
-use AdityaZanjad\Validator\Rules\Constraints\Required;
 
 use function AdityaZanjad\Validator\Utils\validate;
 

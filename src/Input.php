@@ -1,24 +1,43 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AdityaZanjad\Validator;
 
-use function AdityaZanjad\Validator\Utils\array_path_value;
-use function AdityaZanjad\Validator\Utils\array_path_exists;
+use function AdityaZanjad\Validator\Utils\arr_dot;
+use function AdityaZanjad\Validator\Utils\arr_get;
+use function AdityaZanjad\Validator\Utils\arr_exists;
+use function AdityaZanjad\Validator\Utils\arr_filled;
+use function AdityaZanjad\Validator\Utils\arr_not_null;
 
 /**
- * This class manages the input data that we want to validate.
- *
- * @author  Aditya Zanjad <adityazanjad474@gmail.com>
  * @version 1.0
  */
 class Input
 {
     /**
+     * The provided input data.
+     *
+     * @var array<int|string, mixed> $data
+     */
+    protected array $data;
+
+    /**
+     * The array dot notation paths to each input value.
+     *
+     * @var array<int, string> $paths
+     */
+    protected array $paths;
+
+    /**
+     * Inject and initialize the necessary data.
+     *
      * @param array<int|string, mixed> $data
      */
-    public function __construct(protected array $data)
+    public function __construct(array $data)
     {
-        //
+        $this->data     =   $data;
+        $this->paths    =   array_keys(arr_dot($this->data));
     }
 
     /**
@@ -32,46 +51,72 @@ class Input
     }
 
     /**
-     * Get one/more of the provided input data based on the given parameter(s).
+     * Get all of the array paths in the dot notation form.
      *
-     * @param string ...$fields
-     *
-     * @return mixed
+     * @return array<int, string>
      */
-    public function get(string ...$fields): mixed
+    public function allPaths(): array
     {
-        if (count($fields) === 1) {
-            return array_path_value($this->data, $fields[0]);
-        }
-
-        $data = [];
-
-        foreach ($fields as $field) {
-            $data[$field] = array_path_value($this->data, $field);
-        }
-
-        return $data;
+        return $this->paths;
     }
 
     /**
-     * Check whether or not the given array path(s) exist within the provided input data.
+     * Get a value of the particular dot notation array path.
      *
-     * @param string ...$fields
+     * @param string $path
      *
-     * @return bool|array<string, bool>
+     * @return mixed
      */
-    public function exists(string ...$fields): bool|array
+    public function get(string $path)
     {
-        if (count($fields) === 1) {
-            return array_path_exists($this->data, $fields[0]);
-        }
+        return arr_get($this->data, $path);
+    }
 
-        $data = [];
+    /**
+     * Check if a particular dot notation array path exists or not in the given array.
+     *
+     * @param string $path
+     *
+     * @return bool
+     */
+    public function exists(string $path): bool
+    {
+        return arr_exists($this->data, $path);
+    }
 
-        foreach ($fields as $field) {
-            $data[$field] = array_path_exists($this->data, $field);
-        }
+    /**
+     * Check if the given input path is equal to NULL.
+     * 
+     * @param string $path
+     * 
+     * @return bool
+     */
+    public function isNull(string $path): bool
+    {
+        return !arr_not_null($this->data, $path);
+    }
 
-        return $data;
+    /**
+     * Check if the given input path exists & is not equal to NULL.
+     * 
+     * @param string $path
+     * 
+     * @return bool
+     */
+    public function notNull(string $path): bool
+    {
+        return arr_not_null($this->data, $path);
+    }
+
+    /**
+     * Check if a particular dot notation array path exists & its value is not empty.
+     *
+     * @param string $path
+     *
+     * @return bool
+     */
+    public function filled(string $path): bool
+    {
+        return arr_filled($this->data, $path);
     }
 }

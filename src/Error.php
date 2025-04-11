@@ -1,85 +1,69 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AdityaZanjad\Validator;
 
-use function AdityaZanjad\Validator\Utils\array_value_first;
+use Exception;
 
+use function AdityaZanjad\Validator\Utils\arr_first;
+
+/**
+ * @version 1.0
+ */
 class Error
 {
     /**
-     * To contain the validation errors.
+     * To hold the validation errors.
      *
-     * @var array<string, mixed> $errors
+     * @var array<string, array<int, string>> $errors
      */
-    protected array $errors = [];
+    protected array $errors;
 
     /**
-     * Add a new validation error to the errors array.
-     *
-     * @param   string  $attribute
-     * @param   string  $error
-     *
-     * @return  void
+     * Initialize necessary parameters.
      */
-    public function add(string $attribute, bool|string $error): void
+    public function __construct()
     {
-        $error                      =   $error ?: 'The attribute :{attribute} is invalid.';
-        $error                      =   str_replace(':{attribute}', $attribute, $error);
-        $this->errors[$attribute][] =   $error;
+        $this->errors = [];
     }
 
     /**
-     * Get the first error message of the first field from the errors array.
+     * Check if the validation errors array is empty or not.
      *
-     * @return mixed
+     * @return bool
      */
-    public function first(): mixed
+    public function isEmpty(): bool
     {
-        $firstField = array_value_first($this->errors);
+        return empty($this->errors);
+    }
 
-        if (is_null($firstField)) {
-            return null;
+    /**
+     * Add a new error message for the given field
+     *
+     * @param   string      $field
+     * @param   bool|string $message
+     *
+     * @return  static
+     */
+    public function add(string $field, $message = false): static
+    {
+        if ($message === false) {
+            $message = 'The field :{field} is invalid.';
         }
 
-        return array_value_first($firstField);
-    }
-
-    /**
-     * Get the first error message for the given field from the errors array.
-     *
-     * @param string $key
-     *
-     * @return mixed
-     */
-    public function firstOf(string $key): mixed
-    {
-        if (!array_key_exists($key, $this->errors)) {
-            return null;
+        if (!is_string($message)) {
+            throw new Exception("[Developer][Exception]: The validation error message must be either a STRING or a BOOLEAN value.");
         }
 
-        return array_value_first($this->errors[$key]);
+        $this->errors[$field][] = str_replace(':{field}', $field, $message);
+        return $this;
     }
 
     /**
-     * Get all of the validation errors for a certain field.
+     * Get all of the validation errors.
      *
-     * @param string $key
-     * 
-     * @return array<string, string>
-     */
-    public function of(string $key): array
-    {
-        if (!array_key_exists($key, $this->errors)) {
-            return null;
-        }
-
-        return $this->errors[$key];
-    }
-
-    /**
-     * Return all of the validation errors at once as an array.
-     *
-     * @return array<string, array>
+     * @return array<string, array<int, string>>
      */
     public function all(): array
     {
@@ -87,12 +71,48 @@ class Error
     }
 
     /**
-     * Check if the errors array is empty or not. Useful for checking if any validation error has occurred yet.
+     * Get all of the validation errors for a particular field.
      *
-     * @return bool
+     * @param string $field
+     *
+     * @return null|string|array
      */
-    public function isEmpty(): bool
+    public function allOf(string $field)
     {
-        return empty($this->errors);
+        if (!isset($this->errors[$field])) {
+            return null;
+        }
+
+        return $this->errors[$field];
+    }
+
+    /**
+     * Get the first validation error message from the errors array.
+     *
+     * @return null|string
+     */
+    public function first()
+    {
+        $firstFieldErrors = arr_first($this->errors);
+
+        if (is_null($firstFieldErrors)) {
+            return null;
+        }
+
+        return arr_first($firstFieldErrors);
+    }
+
+    /**
+     * Get the first validation error message of a particular field from the errors array.
+     *
+     * @return null|string
+     */
+    public function firstOf(string $field)
+    {
+        if (!isset($this->errors[$field])) {
+            return null;
+        }
+
+        return arr_first($this->errors[$field]);
     }
 }

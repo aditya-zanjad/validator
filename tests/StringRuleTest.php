@@ -3,10 +3,11 @@
 use PHPUnit\Framework\TestCase;
 use AdityaZanjad\Validator\Input;
 use AdityaZanjad\Validator\Validator;
+use AdityaZanjad\Validator\Rules\Max;
+use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\UsesFunction;
 use PHPUnit\Framework\Attributes\CoversFunction;
-use AdityaZanjad\Validator\Rules\Primitives\TypeStr;
+use AdityaZanjad\Validator\Rules\TypeString as TypeStr;
 
 use function AdityaZanjad\Validator\Utils\validate;
 
@@ -14,7 +15,7 @@ use function AdityaZanjad\Validator\Utils\validate;
 #[CoversClass(Error::class)]
 #[CoversClass(Input::class)]
 #[CoversClass(TypeStr::class)]
-#[UsesFunction('\AdityaZanjad\Validator\Utils\validate')]
+// #[UsesFunction('\AdityaZanjad\Validator\Utils\validate')]
 #[CoversFunction('\AdityaZanjad\Validator\Utils\validate')]
 final class StringRuleTest extends TestCase
 {

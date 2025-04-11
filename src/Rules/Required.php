@@ -5,19 +5,20 @@ declare(strict_types=1);
 namespace AdityaZanjad\Validator\Rules;
 
 use AdityaZanjad\Validator\Base\AbstractRule;
+use AdityaZanjad\Validator\Interfaces\RequisiteRule;
 
 /**
  * @version 1.0
  */
-class Email extends AbstractRule
+class Required extends AbstractRule implements RequisiteRule
 {
     /**
      * @inheritDoc
      */
     public function check(string $field, mixed $value): bool|string
     {
-        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-            return "The field {$field} must be a valid email address.";
+        if (!$this->input->notNull($field)) {
+            return "The field {$field} is required.";
         }
 
         return true;

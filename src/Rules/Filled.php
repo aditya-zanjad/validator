@@ -9,15 +9,19 @@ use AdityaZanjad\Validator\Base\AbstractRule;
 /**
  * @version 1.0
  */
-class Email extends AbstractRule
+class Filled extends AbstractRule
 {
     /**
      * @inheritDoc
      */
     public function check(string $field, mixed $value): bool|string
     {
-        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-            return "The field {$field} must be a valid email address.";
+        if ($value === '' || $value === []) {
+            return "The field {$field} must not be empty.";
+        }
+
+        if (is_file($value) && in_array(filesize($value), [0, false])) {
+            return "The file {$field} must not be empty.";
         }
 
         return true;

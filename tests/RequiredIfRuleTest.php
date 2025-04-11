@@ -4,9 +4,9 @@ use PHPUnit\Framework\TestCase;
 use AdityaZanjad\Validator\Input;
 use AdityaZanjad\Validator\Validator;
 use PHPUnit\Framework\Attributes\UsesClass;
+use AdityaZanjad\Validator\Rules\RequiredIf;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversFunction;
-use AdityaZanjad\Validator\Rules\Constraints\RequiredIf;
 
 use function AdityaZanjad\Validator\Utils\validate;
 

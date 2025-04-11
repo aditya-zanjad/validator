@@ -9,15 +9,15 @@ use AdityaZanjad\Validator\Base\AbstractRule;
 /**
  * @version 1.0
  */
-class Email extends AbstractRule
+class TypeArray extends AbstractRule
 {
     /**
      * @inheritDoc
      */
     public function check(string $field, mixed $value): bool|string
     {
-        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-            return "The field {$field} must be a valid email address.";
+        if (!is_array($value)) {
+            return "The field {$field} must be an array.";
         }
 
         return true;
