@@ -21,10 +21,7 @@ class Enum extends NonInstantiable
      */
     public static function all(): array
     {
-        return arr_map_with_keys(static::reflectionClass()->getConstants(), function ($key, $value) {
-            $modifiedKey = static::resolveName($key);
-            return [$modifiedKey => $value];
-        });
+        return static::reflectionClass()->getConstants();
     }
 
     /**
@@ -34,9 +31,7 @@ class Enum extends NonInstantiable
      */
     public static function keys(): array
     {
-        return array_map(function ($key) {
-            return static::resolveName($key);
-        }, array_keys(static::all()));
+        return array_keys(static::all());
     }
 
     /**
@@ -59,18 +54,19 @@ class Enum extends NonInstantiable
      */
     public static function keyOf(mixed $val, bool $strict = true)
     {
-        $all    =   static::all();
-        $key    =   null;
+        $all        =   static::all();
+        $keyFound   =   null;
 
         foreach ($all as $key => $value) {
             $result = $strict ? $value === $val : $value == $val;
 
             if ($result) {
-                $key = static::resolveName($key);
+                $keyFound = $key;
+                break;
             }
         }
 
-        return $key;
+        return $keyFound;
     }
 
     /**
@@ -110,7 +106,7 @@ class Enum extends NonInstantiable
         $transformedKey =   $upperCased ? strtoupper($key) : strtolower($key);
         $currentClass   =   static::class;
 
-        return defined("$currentClass::{$transformedKey}") || defined("{$currentClass}::___{$transformedKey}");
+        return defined("$currentClass::{$transformedKey}");
     }
 
     /**
@@ -128,15 +124,11 @@ class Enum extends NonInstantiable
         $transformedKey =   $upperCased ? strtoupper($key) : strtolower($key);
         $currentClass   =   static::class;
 
-        if (defined("{$currentClass}::{$transformedKey}")) {
-            return constant("{$currentClass}::{$transformedKey}");
+        if (!static::exists($key, $upperCased)) {
+            return null;
         }
 
-        if (defined("{$currentClass}::___{$transformedKey}")) {
-            return constant("{$currentClass}::___{$transformedKey}");
-        }
-
-        return null;
+        return constant("{$currentClass}::{$transformedKey}");
     }
 
     /**
@@ -147,21 +139,5 @@ class Enum extends NonInstantiable
     final protected static function reflectionClass(): ReflectionClass
     {
         return new ReflectionClass(static::class);
-    }
-
-    /**
-     * Resolve the name of the constant to its supposed form if required.
-     *
-     * @param string $name
-     *
-     * @return string
-     */
-    protected static function resolveName(string $name)
-    {
-        if (str_starts_with($name, '___')) {
-            $name = str_after($name, '___');
-        }
-
-        return $name;
     }
 }

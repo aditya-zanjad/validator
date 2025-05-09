@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace AdityaZanjad\Validator;
 
 use Exception;
-use AdityaZanjad\Validator\Input;
-use AdityaZanjad\Validator\Error;
 use AdityaZanjad\Validator\Enums\Rule;
 use AdityaZanjad\Validator\Base\AbstractRule;
+use AdityaZanjad\Validator\Managers\ErrorsManager;
+use AdityaZanjad\Validator\Managers\InputsManager;
 use AdityaZanjad\Validator\Interfaces\RequisiteRule;
 
 use function AdityaZanjad\Validator\Utils\arr_indexed;
@@ -21,9 +21,9 @@ class Validator
     /**
      * To hold & manage all of the input data that we want to validate.
      *
-     * @var \AdityaZanjad\Validator\Input $input
+     * @var \AdityaZanjad\Validator\Managers\InputsManager $input
      */
-    protected Input $input;
+    protected InputsManager $input;
 
     /**
      * To hold the validation rules that we want to apply against the given input data.
@@ -42,9 +42,9 @@ class Validator
     /**
      * To hold & manage the validation errors.
      *
-     * @var \AdityaZanjad\Validator\Error $errors
+     * @var \AdityaZanjad\Validator\Managers\ErrorsManager $errors
      */
-    protected Error $errors;
+    protected ErrorsManager $errors;
 
     /**
      * Useful in deciding whether or not to stop the validator on first failure.
@@ -56,16 +56,17 @@ class Validator
     /**
      * Inject all the necessary parameters to perform the validation.
      *
-     * @param   \AdityaZanjad\Validator\Input                                                                                                       $data
-     * @param   array<string, string|array<int, string|\AdityaZanjad\Validator\Base\AbstractRule|callable(int|string $field, mixed $value): bool>>  $rules
-     * @param   array<string, string>                                                                                                               $messages
+     * @param   \AdityaZanjad\Validator\Managers\InputsManager
+     * @param   \AdityaZanjad\Validator\Managers\ErrorsManager
+     * @param   array<string, string|array<int, string|\AdityaZanjad\Validator\Base\AbstractRule|callable(int|string $field, mixed $value): bool>>
+     * @param   array<string, string>
      */
-    public function __construct(Input $input, array $rules, array $messages = [])
+    public function __construct(InputsManager $input, ErrorsManager $error, array $rules, array $messages = [])
     {
         $this->input                =   $input;
+        $this->errors               =   $error;
         $this->rules                =   $rules;
         $this->messages             =   $messages;
-        $this->errors               =   new Error();
         $this->shouldStopOnFailure  =   false;
     }
 
@@ -159,7 +160,7 @@ class Validator
 
         // Get all the paths that'll match with the given wildcard path either
         // completely or partially from left-to-right.
-        $actualPaths = preg_grep("#^{$path}$#", $this->input->allPaths());
+        $actualPaths = preg_grep("#^{$path}$#", $this->input->keys());
 
         // If no matches found, we want to create at least one dummy path to
         // perform validation if necessary.
@@ -351,9 +352,9 @@ class Validator
     /**
      * Get an instance of the class that holds & manages the error messages.
      *
-     * @return \AdityaZanjad\Validator\Error
+     * @return \AdityaZanjad\Validator\Managers\ErrorsManager
      */
-    public function errors(): Error
+    public function errors(): ErrorsManager
     {
         return $this->errors;
     }

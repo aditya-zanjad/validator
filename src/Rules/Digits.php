@@ -6,15 +6,14 @@ namespace AdityaZanjad\Validator\Rules;
 
 use Exception;
 use AdityaZanjad\Validator\Base\AbstractRule;
-use AdityaZanjad\Validator\Traits\VarHelpers;
+
+use function AdityaZanjad\Validator\Utils\varDigits;
 
 /**
  * @version 1.0
  */
 class Digits extends AbstractRule
 {
-    use VarHelpers;
-
     /**
      * @var int $validDigitsCount
      */
@@ -45,7 +44,7 @@ class Digits extends AbstractRule
             return "The field {$field} must be a valid numeric value.";
         }
 
-        if ($this->varDigits($value) !== $this->validDigitsCount) {
+        if (varDigits($value) !== $this->validDigitsCount) {
             return "The field {$field} must contain exactly {$this->validDigitsCount} digits.";
         }
 

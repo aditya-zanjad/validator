@@ -5,15 +5,14 @@ declare(strict_types=1);
 namespace AdityaZanjad\Validator\Rules;
 
 use AdityaZanjad\Validator\Base\AbstractRule;
-use AdityaZanjad\Validator\Traits\VarHelpers;
+
+use function AdityaZanjad\Validator\Utils\varEvaluateType;
 
 /**
  * @version 1.0
  */
 class Equal extends AbstractRule
 {
-    use VarHelpers;
-
     /**
      * @var mixed $data
      */
@@ -25,7 +24,7 @@ class Equal extends AbstractRule
      */
     public function __construct(mixed $data)
     {
-        $this->data = is_string($data) ? $this->varEvaluateType($data) : $data;
+        $this->data = is_string($data) ? varEvaluateType($data) : $data;
     }
 
     /**

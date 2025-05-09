@@ -5,16 +5,15 @@ declare(strict_types=1);
 namespace AdityaZanjad\Validator\Rules;
 
 use AdityaZanjad\Validator\Base\AbstractRule;
-use AdityaZanjad\Validator\Traits\VarHelpers;
 use AdityaZanjad\Validator\Interfaces\RequisiteRule;
+
+use function AdityaZanjad\Validator\Utils\varEvaluateType;
 
 /**
  * @version 1.0
  */
 class RequiredIf extends AbstractRule implements RequisiteRule
 {
-    use VarHelpers;
-
     /**
      * The data on which we want to operate on the determine if the validation rules passes or fails.
      *
@@ -49,7 +48,7 @@ class RequiredIf extends AbstractRule implements RequisiteRule
         $primaryField       =   $this->entity[0];
         $primaryFieldValue  =   $this->input->get($primaryField);
         $primaryValidValues =   array_slice($this->entity, 1);
-        $primaryValidValues =   array_map(fn ($value) => $this->varEvaluateType($value), $primaryValidValues);
+        $primaryValidValues =   array_map(fn ($value) => varEvaluateType($value), $primaryValidValues);
 
         if (!in_array($primaryFieldValue, $primaryValidValues, true)) {
             return true;

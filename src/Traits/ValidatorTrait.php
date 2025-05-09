@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace AdityaZanjad\Validator\Traits;
 
 use AdityaZanjad\Validator\Validator;
-use AdityaZanjad\Validator\Exceptions\ValidationFailed;
+use function AdityaZanjad\Validator\Utils\validate;
+use function AdityaZanjad\Validator\Utils\validator;
 
 /**
  * @version 2.0
@@ -26,15 +27,7 @@ trait ValidatorTrait
      */
     final public function validate(array $data, array $rules, array $messages = [], bool $shouldThrowException = true): Validator
     {
-        // Perform the validation with pre-defined settings.
-        $validator = new Validator($data, $rules, $messages);
-        $validator->stopOnFirstFailure()->validate();
-
-        if ($validator->failed()) {
-            throw new ValidationFailed($validator->errors()->first());
-        }
-
-        return $validator;
+        return validate($data, $rules, $messages);
     }
 
     /**
@@ -44,10 +37,10 @@ trait ValidatorTrait
      * @param   array<string, string|array>   $rules
      * @param   array<string, string>         $messages
      *
-     * @return  \AdityaZanjad\Validator\Validator\Validator
+     * @return  \AdityaZanjad\Validator\Validator
      */
     final public function validator(array $data, array $rules, array $messages = []): Validator
     {
-        return new Validator($data, $rules, $messages);
+        return validator($data, $rules, $messages);
     }
 }

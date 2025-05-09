@@ -34,7 +34,7 @@ class Max extends AbstractRule
      */
     public function check(string $field, mixed $value): bool|string
     {
-        if ($this->varSize($value) > $this->maxAllowedSize) {
+        if (AdityaZanjad\Validator\Size($value) > $this->maxAllowedSize) {
             return "The field {$field} cannot be more than {$this->maxAllowedSize}.";
         }
 

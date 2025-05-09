@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AdityaZanjad\Validator;
+namespace AdityaZanjad\Validator\Managers;
 
 use function AdityaZanjad\Validator\Utils\arr_dot;
 use function AdityaZanjad\Validator\Utils\arr_get;
@@ -13,7 +13,7 @@ use function AdityaZanjad\Validator\Utils\arr_not_null;
 /**
  * @version 1.0
  */
-class Input
+class InputsManager
 {
     /**
      * The provided input data.
@@ -53,9 +53,9 @@ class Input
     /**
      * Get all of the array paths in the dot notation form.
      *
-     * @return array<int, string>
+     * @return array<int, int|string>
      */
-    public function allPaths(): array
+    public function keys(): array
     {
         return $this->paths;
     }
