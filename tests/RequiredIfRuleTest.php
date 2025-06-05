@@ -1,8 +1,8 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use AdityaZanjad\Validator\Input;
 use AdityaZanjad\Validator\Validator;
+use AdityaZanjad\Validator\Fluents\Input;
 use PHPUnit\Framework\Attributes\UsesClass;
 use AdityaZanjad\Validator\Rules\RequiredIf;
 use PHPUnit\Framework\Attributes\CoversClass;

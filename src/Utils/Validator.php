@@ -3,9 +3,8 @@
 namespace AdityaZanjad\Validator\Utils;
 
 use AdityaZanjad\Validator\Validator;
-use AdityaZanjad\Validator\Managers\ErrorsManager;
-use AdityaZanjad\Validator\Managers\InputsManager;
-use AdityaZanjad\Validator\Exceptions\ValidationFailed;
+use AdityaZanjad\Validator\Fluents\Error;
+use AdityaZanjad\Validator\Fluents\Input;
 
 /**
  * Validate the given input data against the given validation rules.
@@ -14,22 +13,12 @@ use AdityaZanjad\Validator\Exceptions\ValidationFailed;
  * @param   array<string, string|array>     $rules
  * @param   array<string, string>           $messages
  *
- * @throws  \AdityaZanjad\Validator\Exceptions\ValidationFailed
- *
  * @return  \AdityaZanjad\Validator\Validator
  */
 function validate(array $data, array $rules, array $messages = []): Validator
 {
     // Perform the validation with pre-defined settings.
-    $validator = validator($data, $rules, $messages)
-        ->stopOnFirstFailure()
-        ->validate();
-
-    if ($validator->failed()) {
-        throw new ValidationFailed($validator->errors()->first());
-    }
-
-    return $validator;
+    return validator($data, $rules, $messages)->validate();
 }
 
 /**
@@ -43,8 +32,8 @@ function validate(array $data, array $rules, array $messages = []): Validator
  */
 function validator(array $data, array $rules, array $messages = []): Validator
 {
-    $input      =   new InputsManager($data);
-    $error      =   new ErrorsManager();
+    $input      =   new Input($data);
+    $error      =   new Error();
 
     return new Validator($input, $error, $rules, $messages);
 }

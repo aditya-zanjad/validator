@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AdityaZanjad\Validator\Managers;
+namespace AdityaZanjad\Validator\Fluents;
 
 use Exception;
 
@@ -11,7 +11,7 @@ use function AdityaZanjad\Validator\Utils\arr_first;
 /**
  * @version 1.0
  */
-class ErrorsManager
+class Error
 {
     /**
      * To hold the validation errors.

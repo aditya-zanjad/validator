@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AdityaZanjad\Validator\Managers;
+namespace AdityaZanjad\Validator\Fluents;
 
 use function AdityaZanjad\Validator\Utils\arr_dot;
 use function AdityaZanjad\Validator\Utils\arr_get;
@@ -13,7 +13,7 @@ use function AdityaZanjad\Validator\Utils\arr_not_null;
 /**
  * @version 1.0
  */
-class InputsManager
+class Input
 {
     /**
      * The provided input data.
