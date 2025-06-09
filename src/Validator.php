@@ -54,6 +54,13 @@ class Validator
     protected bool $shouldStopOnFailure;
 
     /**
+     * To check whether the validation has been already performed or not.
+     * 
+     * @var bool $alreadyValidated
+     */
+    protected bool $alreadyValidated;
+
+    /**
      * Inject all the necessary parameters to perform the validation.
      *
      * @param   \AdityaZanjad\Validator\Fluents\Input
@@ -61,13 +68,17 @@ class Validator
      * @param   array<string, string|array<int, string|\AdityaZanjad\Validator\Base\AbstractRule|callable(int|string $field, mixed $value): bool>>
      * @param   array<string, string>
      */
-    public function __construct(Input $input, Error $error, array $rules, array $messages = [])
+    public function __construct(array $input, array $rules, array $messages = [])
     {
-        $this->input                =   $input;
-        $this->errors               =   $error;
-        $this->rules                =   $this->preprocessRules($rules);
-        $this->messages             =   $messages;
+        // Initialize/transform the supplied constructor arguments before utilizing them.
+        $this->input    =   new Input($input);
+        $this->rules    =   $this->preprocessRules($rules);
+        $this->messages =   $messages;
+
+        // Set other necessary data to their default options.
+        $this->errors               =   new Error();
         $this->shouldStopOnFailure  =   false;
+        $this->alreadyValidated     =   false;
     }
 
     /**
@@ -193,6 +204,12 @@ class Validator
      */
     public function validate(): static
     {
+        // If the validation has already performed for this instance then
+        // there is no need to do it again.
+        if ($this->alreadyValidated) {
+            return $this;
+        }
+
         foreach ($this->rules as $path => $rules) {
             /**
              * If the current field is empty/NULL and its validation rules include
@@ -238,6 +255,7 @@ class Validator
             }
         }
 
+        $this->alreadyValidated = true;
         return $this;
     }
 

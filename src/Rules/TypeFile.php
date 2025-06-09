@@ -5,15 +5,12 @@ declare(strict_types=1);
 namespace AdityaZanjad\Validator\Rules;
 
 use AdityaZanjad\Validator\Base\AbstractRule;
-use AdityaZanjad\Validator\Traits\VarHelpers;
 
 /**
  * @version 1.0
  */
 class TypeFile extends AbstractRule
 {
-    use VarHelpers;
-
     /**
      * @inheritDoc
      */

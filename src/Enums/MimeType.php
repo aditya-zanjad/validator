@@ -92,6 +92,7 @@ class MimeType extends Enum
     public const XML            =   "application/xml";
     public const XUL            =   "application/vnd.mozilla.xul+xml";
     public const ZIP            =   "application/zip";
+    public const ___WAV         =   "audio/x-wav";
     public const ___3GP_VIDEO   =   "video/3gpp";
     public const ___3GP_AUDIO   =   "audio/3gpp";
     public const ___3G2_VIDEO   =   "video/3gpp2";
@@ -125,5 +126,23 @@ class MimeType extends Enum
         }
 
         return $name;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public static function keyOf(mixed $val, bool $strict = true)
+    {
+        $key = parent::keyOf($val, $strict);
+
+        switch ($key) {
+            case 'XWAV':
+                # code...
+                break;
+            
+            default:
+                # code...
+                break;
+        }
     }
 }

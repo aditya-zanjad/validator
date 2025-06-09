@@ -16,8 +16,8 @@ class Numeric extends AbstractRule
      */
     public function check(string $field, mixed $value): bool|string
     {
-        if (!filter_var($field, FILTER_VALIDATE_INT) || !filter_var($field, FILTER_VALIDATE_FLOAT)) {
-            return "The field {$field} must be a valid number.";
+        if (filter_var($value, FILTER_VALIDATE_FLOAT) === false && filter_var($value, FILTER_VALIDATE_INT) === false) {
+            return "The field :{field} must be a valid number.";
         }
 
         return true;

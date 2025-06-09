@@ -9,7 +9,7 @@ use AdityaZanjad\Validator\Base\AbstractRule;
 /**
  * @version 1.0
  */
-class In extends AbstractRule
+class NotIn extends AbstractRule
 {
     /**
      * Valid values for the given input field.
@@ -33,9 +33,9 @@ class In extends AbstractRule
      */
     public function check(string $field, mixed $value): bool|string
     {
-        if (!in_array($value, $this->params)) {
+        if (in_array($value, $this->params)) {
             $validValues = implode(', ', $this->params);
-            return "The field :{field} must be set to one of these values: {$validValues}.";
+            return "The field :{field} must not be any of these values: {$validValues}.";
         }
 
         return true;

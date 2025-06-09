@@ -4,20 +4,16 @@ declare(strict_types=1);
 
 namespace AdityaZanjad\Validator\Rules;
 
+use finfo;
 use Exception;
-use Throwable;
-use AdityaZanjad\Validator\Core\Utils\Arr;
 use AdityaZanjad\Validator\Enums\MimeType;
 use AdityaZanjad\Validator\Base\AbstractRule;
-use AdityaZanjad\Validator\Traits\VarHelpers;
 
 /**
  * @version 1.0
  */
 class Mime extends AbstractRule
 {
-    use VarHelpers;
-
     /**
      * @var array<int, string> $givenMimeTypes
      */
@@ -32,7 +28,7 @@ class Mime extends AbstractRule
             throw new Exception("[Developer][Exception]: The validation rule [" . static::class . "] must be provided with at least one parameter.");
         }
 
-        $this->givenMimeTypes = Arr::mapFn($givenMimeTypes, fn ($mime) => trim($mime));
+        $this->givenMimeTypes = array_map(fn($mime) => trim($mime), $givenMimeTypes);
     }
 
     /**
@@ -46,36 +42,35 @@ class Mime extends AbstractRule
 
         if (!empty($invalidMimeTypes)) {
             $invalidMimeTypesImploded = implode(',', $invalidMimeTypes);
-            return "The field [$field] has invalid list of MIME types for the rule [mime]: {$invalidMimeTypesImploded}.";
+            throw new Exception("[Developer][Exception]: The field [$field] has been provided with an invalid list of MIME types: {$invalidMimeTypesImploded}.");
         }
 
-        /**
-         * If only a path is given to the file, we'll need to open it obtain
-         * important information about it to validate its MIME type.
-         */
-        $file = null;
+        $valueMimeType = null;
 
-        if (is_string($value) && file_exists($value)) {
-            try {
-                $file = fopen($value, 'r');
-            } catch (Throwable $e) {
-                // dd($e);
-                return "The file [{$field}] must be accessible to figure out its MIME type.";
-            }
-        }
+        switch (gettype($value)) {
+            case 'string':
+                if (is_file($value) && is_readable($value)) {
+                    $valueMimeType = mime_content_type($value);
+                    break;
+                }
 
-        // Make sure that the file has been properly loaded.
-        if (!is_resource($file)) {
-            return "The field {$field} must be a valid file.";
-        }
+                $finfo          =   new finfo();
+                $valueMimeType  =   $finfo->buffer($value, FILEINFO_MIME_TYPE);
+                break;
 
-        $metadata       =   stream_get_meta_data($file);
-        $valueMimeType  =   mime_content_type($file);
+            case 'resource':
+                $metadata = stream_get_meta_data($value);
 
-        fclose($file);
+                if ($metadata['wrapper_type'] !== 'plainfile') {
+                    return "The field {$field} must be a valid file.";
+                }
 
-        if (!in_array($metadata['wrapper_type'], ['plainfile'])) {
-            return "The field {$field} must be a valid file.";
+                $valueMimeType = mime_content_type($metadata['uri']);
+                break;
+
+            default:
+                throw new Exception("[Developer][Exception]: The field :{field} must be a valid file.");
+                break;
         }
 
         if (!in_array($valueMimeType, $this->givenMimeTypes)) {

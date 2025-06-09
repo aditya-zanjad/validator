@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use PHPUnit\Framework\TestCase;
 use AdityaZanjad\Validator\Validator;
 use AdityaZanjad\Validator\Fluents\Input;
@@ -13,51 +15,15 @@ use function AdityaZanjad\Validator\Utils\validate;
 #[CoversClass(Error::class)]
 #[CoversClass(Input::class)]
 #[CoversClass(TypeStr::class)]
-// #[UsesFunction('\AdityaZanjad\Validator\Utils\validate')]
 #[CoversFunction('\AdityaZanjad\Validator\Utils\validate')]
-final class StringRuleTest extends TestCase
+final class StringValidationRuleTest extends TestCase
 {
-    /**
-     * Assert that the validator fails when the given string is an invalid string.
-     *
-     * @return void
-     */
-    public function testGivenFieldIsAnInvalidString(): void
-    {
-        $validator = validate([
-            'abc'       =>  ['this is a string.'],
-            'xyz'       =>  ['this is a string!' => 'this is a string !'],
-            'array'     =>  [1, 2, 3, 4, 5, 6],
-            'int'       =>  12345682385,
-            'float'     =>  57832572.23478235,
-            'object'    =>  (object) ['abc' => 1234]
-        ], [
-            'abc'       =>  'string',
-            'xyz'       =>  'string',
-            'array'     =>  'string',
-            'int'       =>  'string',
-            'float'     =>  'string',
-            'object'    =>  'string'
-        ]);
-
-        $validator->validate();
-        $this->assertTrue($validator->failed());
-        $this->assertNotEmpty($validator->errors()->all());
-        $this->assertNotEmpty($validator->errors()->firstOf('abc'));
-        $this->assertNotEmpty($validator->errors()->firstOf('xyz'));
-        $this->assertNotEmpty($validator->errors()->firstOf('array'));
-        $this->assertNotEmpty($validator->errors()->firstOf('int'));
-        $this->assertNotEmpty($validator->errors()->firstOf('float'));
-        $this->assertNotEmpty($validator->errors()->firstOf('object'));
-
-    }
-
     /**
      * Assert that the validator succeeds when the given fields are valid.
      *
      * @return void
      */
-    public function testGivenFieldsAreValidString(): void
+    public function testStringValidationRulePasses(): void
     {
         $validator = validate([
             'english'   =>  '1234! Get on the dance floor!',
@@ -96,11 +62,45 @@ final class StringRuleTest extends TestCase
     }
 
     /**
+     * Assert that the validator fails when the given string is an invalid string.
+     *
+     * @return void
+     */
+    public function testStringValidationRuleFails(): void
+    {
+        $validator = validate([
+            'abc'       =>  ['this is a string.'],
+            'xyz'       =>  ['this is a string!' => 'this is a string !'],
+            'array'     =>  [1, 2, 3, 4, 5, 6],
+            'int'       =>  12345682385,
+            'float'     =>  57832572.23478235,
+            'object'    =>  (object) ['abc' => 1234]
+        ], [
+            'abc'       =>  'string',
+            'xyz'       =>  'string',
+            'array'     =>  'string',
+            'int'       =>  'string',
+            'float'     =>  'string',
+            'object'    =>  'string'
+        ]);
+
+        $this->assertTrue($validator->failed());
+        $this->assertNotEmpty($validator->errors()->all());
+        $this->assertNotEmpty($validator->errors()->firstOf('abc'));
+        $this->assertNotEmpty($validator->errors()->firstOf('xyz'));
+        $this->assertNotEmpty($validator->errors()->firstOf('array'));
+        $this->assertNotEmpty($validator->errors()->firstOf('int'));
+        $this->assertNotEmpty($validator->errors()->firstOf('float'));
+        $this->assertNotEmpty($validator->errors()->firstOf('object'));
+
+    }
+
+    /**
      * Assert that the validation rule is skipped when given field is missing or is set to null.
      *
      * @return void
      */
-    public function testGivenFieldValidationShouldBeSkipped()
+    public function testStringValidationRuleIsSkipped()
     {
         $validator = validate([
             'xyz' => null
@@ -120,7 +120,7 @@ final class StringRuleTest extends TestCase
      *
      * @return void
      */
-    public function testGivenFieldValidationIsNotMissed()
+    public function testStringValidationRuleIsAppliedToRequiredFields()
     {
         $validator = validate([
             'xyz' => null

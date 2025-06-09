@@ -3,8 +3,6 @@
 namespace AdityaZanjad\Validator\Utils;
 
 use AdityaZanjad\Validator\Validator;
-use AdityaZanjad\Validator\Fluents\Error;
-use AdityaZanjad\Validator\Fluents\Input;
 
 /**
  * Validate the given input data against the given validation rules.
@@ -17,8 +15,8 @@ use AdityaZanjad\Validator\Fluents\Input;
  */
 function validate(array $data, array $rules, array $messages = []): Validator
 {
-    // Perform the validation with pre-defined settings.
-    return validator($data, $rules, $messages)->validate();
+    $validator = new Validator($data, $rules, $messages);
+    return $validator->validate();
 }
 
 /**
@@ -32,8 +30,5 @@ function validate(array $data, array $rules, array $messages = []): Validator
  */
 function validator(array $data, array $rules, array $messages = []): Validator
 {
-    $input      =   new Input($data);
-    $error      =   new Error();
-
-    return new Validator($input, $error, $rules, $messages);
+    return new Validator($data, $rules, $rules, $messages);
 }

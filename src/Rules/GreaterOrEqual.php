@@ -9,7 +9,7 @@ use AdityaZanjad\Validator\Base\AbstractRule;
 /**
  * @version 1.0
  */
-class GreaterThanOrEqualTo extends AbstractRule
+class GreaterOrEqual extends AbstractRule
 {
     /**
      * @var array<int, mixed> $entities

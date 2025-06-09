@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 use PHPUnit\Framework\TestCase;
-use AdityaZanjad\Validator\Validator;
 use AdityaZanjad\Validator\Rules\Min;
+use AdityaZanjad\Validator\Validator;
 use AdityaZanjad\Validator\Fluents\Input;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -70,13 +72,11 @@ class MinValidationRuleTest extends TestCase
 
         $this->assertTrue($validator->failed());
         $this->assertNotEmpty($validator->errors()->all());
-
         $this->assertNotNull($validator->errors()->first());
         $this->assertNotNull($validator->errors()->firstOf('abc'));
         $this->assertNotNull($validator->errors()->firstOf('def'));
         $this->assertNotNull($validator->errors()->firstOf('ghi'));
         $this->assertNotNull($validator->errors()->firstOf('jkl'));
-
         $this->assertIsString($validator->errors()->first());
         $this->assertIsString($validator->errors()->firstOf('abc'));
         $this->assertIsString($validator->errors()->firstOf('def'));

@@ -6,10 +6,12 @@ namespace AdityaZanjad\Validator\Rules;
 
 use AdityaZanjad\Validator\Base\AbstractRule;
 
+use function AdityaZanjad\Validator\Utils\varEvaluateType;
+
 /**
  * @version 1.0
  */
-class In extends AbstractRule
+class InStrict extends AbstractRule
 {
     /**
      * Valid values for the given input field.
@@ -25,7 +27,10 @@ class In extends AbstractRule
      */
     public function __construct(...$params)
     {
-        $this->params = array_map(fn($param) => is_string($param) ? trim($param) : $param, $params);
+        $this->params = array_map( function ($param) {
+            $param = varEvaluateType($param);
+            return is_string($param) ? trim($param) : $param;
+        }, $params);
     }
 
     /**
@@ -33,9 +38,11 @@ class In extends AbstractRule
      */
     public function check(string $field, mixed $value): bool|string
     {
-        if (!in_array($value, $this->params)) {
+        $value = varEvaluateType($value);
+
+        if (!in_array($value, $this->params, true)) {
             $validValues = implode(', ', $this->params);
-            return "The field :{field} must be set to one of these values: {$validValues}.";
+            return "The field {$field} must be one of these values: {$validValues}.";
         }
 
         return true;

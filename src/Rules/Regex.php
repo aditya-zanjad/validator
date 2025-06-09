@@ -12,18 +12,18 @@ use AdityaZanjad\Validator\Base\AbstractRule;
 class Regex extends AbstractRule
 {
     /**
-     * @var array<int, string> $regexes
+     * @var string $regex
      */
-    protected array $regexes;
+    protected string $regex;
 
     /**
      * Inject the dependencies required to execute the validation logic in this rule.
      *
-     * @param int $regexes
+     * @param string $regex
      */
-    public function __construct(string ...$regexes)
+    public function __construct(string $regex)
     {
-        $this->regexes = $regexes;
+        $this->regex = $regex;
     }
 
     /**
@@ -31,18 +31,8 @@ class Regex extends AbstractRule
      */
     public function check(string $field, mixed $value): bool|string
     {
-        // To hold the regular expression matches for iteration.
-        $matches = [];
-
-        foreach ($this->regexes as $regex) {
-            preg_match($regex, $value, $matches);
-
-            if (empty($matches)) {
-                return "The field {$field} must match the regular expression {$regex}.";
-            }
-
-            // Empty up the array containing the regular expressions matches for the next iteration.
-            $matches = [];
+        if (!preg_match($this->regex, $value, $matches)) {
+            return "The field {$field} must match the regular expression {$this->regex}.";
         }
 
         return true;

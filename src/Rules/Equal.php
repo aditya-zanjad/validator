@@ -6,25 +6,22 @@ namespace AdityaZanjad\Validator\Rules;
 
 use AdityaZanjad\Validator\Base\AbstractRule;
 
-use function AdityaZanjad\Validator\Utils\varEvaluateType;
-
 /**
  * @version 1.0
  */
 class Equal extends AbstractRule
 {
     /**
-     * @var mixed $data
+     * @var string $data
      */
-    protected mixed $data;
+    protected string $data;
 
     /**
-     *
-     * @param mixed $data
+     * @param string $data
      */
-    public function __construct(mixed $data)
+    public function __construct(string $data)
     {
-        $this->data = is_string($data) ? varEvaluateType($data) : $data;
+        $this->data = $data;
     }
 
     /**
@@ -32,8 +29,10 @@ class Equal extends AbstractRule
      */
     public function check(string $field, mixed $value): bool|string
     {
-        if ($value !== $this->data) {
-            return "The field {$field} must be equal to {$this->data}.";
+        $dataToMatchWith = $this->data[0];
+
+        if ($value != $dataToMatchWith) {
+            return "The field {$field} must be equal to {$dataToMatchWith}.";
         }
 
         return true;

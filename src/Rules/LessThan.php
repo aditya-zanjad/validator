@@ -29,11 +29,11 @@ class LessThan extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $fieldPath, mixed $value): bool|string
+    public function check(string $field, mixed $value): bool|string
     {
         foreach ($this->entities as $entity) {
-            if ($value >= $entity) {
-                return "The field {$fieldPath} must not be greater than {$entity}.";
+            if (!($value < $entity)) {
+                return "The field :{field} must be less than {$entity}.";
             }
         }
 
