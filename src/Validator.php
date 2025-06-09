@@ -28,7 +28,7 @@ class Validator
     /**
      * To hold the validation rules that we want to apply against the given input data.
      *
-     * @var array<string, string|array<int, string|callable|>> $rules
+     * @var array<string, string|array<int, string|\AdityaZanjad\Validator\Base\AbstractRule|callable(int|string $field, mixed $value): bool>>
      */
     protected array $rules;
 
@@ -63,8 +63,7 @@ class Validator
     /**
      * Inject all the necessary parameters to perform the validation.
      *
-     * @param   \AdityaZanjad\Validator\Fluents\Input
-     * @param   \AdityaZanjad\Validator\Fluents\Error
+     * @param   array<int|string, mixed>
      * @param   array<string, string|array<int, string|\AdityaZanjad\Validator\Base\AbstractRule|callable(int|string $field, mixed $value): bool>>
      * @param   array<string, string>
      */
@@ -132,8 +131,7 @@ class Validator
             return array_fill_keys(array_keys($this->input->all()), $rules);
         }
 
-        // Get all the paths that'll match with the given wildcard path either
-        // completely or partially from left-to-right.
+        // Get all the paths that match with the wildcard path either completely or partially from left-to-right.
         $actualPaths = preg_grep("#^{$path}$#", $this->input->keys());
 
         // If no matches found, we want to create at least one dummy path to

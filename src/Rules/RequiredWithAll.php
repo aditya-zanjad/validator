@@ -30,7 +30,7 @@ class RequiredWithAll extends AbstractRule implements RequisiteRule
      */
     public function check(string $field, mixed $value): bool|string
     {
-        // If any of the dependent field is not filled i.e. not equal to null, the validation
+        // If any of the dependent fields is not filled OR not equal to null, the validation
         // will return true. However, if the all the dependent fields are present & if the
         // current field is missing, a validation error message will be returned.
         foreach ($this->dependentFields as $dependentField) {
@@ -40,7 +40,8 @@ class RequiredWithAll extends AbstractRule implements RequisiteRule
         }
 
         if (!$this->input->exists($field)) {
-            return "The field {$field} is required when the other field {$dependentField} is not exists.";
+            $implodededDependentFields = implode(', ', $this->dependentFields);
+            return "The field {$field} is required when these fields are present: {$implodededDependentFields}.";
         }
 
         return true;

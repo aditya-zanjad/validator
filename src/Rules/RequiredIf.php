@@ -23,7 +23,7 @@ class RequiredIf extends AbstractRule implements RequisiteRule
      *
      * @var array<int, string>|callable($field, $value, \AdityaZanjad\Validator\Validator\Input): bool|string $entity
      */
-    protected mixed $entity;
+    protected $entity;
 
     /**
      * Inject necessary dependencies into the class.

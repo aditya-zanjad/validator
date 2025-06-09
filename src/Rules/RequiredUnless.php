@@ -7,29 +7,31 @@ namespace AdityaZanjad\Validator\Rules;
 use AdityaZanjad\Validator\Base\AbstractRule;
 use AdityaZanjad\Validator\Interfaces\RequisiteRule;
 
+use function AdityaZanjad\Validator\Utils\varEvaluateType;
+
 /**
  * @version 1.0
  */
 class RequiredUnless extends AbstractRule implements RequisiteRule
 {
     /**
-     * @var string $dependentField
+     * @var string $anotherField
      */
-    protected string $dependentField;
+    protected string $anotherField;
 
     /**
-     * @var mixed $validDependentValues
+     * @var mixed $anotherFieldValidValues
      */
-    protected mixed $validDependentValues;
+    protected mixed $anotherFieldValidValues;
 
     /**
-     * @param   string  $dependentField
-     * @param   mixed   $validDependentValues
+     * @param   string  $anotherField
+     * @param   string  ...$anotherFieldValidValues
      */
-    public function __construct(string $dependentField, mixed $validDependentValues)
+    public function __construct(string $anotherField, string ...$anotherFieldValidValues)
     {
-        $this->dependentField       =   $dependentField;
-        $this->validDependentValues =   $validDependentValues;
+        $this->anotherField             =   $anotherField;
+        $this->anotherFieldValidValues  =   array_map(fn ($value) => varEvaluateType($value), array_values($anotherFieldValidValues));
     }
 
     /**
@@ -37,20 +39,27 @@ class RequiredUnless extends AbstractRule implements RequisiteRule
      */
     public function check(string $field, mixed $value): bool|string
     {
-        $currentFieldIsPresent  =   $this->input->exists($field);
-        $dependentFieldValue    =   $this->input->get($this->dependentField);
+        $anotherFieldValue          =   $this->input->get($this->anotherField);
+        $currentFieldIsPresent      =   !is_null($value);
+        $anotherFieldHasValidValue  =   in_array($anotherFieldValue, $this->anotherFieldValidValues);
 
-        /**
-         * If the dependent field's value does not equal to any of its provided
-         * value and the current field is missing as well, then the
-         * validation fails.
-         */
-        foreach ($this->validDependentValues as $validValue) {
-            if ($dependentFieldValue == $validValue && $currentFieldIsPresent) {
-                return "The field {$field} is required only if the field {$this->dependentField} is not equal to: {$validValue}.";
-            }
+        // If another field does not match with any of the values given for it & the current field is present.
+        if (!$anotherFieldHasValidValue && $currentFieldIsPresent) {
+            return true;
         }
 
-        return true;
+        // If another field is equal to any of the given values & the current field is not present OR is NULL.
+        if ($anotherFieldHasValidValue && !$currentFieldIsPresent) {
+            return true;
+        }
+
+        $this->anotherFieldValidValues = array_map(fn ($value) => !is_null($value) ? $value : 'null', $this->anotherFieldValidValues);
+
+        if (count($this->anotherFieldValidValues) === 1) {
+            return "The field {$field} is required only if the field {$this->anotherField} is not equal to {$this->anotherFieldValidValues[0]}.";
+        }
+
+        $implodedValidValues = implode(', ', $this->anotherFieldValidValues);
+        return "The field {$field} is required only if the field {$this->anotherField} is not equal to any of these values: {$implodedValidValues}.";
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AdityaZanjad\Validator\Utils;
 
 use Exception;
@@ -61,7 +63,13 @@ function varDigits(int|float $var): int
  */
 function varEvaluateType(string $var)
 {
-    if (filter_var($var, FILTER_VALIDATE_BOOL)) {
+    $varLowered = strtolower($var);
+
+    if (empty($var) || $varLowered == 'null') {
+        return null;
+    }
+
+    if (in_array($varLowered, [true, false, 'true', 'false'], true)) {
         return (bool) $var;
     }
 
@@ -71,10 +79,6 @@ function varEvaluateType(string $var)
 
     if (filter_var($var, FILTER_VALIDATE_FLOAT)) {
         return (float) $var;
-    }
-
-    if (strtolower($var) === 'null') {
-        return null;
     }
 
     return $var;

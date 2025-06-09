@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AdityaZanjad\Validator\Rules;
 
-use AdityaZanjad\Validator\Core\Utils\Arr;
 use AdityaZanjad\Validator\Base\AbstractRule;
 use AdityaZanjad\Validator\Interfaces\RequisiteRule;
 
@@ -36,13 +35,13 @@ class RequiredWithoutAll extends AbstractRule implements RequisiteRule
     public function check(string $field, mixed $value): bool|string
     {
         $currentFieldExists     =   $this->input->exists($field);
-        $dependentFieldsExist   =   Arr::mapFn($this->dependentFields, fn ($field) => $this->input->exists($field));
-        $dependentFieldExists   =   (bool) array_product($dependentFieldsExist);
+        $dependentFieldsExist   =   array_map(fn ($field) => $this->input->exists($field), $this->dependentFields);
+        $dependentFieldsExists  =   (bool) array_product($dependentFieldsExist);
 
-        // The input field should be present only if
-        if ($currentFieldExists && $dependentFieldExists) {
+        // The input field should be present only if other fields are missing and vice versa.
+        if ($currentFieldExists && $dependentFieldsExists) {
             $dependentFields = implode(', ', $this->dependentFields);
-            return "The field {$field} must be present only when all the other fields are missing: {$dependentFields}.";
+            return "The field {$field} is required when all these other fields are missing: {$dependentFields}.";
         }
 
         return true;
