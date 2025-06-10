@@ -17,7 +17,7 @@ use function AdityaZanjad\Validator\Utils\validate;
 #[CoversClass(Input::class)]
 #[CoversClass(Required::class)]
 #[CoversFunction('\AdityaZanjad\Validator\Utils\validate')]
-final class RequiredRuleTest extends TestCase
+final class RequiredValidationRuleTest extends TestCase
 {
     /**
      * Assert that the validation fails when the required field is missing.

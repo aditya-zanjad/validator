@@ -17,7 +17,7 @@ use function AdityaZanjad\Validator\Utils\validate;
 #[CoversClass(Input::class)]
 #[CoversClass(RequiredIf::class)]
 #[CoversFunction('\AdityaZanjad\Validator\Utils\validate')]
-class RequiredIfRuleTest extends TestCase
+class RequiredIfValidationRuleTest extends TestCase
 {
     /**
      * Validate that the 'required_if' validation rule returns a validation error.

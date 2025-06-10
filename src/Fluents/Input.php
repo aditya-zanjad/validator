@@ -8,7 +8,8 @@ use function AdityaZanjad\Validator\Utils\arr_dot;
 use function AdityaZanjad\Validator\Utils\arr_get;
 use function AdityaZanjad\Validator\Utils\arr_exists;
 use function AdityaZanjad\Validator\Utils\arr_filled;
-use function AdityaZanjad\Validator\Utils\arr_not_null;
+use function AdityaZanjad\Validator\Utils\arr_not_nulled;
+use function AdityaZanjad\Validator\Utils\arr_nulled;
 
 /**
  * @version 1.0
@@ -93,7 +94,7 @@ class Input
      */
     public function isNull(string $path): bool
     {
-        return !arr_not_null($this->data, $path);
+        return arr_nulled($this->data, $path);
     }
 
     /**
@@ -105,7 +106,7 @@ class Input
      */
     public function notNull(string $path): bool
     {
-        return arr_not_null($this->data, $path);
+        return !arr_nulled($this->data, $path);
     }
 
     /**

@@ -19,13 +19,12 @@ function arr_first(array $arr)
         return null;
     }
 
-    $firstKey = array_key_first($arr);
-
-    if (is_null($firstKey)) {
-        return null;
+    if (function_exists('\array_key_first')) {
+        return $arr[\array_key_first($arr)];
     }
 
-    return $arr[$firstKey];
+    reset($arr);
+    return key($arr);
 }
 
 /**
@@ -41,24 +40,44 @@ function arr_dot(array $arr): array
         return $arr;
     }
 
-    $arr    =   new RecursiveArrayIterator($arr);
-    $arr    =   new RecursiveIteratorIterator($arr, RecursiveIteratorIterator::SELF_FIRST);
+    if (class_exists(RecursiveArrayIterator::class) && class_exists(RecursiveIteratorIterator::class)) {
+        $arr    =   new RecursiveArrayIterator($arr);
+        $arr    =   new RecursiveIteratorIterator($arr, RecursiveIteratorIterator::SELF_FIRST);
 
-    $result     =   [];
-    $nestedKeys =   [];
+        $result     =   [];
+        $nestedKeys =   [];
 
-    foreach ($arr as $key => $value) {
-        $nestedKeys[$arr->getDepth()] = $key;
+        foreach ($arr as $key => $value) {
+            $nestedKeys[$arr->getDepth()] = $key;
 
-        if (is_array($value) && !empty($value)) {
-            continue;
+            if (is_array($value) && !empty($value)) {
+                continue;
+            }
+
+            $nestedKeys                         =   array_slice($nestedKeys, 0, $arr->getDepth() + 1);
+            $result[implode('.', $nestedKeys)]  =   $value;
         }
 
-        $nestedKeys                         =   array_slice($nestedKeys, 0, $arr->getDepth() + 1);
-        $result[implode('.', $nestedKeys)]  =   $value;
+        return $result;
     }
 
-    return $result;
+    $fn = function (array $arr, string $context = '') use (&$fn) {
+        $result = [];
+
+        foreach ($arr as $key => $value) {
+            if (\is_array($value)) {
+                foreach ($fn($value, "{$context}.") as $nestedKey => $nestedValue) {
+                    $result[$nestedKey] = $nestedValue;
+                }
+            }
+
+            $result[$key] = $value;
+        }
+
+        return $result;
+    };
+
+    return $fn($arr);
 }
 
 /**
@@ -74,7 +93,7 @@ function arr_exists(array &$arr, string $path): bool
     $path = explode('.', $path);
 
     foreach ($path as $param) {
-        if (!array_key_exists($param, $arr)) {
+        if (!is_array($arr[$param]) || !array_key_exists($param, $arr)) {
             return false;
         }
 
@@ -92,23 +111,20 @@ function arr_exists(array &$arr, string $path): bool
  *
  * @return  bool
  */
-function arr_not_null(array &$arr, string $path): bool
+function arr_nulled(array $arr, string $path): bool
 {
-    $path = explode('.', $path);
+    $ref    =   &$arr;
+    $keys   =   explode('.', $path);
 
-    foreach ($path as $param) {
-        if (!array_key_exists($param, $arr)) {
-            return false;
+    foreach ($keys as $key) {
+        if (!isset($ref[$key])) {
+            return true;
         }
 
-        $arr = &$arr[$param];
-
-        if (is_null($arr)) {
-            return false;
-        }
+        $ref = &$ref[$key];
     }
 
-    return true;
+    return false;
 }
 
 /**

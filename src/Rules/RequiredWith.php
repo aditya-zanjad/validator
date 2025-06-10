@@ -36,7 +36,7 @@ class RequiredWith extends AbstractRule implements RequisiteRule
         // will return true. However, if the all the dependent fields are present & if the
         // current field is missing, a validation error message will be returned.
         foreach ($this->dependentFields as $dependentField) {
-            if ($this->input->exists($dependentField) && $currentFieldIsMissing) {
+            if ($this->input->notNull($dependentField) && $currentFieldIsMissing) {
                 return "The field {$field} is required when the field {$dependentField} is present.";
             }
         }

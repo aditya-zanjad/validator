@@ -12,6 +12,7 @@ use AdityaZanjad\Validator\Base\AbstractRule;
 use AdityaZanjad\Validator\Interfaces\RequisiteRule;
 
 use function AdityaZanjad\Validator\Utils\arr_indexed;
+use function AdityaZanjad\Validator\Utils\str_contains_v2;
 
 /**
  * @version 1.0
@@ -105,11 +106,11 @@ class Validator
                 continue;
             }
 
-            if (!arr_indexed($rules)) {
-                throw new Exception("[Developer][Exception]: The validation rules for the field {$field} must be provided in either a [STRING] OR [Indexed ARRAY] format.");
+            if (!is_array($rules) || !arr_indexed($rules)) {
+                throw new Exception("[Developer][Exception]: The validation rules for the field {$field} must be provided either in a [string] OR [Indexed array] format.");
             }
 
-            if (str_contains($field, '*')) {
+            if (str_contains_v2($field, '*')) {
                 $processed = array_merge($processed, $this->resolveWildCards($field, $rules));
             }
         }
@@ -202,8 +203,7 @@ class Validator
      */
     public function validate(): static
     {
-        // If the validation has already performed for this instance then
-        // there is no need to do it again.
+        // Skip validation if it has already been performed at least once.
         if ($this->alreadyValidated) {
             return $this;
         }
@@ -242,7 +242,7 @@ class Validator
                 }
 
                 if ($result !== false && !is_string($result)) {
-                    throw new Exception("[Developer][Exception]: The validation rule for the field [{$path}] at index [{$index}] must return either a boolean [true] OR a [string] value.");
+                    throw new Exception("[Developer][Exception]: The validation rule for the field [{$path}] at index [{$index}] must return either a [boolean] OR a [string] value.");
                 }
 
                 $this->errors->add($path, $result);

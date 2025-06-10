@@ -65,7 +65,7 @@ function varEvaluateType(string $var)
 {
     $varLowered = strtolower($var);
 
-    if (empty($var) || $varLowered == 'null') {
+    if ($var === '' || $varLowered == 'null') {
         return null;
     }
 
@@ -73,11 +73,11 @@ function varEvaluateType(string $var)
         return (bool) $var;
     }
 
-    if (filter_var($var, FILTER_VALIDATE_INT)) {
+    if (filter_var($var, FILTER_VALIDATE_INT) !== false || is_numeric($var)) {
         return (int) $var;
     }
 
-    if (filter_var($var, FILTER_VALIDATE_FLOAT)) {
+    if (filter_var($var, FILTER_VALIDATE_FLOAT) !== false || is_numeric($var)) {
         return (float) $var;
     }
 

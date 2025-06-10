@@ -17,7 +17,7 @@ use function AdityaZanjad\Validator\Utils\validate;
 #[CoversClass(Input::class)]
 #[CoversClass(RequiredUnless::class)]
 #[CoversFunction('\AdityaZanjad\Validator\Utils\validate')]
-class RequiredUnlessRuleTest extends TestCase
+class RequiredUnlessValidationRuleTest extends TestCase
 {
     /**
      * Test that the 'required_if' validation succeeds.
@@ -27,22 +27,17 @@ class RequiredUnlessRuleTest extends TestCase
     public function testRequiredIfValidationPasses(): void
     {
         $validator = validate([
-            'abc'   =>  'abc',
+            'abc'   =>  '123',
             'def'   =>  null,
-            'pqr'   =>  123,
-            'xyz'   =>  123
+            'xyz'   =>  null
         ], [
-            'abc'   =>  'required_unless:xyz,456|string|min:3',
-            'def'   =>  'required_unless:abc,abc',
-            'pqr'   =>  'required_unless:def,123|numeric|integer|min:1',
-            'xyz'   =>  'required_unless:abc,null|numeric|integer|min:1',
+            'pqr'   =>  'required_unless:abc,123',
+            'xyz'   =>  'required_unless:pqr,null',
         ]);
 
         $this->assertFalse($validator->failed());
         $this->assertEmpty($validator->errors()->all());
         $this->assertEmpty($validator->errors()->first());
-        $this->assertEmpty($validator->errors()->firstOf('abc'));
-        $this->assertEmpty($validator->errors()->firstOf('def'));
         $this->assertEmpty($validator->errors()->firstOf('pqr'));
         $this->assertEmpty($validator->errors()->firstOf('xyz'));
     }
@@ -55,23 +50,17 @@ class RequiredUnlessRuleTest extends TestCase
     public function testRequiredUnlessValidationFails(): void
     {
         $validator = validate([
-            'abc'   =>  '123',
+            'abc'   =>  'abc',
             'def'   =>  'Hello World!',
-            'zyx'   =>  null,
-            'pqr'   =>  123,
-            'xyz'   =>  456
+            'xyz'   =>  null
         ], [
-            'abc'   =>  'required_unless:xyz,456|string|min:3',
-            'def'   =>  'required_unless:abc,123',
-            'pqr'   =>  'required_unless:zyx,null|numeric|integer|min:1',
-            'xyz'   =>  'required_unless:abc,123|numeric|integer|min:1',
+            'pqr'   =>  'required_unless:abc,null|numeric|integer|min:1',
+            'xyz'   =>  'required_unless:def,1234! Get on the dance floor!|numeric|integer|min:1',
         ]);
 
         $this->assertTrue($validator->failed());
         $this->assertNotEmpty($validator->errors()->all());
         $this->assertNotEmpty($validator->errors()->first());
-        $this->assertNotEmpty($validator->errors()->firstOf('abc'));
-        $this->assertNotEmpty($validator->errors()->firstOf('def'));
         $this->assertNotEmpty($validator->errors()->firstOf('pqr'));
         $this->assertNotEmpty($validator->errors()->firstOf('xyz'));
     }

@@ -15,23 +15,26 @@ use function AdityaZanjad\Validator\Utils\varEvaluateType;
 class RequiredUnless extends AbstractRule implements RequisiteRule
 {
     /**
-     * @var string $anotherField
+     * @var string $otherField
      */
-    protected string $anotherField;
+    protected string $otherField;
 
     /**
-     * @var mixed $anotherFieldValidValues
+     * @var mixed $otherFieldValidValues
      */
-    protected mixed $anotherFieldValidValues;
+    protected mixed $otherFieldValidValues;
 
     /**
-     * @param   string  $anotherField
-     * @param   string  ...$anotherFieldValidValues
+     * @param   string  $otherField
+     * @param   string  ...$otherFieldValidValues
      */
-    public function __construct(string $anotherField, string ...$anotherFieldValidValues)
+    public function __construct(string $otherField, string ...$otherFieldValidValues)
     {
-        $this->anotherField             =   $anotherField;
-        $this->anotherFieldValidValues  =   array_map(fn ($value) => varEvaluateType($value), array_values($anotherFieldValidValues));
+        $this->otherField = $otherField;
+
+        // Initially, the given values will be in a stringified format. For example, '1', 'true' etc.
+        // We want to convert them to their actual data type for comparison in the below method.
+        $this->otherFieldValidValues = array_map(fn ($value) => varEvaluateType($value), array_values($otherFieldValidValues));
     }
 
     /**
@@ -39,27 +42,26 @@ class RequiredUnless extends AbstractRule implements RequisiteRule
      */
     public function check(string $field, mixed $value): bool|string
     {
-        $anotherFieldValue          =   $this->input->get($this->anotherField);
+        $otherFieldValue            =   $this->input->get($this->otherField);
         $currentFieldIsPresent      =   !is_null($value);
-        $anotherFieldHasValidValue  =   in_array($anotherFieldValue, $this->anotherFieldValidValues);
+        $otherFieldHasValidValue    =   in_array($otherFieldValue, $this->otherFieldValidValues);
 
         // If another field does not match with any of the values given for it & the current field is present.
-        if (!$anotherFieldHasValidValue && $currentFieldIsPresent) {
+        if (!$otherFieldHasValidValue && $currentFieldIsPresent) {
             return true;
         }
 
-        // If another field is equal to any of the given values & the current field is not present OR is NULL.
-        if ($anotherFieldHasValidValue && !$currentFieldIsPresent) {
+        if ($otherFieldHasValidValue && !$currentFieldIsPresent) {
             return true;
         }
 
-        $this->anotherFieldValidValues = array_map(fn ($value) => !is_null($value) ? $value : 'null', $this->anotherFieldValidValues);
+        $stringifiedOtherFieldValidValues = array_map(fn ($value) => !is_null($value) ? $value : '[NULL]', $this->otherFieldValidValues);
 
-        if (count($this->anotherFieldValidValues) === 1) {
-            return "The field {$field} is required only if the field {$this->anotherField} is not equal to {$this->anotherFieldValidValues[0]}.";
+        if (count($stringifiedOtherFieldValidValues) === 1) {
+            return "The field {$field} is required if the field {$this->otherField} is not equal to {$stringifiedOtherFieldValidValues[0]}.";
         }
 
-        $implodedValidValues = implode(', ', $this->anotherFieldValidValues);
-        return "The field {$field} is required only if the field {$this->anotherField} is not equal to any of these values: {$implodedValidValues}.";
+        $implodedValidValues = implode(', ', $stringifiedOtherFieldValidValues);
+        return "The field {$field} is required if the field {$this->otherField} is not equal to any of these values: {$implodedValidValues}.";
     }
 }
