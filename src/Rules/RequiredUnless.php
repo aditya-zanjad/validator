@@ -34,7 +34,9 @@ class RequiredUnless extends AbstractRule implements RequisiteRule
 
         // Initially, the given values will be in a stringified format. For example, '1', 'true' etc.
         // We want to convert them to their actual data type for comparison in the below method.
-        $this->otherFieldValidValues = array_map(fn ($value) => varEvaluateType($value), array_values($otherFieldValidValues));
+        $this->otherFieldValidValues = array_map(function ($value) {
+            return varEvaluateType($value);
+        }, array_values($otherFieldValidValues));
     }
 
     /**
@@ -55,7 +57,7 @@ class RequiredUnless extends AbstractRule implements RequisiteRule
             return true;
         }
 
-        $stringifiedOtherFieldValidValues = array_map(fn ($value) => !is_null($value) ? $value : '[NULL]', $this->otherFieldValidValues);
+        $stringifiedOtherFieldValidValues = array_map(fn($value) => !is_null($value) ? $value : '[NULL]', $this->otherFieldValidValues);
 
         if (count($stringifiedOtherFieldValidValues) === 1) {
             return "The field {$field} is required if the field {$this->otherField} is not equal to {$stringifiedOtherFieldValidValues[0]}.";

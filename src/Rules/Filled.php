@@ -16,14 +16,31 @@ class Filled extends AbstractRule
      */
     public function check(string $field, mixed $value): bool|string
     {
-        if ($value === '' || $value === []) {
-            return "The field {$field} must not be empty.";
-        }
+        $valueIsFilled = !empty($value);
 
-        if (is_file($value) && in_array(filesize($value), [0, false])) {
+        if (is_string($value) && is_file($value) && in_array(filesize($value), [0, false])) {
             return "The file {$field} must not be empty.";
         }
 
-        return true;
+        if ($valueIsFilled) {
+            return true;
+        }
+
+        switch (gettype($value)) {
+            case 'string':
+                return "The string {$field} must not be empty.";
+
+            case 'array':
+                return "The array {$field} must not be empty.";
+
+            case 'boolean':
+                return true;
+
+            case 'NULL':
+                return "the field {$field} must not be empty or NULL";
+
+            default:
+                return "The field {$field} must not be empty.";
+        }
     }
 }

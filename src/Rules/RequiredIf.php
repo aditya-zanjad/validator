@@ -48,7 +48,10 @@ class RequiredIf extends AbstractRule implements RequisiteRule
         $primaryField       =   $this->entity[0];
         $primaryFieldValue  =   $this->input->get($primaryField);
         $primaryValidValues =   array_slice($this->entity, 1);
-        $primaryValidValues =   array_map(fn ($value) => varEvaluateType($value), $primaryValidValues);
+
+        $primaryValidValues = array_map(function ($value)  {
+            return varEvaluateType($value);
+        }, $primaryValidValues);
 
         if (!in_array($primaryFieldValue, $primaryValidValues, true)) {
             return true;

@@ -111,7 +111,7 @@ class Validator
             }
 
             if (str_contains_v2($field, '*')) {
-                $processed = array_merge($processed, $this->resolveWildCards($field, $rules));
+                $processed = array_merge($processed, $this->resolveWildCardsPath($field, $rules));
             }
         }
 
@@ -126,7 +126,7 @@ class Validator
      *
      * @return  array<int, string>  $actualPaths
      */
-    protected function resolveWildCards(string $path, array $rules): array
+    protected function resolveWildCardsPath(string $path, array $rules): array
     {
         if ($path === '*') {
             return array_fill_keys(array_keys($this->input->all()), $rules);
@@ -298,15 +298,15 @@ class Validator
     /**
      * Evaluate the instance rule & return its result.
      *
-     * @param   callable|\AdityaZanjad\Validator\Abstracts\AbstractRule $rule       =>  The validation rule that we need to evaluate.
-     * @param   string                                                  $field      =>  The dot notation path towards the input field.
-     * @param   mixed                                                   $value      =>  Value of the given field.
+     * @param   \AdityaZanjad\Validator\Abstracts\AbstractRule|callable(string $field, mixed $value): bool|string   $rule       =>  The validation rule that we need to evaluate.
+     * @param   string                                                                                              $field      =>  The dot notation path towards the input field.
+     * @param   mixed                                                                                               $value      =>  Value of the given field.
      *
      * @throws  \Exception
      *
      * @return  bool|string
      */
-    protected function executeInstanceRule(callable|AbstractRule $rule, string $field, $value)
+    protected function executeInstanceRule($rule, string $field, $value)
     {
         if (!$this->shouldExecuteRule($rule, $field)) {
             return null;
@@ -326,20 +326,24 @@ class Validator
      * [1] The validation rule is set to run mandatorily regardless of whether the input field is present or not.
      * [2] The given input field is not equal to NULL.
      *
-     * @param   string|\AdityaZanjad\Validator\Abstracts\AbstractRule   $rule
-     * @param   string                                                  $field
+     * @param   string|\AdityaZanjad\Validator\Abstracts\AbstractRule|callable(string $field, mixed $value): bool|string    $rule
+     * @param   string                                                                                                      $field
      *
      * @return  bool
      */
-    protected function shouldExecuteRule(string|AbstractRule $rule, string $field): bool
+    protected function shouldExecuteRule($rule, string $field): bool
     {
-        $implementedInterfaces = class_implements($rule);
+        $inputIsPresent = $this->input->notNull($field);
 
-        if (in_array(RequisiteRule::class, $implementedInterfaces)) {
+        if ($inputIsPresent) {
             return true;
         }
 
-        if ($this->input->notNull($field)) {
+        if (is_callable($rule) && $inputIsPresent) {
+            return true;
+        }
+
+        if (in_array(RequisiteRule::class, class_implements($rule))) {
             return true;
         }
 
