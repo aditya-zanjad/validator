@@ -34,12 +34,16 @@ class RequiredWithout extends AbstractRule implements RequisiteRule
      */
     public function check(string $field, mixed $value): bool|string
     {
-        $currentFieldExists = is_null($value);
+        $currentFieldIsMissing = is_null($value);
+
+        if (!$currentFieldIsMissing) {
+            return true;
+        }
 
         // The current field is required iff any of the dependent fields is not present in the input.
         foreach ($this->dependentFieldValues as $dependentFieldValue) {
-            if (!$this->input->exists($dependentFieldValue) && !$currentFieldExists) {
-                return "The field {$field} is required when the field {$dependentFieldValue} is missing.";
+            if ($this->input->isNull($dependentFieldValue) && !$currentFieldIsMissing) {
+                return "The field {$field} is required without the field {$dependentFieldValue}.";
             }
         }
 

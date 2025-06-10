@@ -26,7 +26,7 @@ class TypeFile extends AbstractRule
 
         $metadata = stream_get_meta_data($value);
 
-        if (!in_array($metadata['wrapper_type'], ['plainfile'])) {
+        if ($metadata['wrapper_type'] !== 'plainfile') {
             return "The field {$field} must be a valid file resource.";
         }
 
