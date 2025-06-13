@@ -16,13 +16,16 @@ class LowerCase extends AbstractRule
      */
     public function check(string $field, mixed $value): bool|string
     {
-        $valueIsNotLowerCased = !is_string($value)
-            || (function_exists('ctype_upper') && !ctype_lower($value))
-            || (function_exists('preg_match') || preg_match('/^[a-z]+$/', $value) === false)
-            || strtolower($value) !== $value;
+        if (!is_string($value)) {
+            return 'The field :{field} must be a lowercase string.';
+        }
 
-        if ($valueIsNotLowerCased) {
-            return 'The field :{field} must be an uppercase string';
+        if (function_exists('preg_match') && preg_match('/^[a-z0-9!@#$%^&*()_+\-=\[\]{}|;:\'",.<>\/?`~]+$/', $value) === false) {
+            return 'The field :{field} must be a lowercase string.';
+        }
+
+        if (strtolower($value) !== $value) {
+            return 'The field :{field} must be a lowercase string.';
         }
 
         return true;

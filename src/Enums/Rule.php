@@ -23,6 +23,8 @@ use AdityaZanjad\Validator\Rules\Required;
 use AdityaZanjad\Validator\Rules\TypeFile;
 use AdityaZanjad\Validator\Rules\TypeJson;
 use AdityaZanjad\Validator\Rules\TypeArray;
+use AdityaZanjad\Validator\Rules\LowerCase;
+use AdityaZanjad\Validator\Rules\UpperCase;
 use AdityaZanjad\Validator\Rules\RequiredIf;
 use AdityaZanjad\Validator\Rules\TypeString;
 use AdityaZanjad\Validator\Rules\EqualStrict;
@@ -66,6 +68,8 @@ class Rule extends Enum
     public const INTEGER                =   TypeInteger::class;
     public const NUMERIC                =   Numeric::class;
     public const REQUIRED               =   Required::class;
+    public const LOWERCASE              =   LowerCase::class;
+    public const UPPERCASE              =   UpperCase::class;
     public const REQUIRED_IF            =   RequiredIf::class;
     public const EQUAL_STRICT           =   EqualStrict::class;
     public const REQUIRED_WITH          =   RequiredWith::class;
