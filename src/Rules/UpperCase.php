@@ -16,13 +16,16 @@ class UpperCase extends AbstractRule
      */
     public function check(string $field, mixed $value): bool|string
     {
-        $valueIsNotUpperCased = !is_string($value)
-            || (function_exists('ctype_upper') && !ctype_upper($value))
-            || (function_exists('preg_match') || preg_match('/^[A-Z]+$/', $value) === false)
-            || strtoupper($value) !== $value;
+        if (!is_string($value)) {
+            return 'The field :{field} must be an uppercase string.';
+        }
 
-        if ($valueIsNotUpperCased) {
-            return 'The field :{field} must be an uppercase string';
+        if (function_exists('preg_match') && preg_match('/^[A-Z0-9!@#$%^&*()_+\-=\[\]{}|;:\'",.<>\/?`~]+$/', $value) === false) {
+            return 'The field :{field} must be an uppercase string.';
+        }
+
+        if (strtoupper($value) !== $value) {
+            return 'The field :{field} must be an uppercase string.';
         }
 
         return true;

@@ -71,6 +71,5 @@ final class LowerCaseValidationRuleTest extends TestCase
         $this->assertNotEmpty($validator->errors()->firstOf('int'));
         $this->assertNotEmpty($validator->errors()->firstOf('float'));
         $this->assertNotEmpty($validator->errors()->firstOf('object'));
-
     }
 }

@@ -23,22 +23,18 @@ final class UpperCaseValidationRuleTest extends TestCase
      *
      * @return void
      */
-    public function testStringValidationRulePasses(): void
+    public function testUpperCaseValidationRulePasses(): void
     {
         $validator = validate([
-            'text' => 'HELLO WORLD HOW ARE YOU'
+            'text' => 'HELLO WORLD HOW ARE YOU? 1234@/0--=+()! GET ON THE DANCE FLOOR!'
         ], [
-            'english'   =>  'string',
-            'hindi'     =>  'string',
-            'japanese'  =>  'string'
+            'text' => 'required|string|uppercase'
         ]);
 
         $validator->validate();
         $this->assertFalse($validator->failed());
         $this->assertEmpty($validator->errors()->all());
-        $this->assertNull($validator->errors()->firstOf('english'));
-        $this->assertNull($validator->errors()->firstOf('hindi'));
-        $this->assertNull($validator->errors()->firstOf('japanese'));
+        $this->assertNull($validator->errors()->firstOf('text'));
     }
 
     /**
@@ -46,7 +42,7 @@ final class UpperCaseValidationRuleTest extends TestCase
      *
      * @return void
      */
-    public function testStringValidationRuleFails(): void
+    public function testUpperCaseValidationRuleFails(): void
     {
         $validator = validate([
             'abc'       =>  ['this is a string.'],
@@ -54,14 +50,16 @@ final class UpperCaseValidationRuleTest extends TestCase
             'array'     =>  [1, 2, 3, 4, 5, 6],
             'int'       =>  12345682385,
             'float'     =>  57832572.23478235,
-            'object'    =>  (object) ['abc' => 1234]
+            'object'    =>  (object) ['abc' => 1234],
+            'string'    =>  'this is a lowercase string!'
         ], [
-            'abc'       =>  'string',
-            'xyz'       =>  'string',
-            'array'     =>  'string',
-            'int'       =>  'string',
-            'float'     =>  'string',
-            'object'    =>  'string'
+            'abc'       =>  'required|uppercase',
+            'xyz'       =>  'required|uppercase',
+            'array'     =>  'required|uppercase',
+            'int'       =>  'required|uppercase',
+            'float'     =>  'required|uppercase',
+            'object'    =>  'required|uppercase',
+            'string'    =>  'required|string|uppercase'
         ]);
 
         $this->assertTrue($validator->failed());
@@ -72,6 +70,7 @@ final class UpperCaseValidationRuleTest extends TestCase
         $this->assertNotEmpty($validator->errors()->firstOf('int'));
         $this->assertNotEmpty($validator->errors()->firstOf('float'));
         $this->assertNotEmpty($validator->errors()->firstOf('object'));
+        $this->assertNotEmpty($validator->errors()->firstOf('string'));
 
     }
 
