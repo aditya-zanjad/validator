@@ -71,7 +71,6 @@ final class UpperCaseValidationRuleTest extends TestCase
         $this->assertNotEmpty($validator->errors()->firstOf('float'));
         $this->assertNotEmpty($validator->errors()->firstOf('object'));
         $this->assertNotEmpty($validator->errors()->firstOf('string'));
-
     }
 
     /**
