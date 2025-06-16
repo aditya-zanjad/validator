@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AdityaZanjad\Validator\Utils;
 
 /**
@@ -12,11 +14,11 @@ namespace AdityaZanjad\Validator\Utils;
  */
 function str_before(string $str, string $sub): string
 {
-    if (!str_contains($str, $sub)) {
+    if (!\str_contains($str, $sub)) {
         return $str;
     }
-    
-    return substr($str, 0, strpos($str, $sub));
+
+    return \substr($str, 0, \strpos($str, $sub));
 }
 
 /**
@@ -29,11 +31,11 @@ function str_before(string $str, string $sub): string
  */
 function str_after(string $str, string $sub): string
 {
-    if (!str_contains($str, $sub)) {
+    if (!\str_contains($str, $sub)) {
         return $str;
     }
 
-    return substr($str, strpos($str, $sub) + strlen($sub), strlen($str));
+    return \substr($str, \strpos($str, $sub) + \strlen($sub), \strlen($str));
 }
 
 /**
@@ -46,9 +48,9 @@ function str_after(string $str, string $sub): string
  */
 function str_contains_v2(string $str, string $sub): bool
 {
-    if (function_exists('str_contains')) {
-        return str_contains($str, $sub);
+    if (\function_exists('str_contains')) {
+        return \str_contains($str, $sub);
     }
 
-    return strpos($str, $sub) !== false;
+    return \strpos($str, $sub) !== false;
 }

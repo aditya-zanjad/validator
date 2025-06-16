@@ -39,5 +39,5 @@ abstract class AbstractRule
      *
      * @return  bool|string
      */
-    abstract public function check(string $field, mixed $value);
+    abstract public function check(string $field, $value);
 }

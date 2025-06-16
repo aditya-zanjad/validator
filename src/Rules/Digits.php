@@ -29,7 +29,7 @@ class Digits extends AbstractRule
     public function __construct($validDigitsCount)
     {
         if (!filter_var($validDigitsCount, FILTER_VALIDATE_INT)) {
-            throw new Exception("[Developer][Exception]: The parameter to the validation rule [" . static::class . "] must be either an Integer OR a String.");
+            throw new Exception("[Developer][Exception]: The parameter passed to the validation rule [digits] must be a valid integer.");
         }
 
         $this->validDigitsCount = (int) $validDigitsCount;

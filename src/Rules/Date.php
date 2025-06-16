@@ -34,7 +34,7 @@ class Date extends AbstractRule
     public function check(string $field, mixed $value): bool|string
     {
         if (!is_string($value)) {
-            return false;
+            return 'The field :{field} must be a valid date.';
         }
 
         if (!empty($this->format) && DateTime::createFromFormat($this->format, $value) === false) {
@@ -45,6 +45,7 @@ class Date extends AbstractRule
             new DateTime($value);
         } catch (Throwable $e) {
             // var_dump($e);
+            // exit;
             return 'The field :{field} must be a valid date.';
         }
 

@@ -18,7 +18,7 @@ use Exception;
  */
 function varSize(mixed $var): int|float
 {
-    $varType = gettype($var);
+    $varType = \gettype($var);
 
     switch ($varType) {
         case 'integer':
@@ -27,14 +27,21 @@ function varSize(mixed $var): int|float
             return $var;
 
         case 'string':
-            return strlen($var);
+            return \strlen($var);
 
         case 'array':
-            return count($var);
+            return \count($var);
 
         case 'resource':
-            $metadata = stream_get_meta_data($var);
-            return $metadata['wrapper_type'] === 'plainfile' ? filesize($var) : strlen($var);
+            $metadata = \stream_get_meta_data($var);
+
+            switch ($metadata['wrapper_type']) {
+                case 'plainfile':
+                    return \filesize($var);
+
+                default:
+                    return \strlen($var);
+            }
 
         default:
             throw new Exception("[Developer][Exception]: The given parameter has an invalid data type.");
@@ -51,7 +58,7 @@ function varSize(mixed $var): int|float
  */
 function varDigits(int|float $var): int
 {
-    return $var !== 0 ? (int) (log($var, 10) + 1) : 1;
+    return $var !== 0 ? (int) (\log($var, 10) + 1) : 1;
 }
 
 /**
@@ -63,21 +70,21 @@ function varDigits(int|float $var): int
  */
 function varEvaluateType(string $var)
 {
-    $varLowered = strtolower($var);
+    $varLowered = \strtolower($var);
 
     if ($var === '' || $varLowered == 'null') {
         return null;
     }
 
-    if (in_array($varLowered, [true, false, 'true', 'false'], true)) {
+    if (\in_array($varLowered, [true, false, 'true', 'false'], true)) {
         return (bool) $var;
     }
 
-    if (filter_var($var, FILTER_VALIDATE_INT) !== false || is_numeric($var)) {
+    if (\filter_var($var, FILTER_VALIDATE_INT) !== false || \is_numeric($var)) {
         return (int) $var;
     }
 
-    if (filter_var($var, FILTER_VALIDATE_FLOAT) !== false || is_numeric($var)) {
+    if (\filter_var($var, FILTER_VALIDATE_FLOAT) !== false || \is_numeric($var)) {
         return (float) $var;
     }
 
