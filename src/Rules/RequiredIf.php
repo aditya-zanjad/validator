@@ -49,7 +49,7 @@ class RequiredIf extends AbstractRule implements RequisiteRule
         $primaryFieldValue  =   $this->input->get($primaryField);
         $primaryValidValues =   array_slice($this->entity, 1);
 
-        $primaryValidValues = array_map(function ($value)  {
+        $primaryValidValues = array_map(function ($value) {
             return varEvaluateType($value);
         }, $primaryValidValues);
 

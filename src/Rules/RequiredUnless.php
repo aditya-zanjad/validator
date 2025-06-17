@@ -57,7 +57,9 @@ class RequiredUnless extends AbstractRule implements RequisiteRule
             return true;
         }
 
-        $stringifiedOtherFieldValidValues = array_map(fn($value) => !is_null($value) ? $value : '[NULL]', $this->otherFieldValidValues);
+        $stringifiedOtherFieldValidValues = array_map(function ($value) {
+            return !is_null($value) ? $value : '[NULL]';
+        }, $this->otherFieldValidValues);
 
         if (count($stringifiedOtherFieldValidValues) === 1) {
             return "The field {$field} is required if the field {$this->otherField} is not equal to {$stringifiedOtherFieldValidValues[0]}.";

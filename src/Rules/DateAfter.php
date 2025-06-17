@@ -56,8 +56,7 @@ class DateAfter extends AbstractRule
                 return "The field :{field} must be a valid date after the date {$this->afterDateFormat}.";
             }
         } catch (DateMalformedStringException $e) {
-            // var_dump($e);
-            // exit;
+            // var_dump($e); exit;
             return "The field :{field} must be a valid date after the date {$this->afterDateFormat}.";
         }
 

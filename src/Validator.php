@@ -101,17 +101,17 @@ class Validator
         $processed = [];
 
         foreach ($givenRules as $field => $rules) {
-            if (is_string($rules)) {
+            if (\is_string($rules)) {
                 $processed[$field] = explode('|', $rules);
                 continue;
             }
 
-            if (!is_array($rules) || !arr_indexed($rules)) {
+            if (!\is_array($rules) || !arr_indexed($rules)) {
                 throw new Exception("[Developer][Exception]: The validation rules for the field {$field} must be provided either in a [string] OR [Indexed array] format.");
             }
 
             if (str_contains_v2($field, '*')) {
-                $processed = array_merge($processed, $this->resolveWildCardsPath($field, $rules));
+                $processed = \array_merge($processed, $this->resolveWildCardsPath($field, $rules));
             }
         }
 
@@ -129,26 +129,26 @@ class Validator
     protected function resolveWildCardsPath(string $path, array $rules): array
     {
         if ($path === '*') {
-            return array_fill_keys(array_keys($this->input->all()), $rules);
+            return \array_fill_keys(\array_keys($this->input->all()), $rules);
         }
 
         // Get all the paths that match with the wildcard path either completely or partially from left-to-right.
-        $actualPaths = preg_grep("#^{$path}$#", $this->input->keys());
+        $actualPaths = \preg_grep("#^{$path}$#", $this->input->keys());
 
         // If no matches found, we want to create at least one dummy path to
         // perform validation if necessary.
         if (empty($actualPath)) {
-            return [str_replace($path, '*', '0') => $rules];
+            return [\str_replace($path, '*', '0') => $rules];
         }
 
-        $wildCardParams         =   explode('.', $path);
-        $wildCardParamsLength   =   count($wildCardParams);
+        $wildCardParams         =   \explode('.', $path);
+        $wildCardParamsLength   =   \count($wildCardParams);
 
         // Loop through the array of found paths & complete any path which is
         // incomplete when compared to the wildcard path.
         foreach ($actualPaths as $index => $actualPath) {
-            $actualParams       =   explode('.', $actualPath);
-            $actualParamsLength =   count($actualParams);
+            $actualParams       =   \explode('.', $actualPath);
+            $actualParamsLength =   \count($actualParams);
 
             // If the current path perfectly matches with the wildcard pattern, there
             // is no need to modify anything.
@@ -160,9 +160,17 @@ class Validator
             // parameters in the current actual path, we need to add the missing
             // parameters to the current path.
             if ($actualParamsLength < $wildCardParamsLength) {
-                $actualParams           =   array_replace($wildCardParams, $actualParams);
-                $actualParams           =   array_map(fn($param) => $param === '*' ? '0' : $param, $actualParams);
-                $actualParams           =   implode('.', $actualParams);
+                $actualParams = \array_replace($wildCardParams, $actualParams);
+
+                $actualParams = \array_map(function ($param) {
+                    if ($param === '*') {
+                        return '0';
+                    }
+
+                    return $param;
+                }, $actualParams);
+
+                $actualParams           =   \implode('.', $actualParams);
                 $actualPaths[$index]    =   $actualParams;
 
                 continue;
@@ -172,15 +180,15 @@ class Validator
             // in the wildcard parameter path, we need to trim down current path
             // containing actual parameters.
             if ($actualParamsLength > $wildCardParamsLength) {
-                $actualParams           =   array_slice($actualParams, 0, $wildCardParamsLength);
-                $actualParams           =   implode('.', $actualParams);
+                $actualParams           =   \array_slice($actualParams, 0, $wildCardParamsLength);
+                $actualParams           =   \implode('.', $actualParams);
                 $actualPaths[$index]    =   $actualParams;
 
                 continue;
             }
         }
 
-        return array_fill_keys($actualPaths, $rules);
+        return \array_fill_keys($actualPaths, $rules);
     }
 
     /**
@@ -214,7 +222,7 @@ class Validator
              * the rule 'nullable', this method will return true indicating that
              * its entire validation can be skipped else it'll return false.
              */
-            if (in_array('nullable', $rules) && !$this->input->exists($path)) {
+            if (\in_array('nullable', $rules) && !$this->input->exists($path)) {
                 continue;
             }
 
@@ -224,7 +232,7 @@ class Validator
                 $result = null;
 
                 // Evaluate the validation rule & obtain its result.
-                switch (gettype($rule)) {
+                switch (\gettype($rule)) {
                     case 'string':
                         $result = $this->executeStringifiedRule($rule, $index, $path, $this->input->get($path));
                         break;
@@ -241,7 +249,7 @@ class Validator
                     continue;
                 }
 
-                if ($result !== false && !is_string($result)) {
+                if ($result !== false && !\is_string($result)) {
                     throw new Exception("[Developer][Exception]: The validation rule for the field [{$path}] at index [{$index}] must return either a [boolean] OR a [string] value.");
                 }
 
@@ -275,11 +283,11 @@ class Validator
         }
 
         // Extract the important data from the given parameters to execute the validation rule.
-        $rule           =   explode(':', $rule);
+        $rule           =   \explode(':', $rule);
         $ruleName       =   $rule[0];
         $ruleClassName  =   Rule::valueOf($ruleName);
 
-        if (is_null($ruleClassName)) {
+        if (\is_null($ruleClassName)) {
             throw new Exception("[Developer][Exception]: The field [{$field}] has an invalid validation rule [{$ruleName}] at the index [{$ruleIndex}].");
         }
 
@@ -289,7 +297,7 @@ class Validator
         }
 
         // Instantiate & execute the validation rule.
-        $ruleParams     =   isset($rule[1]) ? explode(',', $rule[1]) : [];
+        $ruleParams     =   isset($rule[1]) ? \explode(',', $rule[1]) : [];
         $ruleInstance   =   new $ruleClassName(...$ruleParams);
 
         return $ruleInstance->setInput($this->input)->check($field, $value);
@@ -339,11 +347,11 @@ class Validator
             return true;
         }
 
-        if (is_callable($rule) && $inputIsPresent) {
+        if (\is_callable($rule) && $inputIsPresent) {
             return true;
         }
 
-        if (in_array(RequisiteRule::class, class_implements($rule))) {
+        if (\in_array(RequisiteRule::class, \class_implements($rule))) {
             return true;
         }
 

@@ -25,7 +25,9 @@ class In extends AbstractRule
      */
     public function __construct(...$params)
     {
-        $this->params = array_map(fn($param) => is_string($param) ? trim($param) : $param, $params);
+        $this->params = array_map(function ($param) {
+            return is_string($param) ? trim($param) : $param;
+        }, $params);
     }
 
     /**

@@ -44,8 +44,7 @@ class Date extends AbstractRule
         try {
             new DateTime($value);
         } catch (Throwable $e) {
-            // var_dump($e);
-            // exit;
+            // var_dump($e); exit;
             return 'The field :{field} must be a valid date.';
         }
 

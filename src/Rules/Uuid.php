@@ -31,19 +31,23 @@ class Uuid extends AbstractRule
      */
     public function check(string $field, mixed $value): bool|string
     {
-        $valueIsValidUuid = false;
+        if (!is_string($value)) {
+            return 'The field :{field} must be a valid UUID.';
+        }
+
+        $givenValueIsValidUuid = false;
 
         switch ($this->version) {
             case 'v4':
-                $valueIsValidUuid = (bool) preg_match('/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i', $value);
+                $givenValueIsValidUuid = preg_match('/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i', $value) !== false;
                 break;
 
             default:
-                $valueIsValidUuid = false;
+                $givenValueIsValidUuid = false;
                 break;
         }
 
-        if ($valueIsValidUuid) {
+        if ($givenValueIsValidUuid) {
             return 'The field :{field} must be a valid UUID.';
         }
 

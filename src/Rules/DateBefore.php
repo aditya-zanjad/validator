@@ -36,7 +36,7 @@ class DateBefore extends AbstractRule
             $this->beforeDate       =   new DateTime($beforeDateFormat);
         } catch (DateMalformedStringException $e) {
             // var_dump($e); exit;
-            throw new Exception("[Developer][Exception]: The validation rule [date_lt] must be provided with a valid after date.");
+            throw new Exception("[Developer][Exception]: The validation rule [date_lt] must be provided with a valid before date.");
         }
     }
 
@@ -56,8 +56,7 @@ class DateBefore extends AbstractRule
                 return "The field :{field} must be a valid date before the date {$this->beforeDateFormat}.";
             }
         } catch (DateMalformedStringException $e) {
-            // var_dump($e);
-            // exit;
+            // var_dump($e); exit;
             return "The field :{field} must be a valid date before the date {$this->beforeDateFormat}.";
         }
 

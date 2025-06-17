@@ -28,7 +28,9 @@ class Mime extends AbstractRule
             throw new Exception("[Developer][Exception]: The validation rule [" . static::class . "] must be provided with at least one parameter.");
         }
 
-        $this->givenMimeTypes = array_map(fn($mime) => trim($mime), $givenMimeTypes);
+        $this->givenMimeTypes = array_map(function ($mime) {
+            return trim($mime);
+        }, $givenMimeTypes);
     }
 
     /**

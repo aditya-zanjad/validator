@@ -36,7 +36,7 @@ class DateAfterOrEqual extends AbstractRule
             $this->afterOrEqualDate         =   new DateTime($afterOrEqualDateFormat);
         } catch (DateMalformedStringException $e) {
             // var_dump($e); exit;
-            throw new Exception("[Developer][Exception]: The validation rule [date_gte] must be provided with a valid after date.");
+            throw new Exception("[Developer][Exception]: The validation rule [date_gte] must be provided with a valid after/equal date.");
         }
     }
 
@@ -56,8 +56,7 @@ class DateAfterOrEqual extends AbstractRule
                 return "The field :{field} must be a date after or equal the date {$this->afterOrEqualDateFormat}.";
             }
         } catch (DateMalformedStringException $e) {
-            // var_dump($e);
-            // exit;
+            // var_dump($e); exit;
             return "The field :{field} must be a date after or equal the date {$this->afterOrEqualDateFormat}.";
         }
 
