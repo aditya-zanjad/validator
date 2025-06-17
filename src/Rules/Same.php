@@ -27,7 +27,7 @@ class Same extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value): bool|string
+    public function check(string $field, $value)
     {
         if ($value !== $this->input->get($this->comparingField)) {
             return "The value of the field :{field} must be the same as that of the field {$this->comparingField}.";

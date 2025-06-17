@@ -42,7 +42,7 @@ class RequiredUnless extends AbstractRule implements RequisiteRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool|string
+    public function check(string $field, $value)
     {
         $otherFieldValue            =   $this->input->get($this->otherField);
         $currentFieldIsPresent      =   !is_null($value);

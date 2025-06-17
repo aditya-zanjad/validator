@@ -28,12 +28,9 @@ class Size extends AbstractRule
     }
 
     /**
-     * Check if the given value matches the given size or not.
-     *
-     * @param   string  $field
-     * @param   mixed   $value
+     * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool|string
+    public function check(string $field, $value)
     {
         $size               =   varSize($value);
         $valueSizeIsValid   =   $size === $this->validSize;

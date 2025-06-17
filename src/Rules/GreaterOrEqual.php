@@ -29,7 +29,7 @@ class GreaterOrEqual extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool|string
+    public function check(string $field, $value)
     {
         foreach ($this->entities as $entity) {
             if ($value < $entity) {

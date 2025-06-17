@@ -31,7 +31,7 @@ class TypeJson extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool|string
+    public function check(string $field, $value)
     {
         $preprocessedValue = $this->preprocessValue($value);
 

@@ -33,7 +33,7 @@ class In extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool|string
+    public function check(string $field, $value)
     {
         if (!in_array($value, $this->params)) {
             $validValues = implode(', ', $this->params);

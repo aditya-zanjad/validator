@@ -32,7 +32,7 @@ class RequiredWithoutAll extends AbstractRule implements RequisiteRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool|string
+    public function check(string $field, $value)
     {
         $currentFieldIsPresent = !is_null($value);
 

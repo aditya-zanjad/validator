@@ -43,7 +43,7 @@ class DateEqual extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool|string
+    public function check(string $field, $value)
     {
         if (!is_string($value)) {
             return "The field :{field} must be a date before or equal to the date {$this->equalDateFormat}.";

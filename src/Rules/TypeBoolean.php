@@ -19,7 +19,7 @@ class TypeBoolean extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool|string
+    public function check(string $field, $value)
     {
         if (!in_array($value, $this->validBooleans, true)) {
             return "The field {$field} must be a boolean value.";

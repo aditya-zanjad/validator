@@ -14,7 +14,7 @@ class TypeFile extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value)
+    public function check(string $field, $value)
     {
         if (is_string($value) && file_exists($value)) {
             return true;

@@ -43,7 +43,7 @@ class DateAfter extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool|string
+    public function check(string $field, $value)
     {
         if (!is_string($value)) {
             return "The field :{field} must be a valid date after the date {$this->afterDateFormat}.";

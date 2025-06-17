@@ -36,7 +36,7 @@ class Mime extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool|string
+    public function check(string $field, $value)
     {
         // First, we'll check that the supplied list of MIME types is a valid one.
         $mimeTypes          =   array_unique(MimeType::values());

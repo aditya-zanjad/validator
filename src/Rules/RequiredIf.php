@@ -38,7 +38,7 @@ class RequiredIf extends AbstractRule implements RequisiteRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool|string
+    public function check(string $field, $value)
     {
         if (is_callable($this->entity[0])) {
             return call_user_func($this->entity[0], $field, $value, $this->input);
