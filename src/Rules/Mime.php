@@ -38,15 +38,6 @@ class Mime extends AbstractRule
      */
     public function check(string $field, $value)
     {
-        // First, we'll check that the supplied list of MIME types is a valid one.
-        $mimeTypes          =   array_unique(MimeType::values());
-        $invalidMimeTypes   =   array_diff($this->givenMimeTypes, $mimeTypes);
-
-        if (!empty($invalidMimeTypes)) {
-            $invalidMimeTypesImploded = implode(',', $invalidMimeTypes);
-            throw new Exception("[Developer][Exception]: The field [$field] has been provided with an invalid list of MIME types: {$invalidMimeTypesImploded}.");
-        }
-
         $valueMimeType = null;
 
         switch (gettype($value)) {
@@ -68,6 +59,11 @@ class Mime extends AbstractRule
                 }
 
                 $valueMimeType = mime_content_type($metadata['uri']);
+
+                if ($valueMimeType === false) {
+                    $finfo          =   new finfo();
+                    $valueMimeType  =   $finfo->file($metadata['uri'], FILEINFO_MIME_TYPE);
+                }
                 break;
 
             default:

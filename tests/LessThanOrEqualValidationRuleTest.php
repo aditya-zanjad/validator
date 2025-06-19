@@ -11,14 +11,14 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use AdityaZanjad\Validator\Rules\LessOrEqual;
 use PHPUnit\Framework\Attributes\CoversFunction;
 
-use function AdityaZanjad\Validator\Utils\validate;
+use function AdityaZanjad\Validator\validate;
 
 #[UsesClass(Validator::class)]
 #[CoversClass(Error::class)]
 #[CoversClass(Input::class)]
 #[CoversClass(Required::class)]
 #[CoversClass(LessOrEqual::class)]
-#[CoversFunction('\AdityaZanjad\Validator\Utils\validate')]
+#[CoversFunction('\AdityaZanjad\Validator\validate')]
 class LessThanOrEqualValidationRuleTest extends TestCase
 {
     /**

@@ -10,13 +10,13 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversFunction;
 use AdityaZanjad\Validator\Rules\RequiredWithoutAll;
 
-use function AdityaZanjad\Validator\Utils\validate;
+use function AdityaZanjad\Validator\validate;
 
 #[UsesClass(Validator::class)]
 #[CoversClass(Error::class)]
 #[CoversClass(Input::class)]
 #[CoversClass(RequiredWithoutAll::class)]
-#[CoversFunction('\AdityaZanjad\Validator\Utils\validate')]
+#[CoversFunction('\AdityaZanjad\Validator\validate')]
 final class RequiredWithoutAllValidationRuleTest extends TestCase
 {
     /**

@@ -9,13 +9,13 @@ use AdityaZanjad\Validator\Rules\TypeFile;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversFunction;
 
-use function AdityaZanjad\Validator\Utils\validate;
+use function AdityaZanjad\Validator\validate;
 
 #[CoversClass(Validator::class)]
 #[CoversClass(Error::class)]
 #[CoversClass(Input::class)]
 #[CoversClass(TypeFile::class)]
-#[CoversFunction('\AdityaZanjad\Validator\Utils\validate')]
+#[CoversFunction('\AdityaZanjad\Validator\validate')]
 final class FileValidationRuleTest extends TestCase
 {
     /**

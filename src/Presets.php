@@ -2,9 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AdityaZanjad\Validator\Utils;
-
-use AdityaZanjad\Validator\Validator;
+namespace AdityaZanjad\Validator;
 
 /**
  * Validate the given input data against the given validation rules.

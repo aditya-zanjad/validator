@@ -10,13 +10,13 @@ use AdityaZanjad\Validator\Rules\RequiredIf;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversFunction;
 
-use function AdityaZanjad\Validator\Utils\validate;
+use function AdityaZanjad\Validator\validate;
 
 #[UsesClass(Validator::class)]
 #[CoversClass(Error::class)]
 #[CoversClass(Input::class)]
 #[CoversClass(RequiredIf::class)]
-#[CoversFunction('\AdityaZanjad\Validator\Utils\validate')]
+#[CoversFunction('\AdityaZanjad\Validator\validate')]
 class RequiredIfValidationRuleTest extends TestCase
 {
     /**

@@ -17,7 +17,7 @@
             "src/Utils/Arr.php",
             "src/Utils/Str.php",
             "src/Utils/Var.php",
-            "src/Utils/Validator.php"
+            "src/Presets.php"
         ]
     },
     "require-dev": {
