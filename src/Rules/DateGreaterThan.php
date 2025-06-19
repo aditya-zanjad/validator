@@ -12,7 +12,7 @@ use AdityaZanjad\Validator\Base\AbstractRule;
 /**
  * @version 1.0
  */
-class DateAfter extends AbstractRule
+class DateGreaterThan extends AbstractRule
 {
     /**
      * @var string $afterDateFormat

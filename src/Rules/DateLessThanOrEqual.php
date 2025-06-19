@@ -12,7 +12,7 @@ use AdityaZanjad\Validator\Base\AbstractRule;
 /**
  * @version 1.0
  */
-class DateBeforeOrEqual extends AbstractRule
+class DateLessThanOrEqual extends AbstractRule
 {
     /**
      * @var string $beforeOrEqualDateFormat
