@@ -42,44 +42,99 @@ function arr_dot(array $arr): array
         return $arr;
     }
 
-    if (\class_exists(RecursiveArrayIterator::class) && \class_exists(RecursiveIteratorIterator::class)) {
-        $arr    =   new RecursiveArrayIterator($arr);
-        $arr    =   new RecursiveIteratorIterator($arr, RecursiveIteratorIterator::SELF_FIRST);
+    if (!\class_exists(RecursiveArrayIterator::class) || !\class_exists(RecursiveIteratorIterator::class)) {
+        $fn = function (array $arr, string $context = '') use (&$fn) {
+            $result = [];
 
-        $result     =   [];
-        $nestedKeys =   [];
-
-        foreach ($arr as $key => $value) {
-            $nestedKeys[$arr->getDepth()] = $key;
-
-            if (\is_array($value) && !empty($value)) {
-                continue;
-            }
-
-            $nestedKeys                         =   \array_slice($nestedKeys, 0, $arr->getDepth() + 1);
-            $result[\implode('.', $nestedKeys)] =   $value;
-        }
-
-        return $result;
-    }
-
-    $fn = function (array $arr, string $context = '') use (&$fn) {
-        $result = [];
-
-        foreach ($arr as $key => $value) {
-            if (\is_array($value)) {
-                foreach ($fn($value, "{$context}.") as $nestedKey => $nestedValue) {
-                    $result[$nestedKey] = $nestedValue;
+            foreach ($arr as $key => $value) {
+                if (\is_array($value)) {
+                    foreach ($fn($value, "{$context}{$key}.") as $nestedKey => $nestedValue) {
+                        $result[$nestedKey] = $nestedValue;
+                    }
+                } else {
+                    $result["{$context}{$key}."] = $value;
                 }
             }
 
-            $result[$key] = $value;
+            return $result;
+        };
+
+        return $fn($arr);
+    }
+
+    $arr        =   new RecursiveArrayIterator($arr);
+    $arr        =   new RecursiveIteratorIterator($arr, RecursiveIteratorIterator::SELF_FIRST);
+    $result     =   [];
+    $nestedKeys =   [];
+
+    foreach ($arr as $key => $value) {
+        $nestedKeys[$arr->getDepth()] = $key;
+
+        if (\is_array($value) && !empty($value)) {
+            continue;
         }
 
-        return $result;
-    };
+        $nestedKeys                         =   \array_slice($nestedKeys, 0, $arr->getDepth() + 1);
+        $result[\implode('.', $nestedKeys)] =   $value;
+    }
 
-    return $fn($arr);
+    return $result;
+}
+
+/**
+ * Get the nested array paths in the form of dot notations.
+ *
+ * @param   array<int|string, mixed> $arr
+ * 
+ * @return  array<int, int|string>
+ */
+function arr_dot_paths(array $arr): array
+{
+    if (empty($arr)) {
+        return $arr;
+    }
+
+    if (!\class_exists(RecursiveArrayIterator::class) || !\class_exists(RecursiveIteratorIterator::class)) {
+        $fn = function (array $arr, $context = '') use (&$fn) {
+            $result = array();
+
+            foreach ($arr as $key => $value) {
+                $path = "{$context}{$key}";
+
+                if (\is_array($value)) {
+                    $nested = $fn($value, "{$path}.");
+
+                    foreach ($nested as $p) {
+                        $result[] = $p;
+                    }
+                } else {
+                    $result[] = $path;
+                }
+            }
+
+            return $result;
+        };
+
+        return $fn($arr);
+    }
+
+    $arr        =   new RecursiveArrayIterator($arr);
+    $arr        =   new RecursiveIteratorIterator($arr, RecursiveIteratorIterator::SELF_FIRST);
+    $result     =   [];
+    $nestedKeys =   [];
+
+    foreach ($arr as $key => $value) {
+        $nestedKeys[$arr->getDepth()] = $key;
+
+        if (\is_array($value) && !empty($value)) {
+            continue;
+        }
+
+        $nestedKeys =   \array_slice($nestedKeys, 0, $arr->getDepth() + 1);
+        $result[]   =   \implode('.', $nestedKeys);
+    }
+
+    return $result;
 }
 
 /**
@@ -241,7 +296,7 @@ function arr_map_with_keys(array $arr, callable $fn): array
         if (!\is_array($result)) {
             throw new Exception("[Developer][Exception]: The callback function must return an array.");
         }
-        
+
         $firstKey           =   function_exists('\\array_key_first') ? \array_key_first($result) : key($result);
         $mapped[$firstKey]  =   $result[$firstKey];
     }

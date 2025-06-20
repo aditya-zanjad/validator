@@ -12,6 +12,7 @@ use AdityaZanjad\Validator\Base\AbstractRule;
 use AdityaZanjad\Validator\Interfaces\RequisiteRule;
 
 use function AdityaZanjad\Validator\Utils\arr_indexed;
+use function AdityaZanjad\Validator\Utils\str_before;
 use function AdityaZanjad\Validator\Utils\str_contains_v2;
 
 /**
@@ -102,7 +103,7 @@ class Validator
 
         foreach ($givenRules as $field => $rules) {
             if (\is_string($rules)) {
-                $processed[$field] = explode('|', $rules);
+                $processed[$field] = \explode('|', $rules);
                 continue;
             }
 
@@ -129,16 +130,27 @@ class Validator
     protected function resolveWildCardsPath(string $path, array $rules): array
     {
         if ($path === '*') {
-            return \array_fill_keys(\array_keys($this->input->all()), $rules);
+            $result = [];
+
+            foreach ($this->rules as $path => $pathRules) {
+                if (!str_contains_v2($path, '.')) {
+                    $result[$path] = \array_merge($pathRules, $rules);
+                }
+            }
+
+            return $result;
         }
 
         // Get all the paths that match with the wildcard path either completely or partially from left-to-right.
         $actualPaths = \preg_grep("#^{$path}$#", $this->input->keys());
 
-        // If no matches found, we want to create at least one dummy path to
-        // perform validation if necessary.
+        // If no matches found, we want to create at least one dummy path to perform validation if necessary.
         if (empty($actualPaths)) {
-            return [\str_replace($path, '*', '0') => $rules];
+            $search         =   ['.*.', '.*', '*.'];
+            $replace        =   ['.0.', '.0', '0.'];
+            $modifiedPath   =   \str_replace($search, $replace, $path);
+
+            return [$modifiedPath => $rules];
         }
 
         $wildCardParams         =   \explode('.', $path);

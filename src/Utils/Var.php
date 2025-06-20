@@ -52,12 +52,18 @@ function varSize(mixed $var): int|float
 /**
  * Find out the number of digits in a number.
  *
- * @param int|float $var
+ * @param   int|float $var
+ * 
+ * @throws  \Exception
  *
- * @return int
+ * @return  int
  */
-function varDigits(int|float $var): int
+function varDigits($var): int
 {
+    if (filter_var($var, FILTER_VALIDATE_INT) === false || filter_var($var, FILTER_VALIDATE_FLOAT)) {
+        throw new Exception("[Developer][Exception]: The parameter must be either an Integer OR a Float value.");
+    }
+
     return $var !== 0 ? (int) (\log($var, 10) + 1) : 1;
 }
 

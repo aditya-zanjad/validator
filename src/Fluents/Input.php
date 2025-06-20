@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace AdityaZanjad\Validator\Fluents;
 
-use function AdityaZanjad\Validator\Utils\arr_dot;
 use function AdityaZanjad\Validator\Utils\arr_get;
 use function AdityaZanjad\Validator\Utils\arr_exists;
 use function AdityaZanjad\Validator\Utils\arr_filled;
-use function AdityaZanjad\Validator\Utils\arr_not_nulled;
 use function AdityaZanjad\Validator\Utils\arr_nulled;
+use function AdityaZanjad\Validator\Utils\arr_dot_paths;
 
 /**
  * @version 1.0
@@ -37,8 +36,7 @@ class Input
      */
     public function __construct(array $data)
     {
-        $this->data     =   $data;
-        $this->paths    =   array_keys(arr_dot($this->data));
+        $this->data = $data;
     }
 
     /**
@@ -58,6 +56,10 @@ class Input
      */
     public function keys(): array
     {
+        if (!isset($this->paths)) {
+            $this->paths = array_keys(arr_dot_paths($this->data));
+        }
+
         return $this->paths;
     }
 
