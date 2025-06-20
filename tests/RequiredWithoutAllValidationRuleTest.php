@@ -34,7 +34,6 @@ final class RequiredWithoutAllValidationRuleTest extends TestCase
             'abc'   =>  'required_without_all:def,ghi,jkl,xyz',
         ]);
 
-        $validator->validate();
         $this->assertFalse($validator->failed());
         $this->assertEmpty($validator->errors()->all());
         $this->assertNull($validator->errors()->firstOf('abc'));
@@ -59,7 +58,6 @@ final class RequiredWithoutAllValidationRuleTest extends TestCase
             'xyz'   =>  'required_without_all:abc,ghi,jkl|numeric|integer|min:100000',
         ]);
 
-        $validator->validate();
         $this->assertTrue($validator->failed());
         $this->assertNotEmpty($validator->errors()->all());
         $this->assertIsArray($validator->errors()->all());

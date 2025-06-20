@@ -31,7 +31,6 @@ final class UpperCaseValidationRuleTest extends TestCase
             'text' => 'required|string|uppercase'
         ]);
 
-        $validator->validate();
         $this->assertFalse($validator->failed());
         $this->assertEmpty($validator->errors()->all());
         $this->assertNull($validator->errors()->firstOf('text'));

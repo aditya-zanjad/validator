@@ -53,7 +53,6 @@ final class StringValidationRuleTest extends TestCase
             'japanese'  =>  'string'
         ]);
 
-        $validator->validate();
         $this->assertFalse($validator->failed());
         $this->assertEmpty($validator->errors()->all());
         $this->assertNull($validator->errors()->firstOf('english'));

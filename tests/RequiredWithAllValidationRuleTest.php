@@ -37,7 +37,6 @@ final class RequiredWithAllValidationRuleTest extends TestCase
             'zyx'   =>  'required_with_all:abc,def,ghi,jkl,pqr|string|min:12',
         ]);
 
-        $validator->validate();
         $this->assertFalse($validator->failed());
         $this->assertEmpty($validator->errors()->all());
         $this->assertNull($validator->errors()->firstOf('abc'));
@@ -65,7 +64,6 @@ final class RequiredWithAllValidationRuleTest extends TestCase
             'zyx'   =>  'required_with_all:abc,ghi,jkl|string|min:12',
         ]);
 
-        $validator->validate();
         $this->assertTrue($validator->failed());
         $this->assertNotEmpty($validator->errors()->all());
         $this->assertIsArray($validator->errors()->all());

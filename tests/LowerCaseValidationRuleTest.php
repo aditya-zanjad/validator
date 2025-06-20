@@ -33,7 +33,6 @@ final class LowerCaseValidationRuleTest extends TestCase
             'pqr' => 'required|string|lowercase'
         ]);
 
-        $validator->validate();
         $this->assertFalse($validator->failed());
         $this->assertEmpty($validator->errors()->all());
         $this->assertNull($validator->errors()->firstOf('abc'));

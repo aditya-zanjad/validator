@@ -15,18 +15,18 @@ class RequiredWithout extends AbstractRule implements RequisiteRule
     /**
      * The dependent fields against which we want to check the existence of the current field.
      *
-     * @var array<int, string> $dependentFieldValues
+     * @var array<int, string> $otherFields
      */
-    protected array $dependentFieldValues;
+    protected array $otherFields;
 
     /**
      * Inject necessary dependencies into the class.
      *
-     * @param string ...$dependentFieldValues
+     * @param string ...$otherFields
      */
-    public function __construct(string ...$dependentFieldValues)
+    public function __construct(string ...$otherFields)
     {
-        $this->dependentFieldValues = $dependentFieldValues;
+        $this->otherFields = $otherFields;
     }
 
     /**
@@ -41,7 +41,7 @@ class RequiredWithout extends AbstractRule implements RequisiteRule
         }
 
         // The current field is required iff any of the dependent fields is not present in the input.
-        foreach ($this->dependentFieldValues as $dependentFieldValue) {
+        foreach ($this->otherFields as $dependentFieldValue) {
             if ($this->input->isNull($dependentFieldValue) && !$currentFieldIsMissing) {
                 return "The field {$field} is required without the field {$dependentFieldValue}.";
             }

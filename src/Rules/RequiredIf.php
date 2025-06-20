@@ -40,32 +40,40 @@ class RequiredIf extends AbstractRule implements RequisiteRule
      */
     public function check(string $field, $value)
     {
+        // If the constructor was provided with a callback function, we evaluate this callback & return its result as it is.
         if (is_callable($this->entity[0])) {
             return call_user_func($this->entity[0], $field, $value, $this->input);
         }
 
         // Obtain the necessary data required to validate the field.
-        $primaryField       =   $this->entity[0];
-        $primaryFieldValue  =   $this->input->get($primaryField);
-        $primaryValidValues =   array_slice($this->entity, 1);
+        $otherField         =   $this->entity[0];
+        $otherFieldValue    =   $this->input->get($otherField);
 
-        $primaryValidValues = array_map(function ($value) {
-            return varEvaluateType($value);
-        }, $primaryValidValues);
+        /**
+         * Evaluate the given values for the other field to their respective data types.
+         * 
+         * Examples: 
+         * 'null' gets evaluated NULL, 
+         * '123' gets evaluated to integer 123 & so on.
+         */
+        $otherFieldExpectedValues = array_map(function ($val) { 
+            return varEvaluateType($val); 
+        }, array_slice($this->entity, 1));
 
-        if (!in_array($primaryFieldValue, $primaryValidValues, true)) {
+        // If value of the other field is not equal to any of its expected values, then there is no need to proceed further.
+        if (!in_array($otherFieldValue, $otherFieldExpectedValues, true)) {
             return true;
         }
 
         // If the dependent field has one of the specified values & if the current field is not present.
-        if ($this->input->notNull($field)) {
+        if (!is_null($value)) {
             return true;
         }
 
-        if (is_null($primaryFieldValue)) {
-            $primaryFieldValue = 'null';
+        if (is_null($otherFieldValue)) {
+            $otherFieldValue = 'null';
         }
 
-        return "The field {$field} is required when the field {$primaryField} is set to {$primaryFieldValue}.";
+        return "The field {$field} is required when the field {$otherField} is set to {$otherFieldValue}.";
     }
 }

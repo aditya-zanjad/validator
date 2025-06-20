@@ -206,6 +206,8 @@ class Validator
 
     /**
      * Perform the validation process.
+     * 
+     * @throws \Exception
      *
      * @return static
      */
@@ -213,7 +215,7 @@ class Validator
     {
         // Skip validation if it has already been performed at least once.
         if ($this->alreadyValidated) {
-            return $this;
+            throw new Exception("[Developer][Exception]: The validation has already been performed for this instance.");
         }
 
         foreach ($this->rules as $path => $rules) {
@@ -245,18 +247,12 @@ class Validator
                         throw new Exception("[Developer][Exception]: The validation rule must be either a [STRING] or a [CALLABLE] or an instance of [" . AbstractRule::class . "]");
                 }
 
-                if ($result === true) {
-                    continue;
-                }
+                if ($result === false || \is_string($result)) {
+                    $this->errors->add($path, $result);
 
-                if ($result !== false && !\is_string($result)) {
-                    throw new Exception("[Developer][Exception]: The validation rule for the field [{$path}] at index [{$index}] must return either a [boolean] OR a [string] value.");
-                }
-
-                $this->errors->add($path, $result);
-
-                if ($this->shouldStopOnFailure) {
-                    break 2;
+                    if ($this->shouldStopOnFailure) {
+                        break 2;
+                    }
                 }
             }
         }

@@ -15,18 +15,18 @@ class RequiredWithoutAll extends AbstractRule implements RequisiteRule
     /**
      * The dependent fields against which we want to check the existence of the current field.
      *
-     * @var array<int, string> $dependentFields
+     * @var array<int, string> $otherFields
      */
-    protected array $dependentFields;
+    protected array $otherFields;
 
     /**
      * Inject necessary dependencies into the class.
      *
-     * @param string ...$dependentFields
+     * @param string ...$otherFields
      */
-    public function __construct(string ...$dependentFields)
+    public function __construct(string ...$otherFields)
     {
-        $this->dependentFields = $dependentFields;
+        $this->otherFields = $otherFields;
     }
 
     /**
@@ -38,14 +38,14 @@ class RequiredWithoutAll extends AbstractRule implements RequisiteRule
 
         $depedentFieldsPresenceStatus = array_map(function ($field) {
             return $this->input->notNull($field);
-        }, $this->dependentFields);
+        }, $this->otherFields);
 
-        $dependentFieldsPresent = (bool) array_product($depedentFieldsPresenceStatus);
+        $otherFieldsArePresent = (bool) array_product($depedentFieldsPresenceStatus);
 
         // The input field should be present only if other fields are missing and vice versa.
-        if (!$currentFieldIsPresent && !$dependentFieldsPresent) {
-            $dependentFields = implode(', ', $this->dependentFields);
-            return "The field {$field} is required when all these other fields are missing: {$dependentFields}.";
+        if (!$currentFieldIsPresent && !$otherFieldsArePresent) {
+            $joinedOtherFields = implode(', ', $this->otherFields);
+            return "The field {$field} is required when all these other fields are missing: {$joinedOtherFields}.";
         }
 
         return true;

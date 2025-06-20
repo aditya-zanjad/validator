@@ -41,7 +41,6 @@ final class RequiredWithValidationRuleTest extends TestCase
             'xyz'   =>  'required_with:pqr|array|size:10'
         ]);
 
-        $validator->validate();
         $this->assertFalse($validator->failed());
         $this->assertEmpty($validator->errors()->all());
         $this->assertNull($validator->errors()->first('abc'));
@@ -69,7 +68,6 @@ final class RequiredWithValidationRuleTest extends TestCase
             'ijk'   =>  'required_with:abc,def,ghi|string|size:1',
         ]);
 
-        $validator->validate();
         $this->assertTrue($validator->failed());
         $this->assertNotEmpty($validator->errors()->all());
         $this->assertIsArray($validator->errors()->all());

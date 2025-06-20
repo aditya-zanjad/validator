@@ -24,7 +24,7 @@ class RequiredUnlessValidationRuleTest extends TestCase
      *
      * @return void
      */
-    public function testRequiredIfValidationPasses(): void
+    public function testRequiredUnlessValidationPasses(): void
     {
         $validator = validate([
             'abc'   =>  '123',

@@ -68,7 +68,6 @@ final class RequiredValidationRuleTest extends TestCase
             789     =>  'required',
         ]);
 
-        $validator->validate();
         $this->assertFalse($validator->failed());
         $this->assertEmpty($validator->errors()->all());
         $this->assertNull($validator->errors()->first('abc'));
@@ -104,7 +103,6 @@ final class RequiredValidationRuleTest extends TestCase
             '123.456.789.0' =>  'required'
         ]);
 
-        $validator->validate();
         $this->assertTrue($validator->failed());
         $this->assertNotNull($validator->errors()->firstOf('abc.pqr.xyz'));
         $this->assertNotNull($validator->errors()->firstOf('123.456.789.0'));
@@ -146,7 +144,6 @@ final class RequiredValidationRuleTest extends TestCase
             '123.456.789.0'                     =>  'required'
         ]);
 
-        $validator->validate();
         $this->assertFalse($validator->failed());
         $this->assertEmpty($validator->errors()->all());
         $this->assertNull($validator->errors()->firstOf('123.456.789.0'));

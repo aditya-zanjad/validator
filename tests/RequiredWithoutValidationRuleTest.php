@@ -35,7 +35,6 @@ final class RequiredWithoutValidationRuleTest extends TestCase
             'ghi'   =>  'required_without:jkl|numeric|integer|min:12',
         ]);
 
-        $validator->validate();
         $this->assertFalse($validator->failed());
         $this->assertEmpty($validator->errors()->all());
         $this->assertNull($validator->errors()->firstOf('abc'));
@@ -57,7 +56,6 @@ final class RequiredWithoutValidationRuleTest extends TestCase
             'ghi'   =>  'required_without:jkl|numeric|integer|min:12',
         ]);
 
-        $validator->validate();
         $this->assertFalse($validator->failed());
         $this->assertEmpty($validator->errors()->all());
         $this->assertNull($validator->errors()->firstOf('abc'));

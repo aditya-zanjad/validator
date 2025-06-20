@@ -13,16 +13,16 @@ use AdityaZanjad\Validator\Interfaces\RequisiteRule;
 class RequiredWith extends AbstractRule implements RequisiteRule
 {
     /**
-     * @var array $dependentFields
+     * @var array $otherFields
      */
-    protected array $dependentFields;
+    protected array $otherFields;
 
     /**
-     * @param string $dependentFields
+     * @param string $otherFields
      */
-    public function __construct(string ...$dependentFields)
+    public function __construct(string ...$otherFields)
     {
-        $this->dependentFields = $dependentFields;
+        $this->otherFields = $otherFields;
     }
 
     /**
@@ -35,7 +35,7 @@ class RequiredWith extends AbstractRule implements RequisiteRule
         // If any of the dependent field is not filled i.e. not equal to null, the validation
         // will return true. However, if the all the dependent fields are present & if the
         // current field is missing, a validation error message will be returned.
-        foreach ($this->dependentFields as $dependentField) {
+        foreach ($this->otherFields as $dependentField) {
             if ($this->input->notNull($dependentField) && $currentFieldIsMissing) {
                 return "The field {$field} is required when the field {$dependentField} is present.";
             }

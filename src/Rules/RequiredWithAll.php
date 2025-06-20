@@ -13,16 +13,16 @@ use AdityaZanjad\Validator\Interfaces\RequisiteRule;
 class RequiredWithAll extends AbstractRule implements RequisiteRule
 {
     /**
-     * @var array $dependentFields
+     * @var array $otherFields
      */
-    protected array $dependentFields;
+    protected array $otherFields;
 
     /**
-     * @param string $dependentFields
+     * @param string $otherFields
      */
-    public function __construct(string ...$dependentFields)
+    public function __construct(string ...$otherFields)
     {
-        $this->dependentFields = $dependentFields;
+        $this->otherFields = $otherFields;
     }
 
     /**
@@ -30,20 +30,20 @@ class RequiredWithAll extends AbstractRule implements RequisiteRule
      */
     public function check(string $field, $value)
     {
-        $allDependentsArePresent = true;
+        $allOtherFieldsArePresent = true;
 
         // If any of the dependent fields is not filled OR not equal to null, the validation
         // will return true. However, if the all the dependent fields are present & if the
         // current field is missing, a validation error message will be returned.
-        foreach ($this->dependentFields as $dependentField) {
+        foreach ($this->otherFields as $dependentField) {
             if ($this->input->isNull($dependentField)) {
-                $allDependentsArePresent = false;
+                $allOtherFieldsArePresent = false;
             }
         }
 
-        if ($allDependentsArePresent && is_null($value)) {
-            $implodededDependentFields = implode(', ', $this->dependentFields);
-            return "The field {$field} is required when these fields are present: {$implodededDependentFields}.";
+        if ($allOtherFieldsArePresent && is_null($value)) {
+            $joinedOtherFields = implode(', ', $this->otherFields);
+            return "The field {$field} is required when these fields are present: {$joinedOtherFields}.";
         }
 
         return true;

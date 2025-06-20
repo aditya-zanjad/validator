@@ -45,7 +45,7 @@ class RequiredIfValidationRuleTest extends TestCase
      *
      * @return void
      */
-    public function testRequiredIfValidationSucceeds(): void
+    public function testRequiredIfValidationPasses(): void
     {
         $validator = validate([
             'abc'   =>  123,

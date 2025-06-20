@@ -20,23 +20,28 @@ class RequiredUnless extends AbstractRule implements RequisiteRule
     protected string $otherField;
 
     /**
-     * @var mixed $otherFieldValidValues
+     * @var array<int, mixed> $otherFieldExpectedValues
      */
-    protected mixed $otherFieldValidValues;
+    protected array $otherFieldExpectedValues;
 
     /**
      * @param   string  $otherField
-     * @param   string  ...$otherFieldValidValues
+     * @param   string  ...$otherFieldExpectedValues
      */
-    public function __construct(string $otherField, string ...$otherFieldValidValues)
+    public function __construct(string $otherField, string ...$otherFieldExpectedValues)
     {
         $this->otherField = $otherField;
 
-        // Initially, the given values will be in a stringified format. For example, '1', 'true' etc.
-        // We want to convert them to their actual data type for comparison in the below method.
-        $this->otherFieldValidValues = array_map(function ($value) {
+        /**
+         * Evaluate the given values for the other field to their respective data types.
+         * 
+         * Examples: 
+         * 'null' gets evaluated NULL, 
+         * '123' gets evaluated to integer 123 & so on.
+         */
+        $this->otherFieldExpectedValues = array_map(function ($value) {
             return varEvaluateType($value);
-        }, array_values($otherFieldValidValues));
+        }, array_values($otherFieldExpectedValues));
     }
 
     /**
@@ -46,26 +51,27 @@ class RequiredUnless extends AbstractRule implements RequisiteRule
     {
         $otherFieldValue            =   $this->input->get($this->otherField);
         $currentFieldIsPresent      =   !is_null($value);
-        $otherFieldHasValidValue    =   in_array($otherFieldValue, $this->otherFieldValidValues);
+        $otherFieldHasExpectedValue =   in_array($otherFieldValue, $this->otherFieldExpectedValues);
 
-        // If another field does not match with any of the values given for it & the current field is present.
-        if (!$otherFieldHasValidValue && $currentFieldIsPresent) {
+        // If the other field does not equal to any of the expected values & the current is present [i.e. not missing or not NULL]
+        if (!$otherFieldHasExpectedValue && $currentFieldIsPresent) {
             return true;
         }
 
-        if ($otherFieldHasValidValue && !$currentFieldIsPresent) {
+        // Other field equals one of the expected values & the current field is missing [i.e. is missing or is NULL]
+        if ($otherFieldHasExpectedValue && !$currentFieldIsPresent) {
             return true;
         }
 
-        $stringifiedOtherFieldValidValues = array_map(function ($value) {
+        /**
+         * If any of the expected values is/are NULL, we want to convert them to a 
+         * string 'NULL' in order to represent them in the error message.
+         */
+        $joinedOtherFieldExpectedValues = array_map(function ($value) {
             return !is_null($value) ? $value : '[NULL]';
-        }, $this->otherFieldValidValues);
+        }, $this->otherFieldExpectedValues);
 
-        if (count($stringifiedOtherFieldValidValues) === 1) {
-            return "The field {$field} is required if the field {$this->otherField} is not equal to {$stringifiedOtherFieldValidValues[0]}.";
-        }
-
-        $implodedValidValues = implode(', ', $stringifiedOtherFieldValidValues);
-        return "The field {$field} is required if the field {$this->otherField} is not equal to any of these values: {$implodedValidValues}.";
+        $implodedOtherFieldExpectedValues = implode(', ', $joinedOtherFieldExpectedValues);
+        return "The field {$field} is required if the field {$this->otherField} is not equal to any of these values: {$implodedOtherFieldExpectedValues}.";
     }
 }
