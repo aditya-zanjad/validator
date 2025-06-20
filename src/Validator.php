@@ -137,7 +137,7 @@ class Validator
 
         // If no matches found, we want to create at least one dummy path to
         // perform validation if necessary.
-        if (empty($actualPath)) {
+        if (empty($actualPaths)) {
             return [\str_replace($path, '*', '0') => $rules];
         }
 
@@ -149,12 +149,6 @@ class Validator
         foreach ($actualPaths as $index => $actualPath) {
             $actualParams       =   \explode('.', $actualPath);
             $actualParamsLength =   \count($actualParams);
-
-            // If the current path perfectly matches with the wildcard pattern, there
-            // is no need to modify anything.
-            if ($wildCardParamsLength === $actualParamsLength) {
-                continue;
-            }
 
             // If the number of parameters in the wildcard path exceed the number of
             // parameters in the current actual path, we need to add the missing
