@@ -6,7 +6,6 @@ namespace AdityaZanjad\Validator\Rules;
 
 use finfo;
 use Exception;
-use AdityaZanjad\Validator\Enums\MimeType;
 use AdityaZanjad\Validator\Base\AbstractRule;
 
 /**
@@ -28,8 +27,8 @@ class Mime extends AbstractRule
             throw new Exception("[Developer][Exception]: The validation rule [" . static::class . "] must be provided with at least one parameter.");
         }
 
-        $this->givenMimeTypes = array_map(function ($mime) {
-            return trim($mime);
+        $this->givenMimeTypes = \array_map(function ($mime) {
+            return \trim($mime);
         }, $givenMimeTypes);
     }
 
@@ -40,10 +39,10 @@ class Mime extends AbstractRule
     {
         $valueMimeType = null;
 
-        switch (gettype($value)) {
+        switch (\gettype($value)) {
             case 'string':
-                if (is_file($value) && is_readable($value)) {
-                    $valueMimeType = mime_content_type($value);
+                if (\is_file($value) && \is_readable($value)) {
+                    $valueMimeType = \mime_content_type($value);
                     break;
                 }
 
@@ -52,13 +51,13 @@ class Mime extends AbstractRule
                 break;
 
             case 'resource':
-                $metadata = stream_get_meta_data($value);
+                $metadata = \stream_get_meta_data($value);
 
                 if ($metadata['wrapper_type'] !== 'plainfile') {
                     return "The field {$field} must be a valid file.";
                 }
 
-                $valueMimeType = mime_content_type($metadata['uri']);
+                $valueMimeType = \mime_content_type($metadata['uri']);
 
                 if ($valueMimeType === false) {
                     $finfo          =   new finfo();

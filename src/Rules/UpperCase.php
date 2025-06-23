@@ -16,15 +16,15 @@ class UpperCase extends AbstractRule
      */
     public function check(string $field, $value)
     {
-        if (!is_string($value)) {
+        if (!\is_string($value)) {
             return 'The field :{field} must be an uppercase string.';
         }
 
-        if (function_exists('preg_match') && preg_match('/^[A-Z0-9!@#$%^&*()_+\-=\[\]{}|;:\'",.<>\/?`~]+$/', $value) === false) {
+        if (\function_exists('preg_match') && \preg_match('/^[A-Z0-9!@#$%^&*()_+\-=\[\]{}|;:\'",.<>\/?`~]+$/', $value) === false) {
             return 'The field :{field} must be an uppercase string.';
         }
 
-        if (strtoupper($value) !== $value) {
+        if (\strtoupper($value) !== $value) {
             return 'The field :{field} must be an uppercase string.';
         }
 

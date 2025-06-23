@@ -23,7 +23,7 @@ class TypeString extends AbstractRule
      */
     public function check(string $field, $value)
     {
-        if (!is_string($value)) {
+        if (!\is_string($value)) {
             return "The field {$field} must be a string.";
         }
 
@@ -31,7 +31,7 @@ class TypeString extends AbstractRule
             return true;
         }
 
-        if (preg_match($this->regex, $value) === false) {
+        if (\preg_match($this->regex, $value) === false) {
             return "The field :{field} must be string matching with the regex {$this->regex}.";
         }
 

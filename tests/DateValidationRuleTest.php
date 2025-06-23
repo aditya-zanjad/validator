@@ -33,7 +33,8 @@ final class DateValidationRuleTest extends TestCase
             'mno'   =>  '11/05/1994',
             'pqr'   =>  '05/11/1994',
             'uvw'   =>  'May 11, 1994',
-            'xyz'   =>  '1994/05/11'
+            'xyz'   =>  '1994/05/11',
+            'zyx'   =>  '1750687200'
         ], [
             'abc'   =>  'date',
             'def'   =>  'date:d-m-Y',
@@ -43,6 +44,7 @@ final class DateValidationRuleTest extends TestCase
             'pqr'   =>  'date:m/d/Y',
             'uvw'   =>  'date: F d, Y',
             'xyz'   =>  'date:Y/m/d',
+            'zyx'   =>  'date'
         ]);
 
         $this->assertFalse($validator->failed());
@@ -55,6 +57,7 @@ final class DateValidationRuleTest extends TestCase
         $this->assertEmpty($validator->errors()->firstOf('pqr'));
         $this->assertEmpty($validator->errors()->firstOf('uvw'));
         $this->assertEmpty($validator->errors()->firstOf('xyz'));
+        $this->assertEmpty($validator->errors()->firstOf('zyx'));
     }
 
     /**

@@ -28,7 +28,7 @@ class Digits extends AbstractRule
      */
     public function __construct($validDigitsCount)
     {
-        if (!filter_var($validDigitsCount, FILTER_VALIDATE_INT)) {
+        if (!\filter_var($validDigitsCount, FILTER_VALIDATE_INT)) {
             throw new Exception("[Developer][Exception]: The parameter passed to the validation rule [digits] must be a valid integer.");
         }
 
@@ -40,7 +40,7 @@ class Digits extends AbstractRule
      */
     public function check(string $field, $value)
     {
-        if (!is_numeric($value)) {
+        if (!\is_numeric($value)) {
             return "The field {$field} must be a valid numeric value.";
         }
 

@@ -25,8 +25,8 @@ class NotIn extends AbstractRule
      */
     public function __construct(...$params)
     {
-        $this->params = array_map(function ($param) {
-            return is_string($param) ? trim($param) : $param;
+        $this->params = \array_map(function ($param) {
+            return \is_string($param) ? \trim($param) : $param;
         }, $params);
     }
 
@@ -35,7 +35,7 @@ class NotIn extends AbstractRule
      */
     public function check(string $field, $value)
     {
-        if (in_array($value, $this->params)) {
+        if (\in_array($value, $this->params)) {
             $validValues = implode(', ', $this->params);
             return "The field :{field} must not be any of these values: {$validValues}.";
         }

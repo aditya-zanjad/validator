@@ -34,7 +34,7 @@ class Date extends AbstractRule
      */
     public function __construct(string ...$formatChars)
     {
-        $this->format = !empty($formatChars) ? trim(implode(',', $formatChars)) : '';
+        $this->format = !empty($formatChars) ? \trim(\implode(',', $formatChars)) : '';
     }
 
     /**
@@ -59,7 +59,7 @@ class Date extends AbstractRule
                     break;
 
                 case 'integer':
-                    date('Y-m-d', $evaluatedValue);
+                    new DateTime("@{$evaluatedValue}");
                     break;
 
                 default:

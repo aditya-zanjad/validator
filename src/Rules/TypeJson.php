@@ -39,8 +39,8 @@ class TypeJson extends AbstractRule
             return false;
         }
 
-        $valueIsValidJson = function_exists('json_validate') && json_validate($preprocessedValue, $this->jsonDepth)
-            || json_decode($preprocessedValue, true, $this->jsonDepth) && json_last_error() === JSON_ERROR_NONE;
+        $valueIsValidJson = \function_exists('\\json_validate') && \json_validate($preprocessedValue, $this->jsonDepth)
+            || \json_decode($preprocessedValue, true, $this->jsonDepth) && \json_last_error() === JSON_ERROR_NONE;
 
         if (!$valueIsValidJson) {
             return "The field :{field} must be a valid JSON.";
