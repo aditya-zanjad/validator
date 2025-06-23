@@ -11,6 +11,13 @@ use AdityaZanjad\Validator\Base\AbstractRule;
  */
 class TypeString extends AbstractRule
 {
+    protected string $regex;
+
+    public function __construct(string $regex = '')
+    {
+        $this->regex = $regex;
+    }
+
     /**
      * @inheritDoc
      */
@@ -18,6 +25,14 @@ class TypeString extends AbstractRule
     {
         if (!is_string($value)) {
             return "The field {$field} must be a string.";
+        }
+
+        if (empty($this->regex)) {
+            return true;
+        }
+
+        if (preg_match($this->regex, $value) === false) {
+            return "The field :{field} must be string matching with the regex {$this->regex}.";
         }
 
         return true;

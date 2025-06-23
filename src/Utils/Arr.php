@@ -96,20 +96,19 @@ function arr_dot_paths(array $arr): array
 
     if (!\class_exists(RecursiveArrayIterator::class) || !\class_exists(RecursiveIteratorIterator::class)) {
         $fn = function (array $arr, $context = '') use (&$fn) {
-            $result = array();
+            $result = [];
 
             foreach ($arr as $key => $value) {
                 $path = "{$context}{$key}";
 
                 if (\is_array($value)) {
-                    $nested = $fn($value, "{$path}.");
-
-                    foreach ($nested as $p) {
-                        $result[] = $p;
-                    }
-                } else {
-                    $result[] = $path;
+                    $nested =   $fn($value, "{$path}.");
+                    $result =   array_merge($result, $nested);
+                    
+                    continue;
                 }
+                
+                $result[] = $path;
             }
 
             return $result;
@@ -247,7 +246,7 @@ function arr_indexed(array $arr): bool
     }
 
     if (\function_exists('\\array_is_list')) {
-        return array_is_list($arr);
+        return \array_is_list($arr);
     }
 
     return \array_keys($arr) === \range(0, count($arr) - 1);
@@ -282,7 +281,7 @@ function arr_first_key(array $arr)
  *
  * @return  array<int|string, mixed>
  */
-function arr_map_with_keys(array $arr, callable $fn): array
+function arr_map_v2(array $arr, callable $fn): array
 {
     if (empty($arr)) {
         return [];

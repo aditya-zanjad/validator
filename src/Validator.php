@@ -219,7 +219,7 @@ class Validator
      */
     public function validate(): static
     {
-        // Skip validation if it has already been performed at least once.
+        // Do not allow performing the same validation more than once.
         if ($this->alreadyValidated) {
             throw new Exception("[Developer][Exception]: The validation has already been performed for this instance.");
         }
@@ -230,7 +230,7 @@ class Validator
              * the rule 'nullable', this method will return true indicating that
              * its entire validation can be skipped else it'll return false.
              */
-            if (\in_array('nullable', $rules) && !$this->input->exists($path)) {
+            if (\in_array('nullable', $rules) && $this->input->isNull($path)) {
                 continue;
             }
 
@@ -242,23 +242,29 @@ class Validator
                 // Evaluate the validation rule & obtain its result.
                 switch (\gettype($rule)) {
                     case 'string':
-                        $result = $this->executeStringifiedRule($rule, $index, $path, $this->input->get($path));
+                        $result = $this->executeRuleFromString($rule, $index, $path, $this->input->get($path));
                         break;
 
                     case 'object':
-                        $result = $this->executeInstanceRule($rule, $path, $this->input->get($path));
+                        $result = $this->executeRuleFromInstance($rule, $path, $this->input->get($path));
                         break;
 
                     default:
                         throw new Exception("[Developer][Exception]: The validation rule must be either a [STRING] or a [CALLABLE] or an instance of [" . AbstractRule::class . "]");
                 }
 
-                if ($result === false || \is_string($result)) {
-                    $this->errors->add($path, $result);
+                if (!\is_bool($result) && !\is_string($result)) {
+                    throw new Exception("[Developer][Exception]: The validation rule at the index [{$index}] for the field [{$path}] must return either a [boolean] OR a [string] value.");
+                }
 
-                    if ($this->shouldStopOnFailure) {
-                        break 2;
-                    }
+                if ($result === true) {
+                    continue;
+                }
+
+                $this->errors->add($path, $this->messages["{$path}.{$rule}"] ?? $result);
+
+                if ($this->shouldStopOnFailure) {
+                    break 2;
                 }
             }
         }
@@ -278,7 +284,7 @@ class Validator
      *
      * @return  bool|string
      */
-    protected function executeStringifiedRule(string $rule, int $ruleIndex, string $field, $value)
+    protected function executeRuleFromString(string $rule, int $ruleIndex, string $field, $value)
     {
         if (empty($rule)) {
             throw new Exception("[Developer][Exception]: The validation rule [{$rule}] at the index [{$ruleIndex}] for field [{$field}] must not be empty.");
@@ -316,7 +322,7 @@ class Validator
      *
      * @return  bool|string
      */
-    protected function executeInstanceRule($rule, string $field, $value)
+    protected function executeRuleFromInstance($rule, string $field, $value)
     {
         if (!$this->shouldExecuteRule($rule, $field)) {
             return null;

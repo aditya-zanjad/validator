@@ -8,6 +8,8 @@ use DateTime;
 use Throwable;
 use AdityaZanjad\Validator\Base\AbstractRule;
 
+use function AdityaZanjad\Validator\Utils\varEvaluateType;
+
 /**
  * @version 1.0
  */
@@ -19,13 +21,20 @@ class Date extends AbstractRule
     protected string $format;
 
     /**
+     * The error message to return on validation failure.
+     *
+     * @var string $error
+     */
+    protected string $error = 'The field :{field} must be a valid date.';
+
+    /**
      * Inject the data required to perform validation.
      *
      * @param string $format
      */
-    public function __construct(string $format = '')
+    public function __construct(string ...$formatChars)
     {
-        $this->format = $format;
+        $this->format = !empty($formatChars) ? trim(implode(',', $formatChars)) : '';
     }
 
     /**
@@ -33,19 +42,32 @@ class Date extends AbstractRule
      */
     public function check(string $field, $value)
     {
-        if (!is_string($value)) {
-            return 'The field :{field} must be a valid date.';
+        if (!\is_string($value)) {
+            return $this->error;
         }
 
-        if (!empty($this->format) && DateTime::createFromFormat($this->format, $value) === false) {
+        if (!empty($this->format) && DateTime::createFromFormat($this->format, (string) $value) === false) {
             return "The field :{field} must be a valid date in the format {$this->format}.";
         }
 
         try {
-            new DateTime($value);
+            $evaluatedValue = varEvaluateType($value);
+
+            switch (\gettype($evaluatedValue)) {
+                case 'string':
+                    new DateTime($evaluatedValue);
+                    break;
+
+                case 'integer':
+                    date('Y-m-d', $evaluatedValue);
+                    break;
+
+                default:
+                    return $this->error;
+            }
         } catch (Throwable $e) {
             // var_dump($e); exit;
-            return 'The field :{field} must be a valid date.';
+            return $this->error;
         }
 
         return true;

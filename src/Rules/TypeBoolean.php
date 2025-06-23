@@ -6,8 +6,6 @@ namespace AdityaZanjad\Validator\Rules;
 
 use AdityaZanjad\Validator\Base\AbstractRule;
 
-use function AdityaZanjad\Validator\Utils\varEvaluateType;
-
 /**
  * @version 1.0
  */
@@ -23,10 +21,28 @@ class TypeBoolean extends AbstractRule
      */
     public function check(string $field, $value)
     {
-        if (!in_array(varEvaluateType($value), $this->validBooleans)) {
+        $transformedValue = $this->transformValue($value);
+
+        if (!in_array($transformedValue, $this->validBooleans, true)) {
             return "The field {$field} must be a boolean value.";
         }
 
         return true;
+    }
+
+    /**
+     * Transform the given value based on certain conditions.
+     *
+     * @param bool|int|string $value
+     * 
+     * @return bool|int|string
+     */
+    protected function transformValue($value)
+    {
+        if (is_string($value)) {
+            return strtolower($value);
+        }
+
+        return $value;
     }
 }
