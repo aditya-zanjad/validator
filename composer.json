@@ -15,10 +15,11 @@
             "AdityaZanjad\\Validator\\": "src/"
         },
         "files": [
+            "src/Presets.php",
             "src/Utils/Arr.php",
             "src/Utils/Str.php",
             "src/Utils/Var.php",
-            "src/Presets.php"
+            "src/Utils/Date.php"
         ]
     },
     "require-dev": {

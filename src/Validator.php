@@ -12,7 +12,6 @@ use AdityaZanjad\Validator\Base\AbstractRule;
 use AdityaZanjad\Validator\Interfaces\RequisiteRule;
 
 use function AdityaZanjad\Validator\Utils\arr_indexed;
-use function AdityaZanjad\Validator\Utils\str_before;
 use function AdityaZanjad\Validator\Utils\str_contains_v2;
 
 /**

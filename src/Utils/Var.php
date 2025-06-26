@@ -60,7 +60,7 @@ function varSize(mixed $var): int|float
  */
 function varDigits($var): int
 {
-    if (filter_var($var, FILTER_VALIDATE_INT) === false || filter_var($var, FILTER_VALIDATE_FLOAT)) {
+    if (filter_var($var, FILTER_VALIDATE_INT) === false || filter_var($var, FILTER_VALIDATE_FLOAT) === false) {
         throw new Exception("[Developer][Exception]: The parameter must be either an Integer OR a Float value.");
     }
 

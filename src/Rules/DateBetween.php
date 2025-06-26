@@ -6,8 +6,9 @@ namespace AdityaZanjad\Validator\Rules;
 
 use DateTime;
 use Exception;
-use DateMalformedStringException;
 use AdityaZanjad\Validator\Base\AbstractRule;
+
+use function AdityaZanjad\Validator\Utils\parseDateTime;
 
 /**
  * @version 1.0
@@ -15,24 +16,24 @@ use AdityaZanjad\Validator\Base\AbstractRule;
 class DateBetween extends AbstractRule
 {
     /**
-     * @var string $minDateFormat
+     * @var string $minDateString
      */
-    protected string $minDateFormat;
+    protected string $minDateString;
 
     /**
-     * @var string $maxDateFormat
+     * @var string $maxDateString
      */
-    protected string $maxDateFormat;
+    protected string $maxDateString;
 
     /**
-     * @var \DateTime $minDate
+     * @var bool|\DateTime $minDate
      */
-    protected DateTime $minDate;
+    protected $minDate;
 
     /**
-     * @var \DateTime $maxDate
+     * @var bool|\DateTime $maxDate
      */
-    protected DateTime $maxDate;
+    protected $maxDate;
 
     /**
      * Inject the data required to perform validation.
@@ -42,17 +43,20 @@ class DateBetween extends AbstractRule
      */
     public function __construct(string $minDate, string $maxDate)
     {
-        try {
-            // Parse minimum date
-            $this->minDateFormat    =   $minDate;
-            $this->minDate          =   new DateTime($minDate);
+        // Parse minimum date
+        $this->minDateString    =   $minDate;
+        $this->minDate          =   parseDateTime($minDate);
 
-            // Parse maximum date
-            $this->maxDateFormat    =   $maxDate;
-            $this->maxDate          =   new DateTime($maxDate);
-        } catch (DateMalformedStringException $e) {
-            // var_dump($e); exit;
-            throw new Exception("[Developer][Exception]: The parameters passed to the validation rule [date_between] must be the valid dates.");
+        if ($this->minDate === false) {
+            throw new Exception("[Developer][Exception]: The validation rule [date_between] requires a valid minimum date.");
+        }
+
+        // Parse maximum date
+        $this->maxDateString    =   $maxDate;
+        $this->maxDate          =   parseDateTime($maxDate);
+
+        if ($this->minDate === false) {
+            throw new Exception("[Developer][Exception]: The validation rule [date_between] requires a valid maximum date.");
         }
     }
 
@@ -61,20 +65,10 @@ class DateBetween extends AbstractRule
      */
     public function check(string $field, $value)
     {
-        if (!is_string($value)) {
-            return "The field :{field} must be a date between the dates {$this->minDateFormat} and {$this->maxDateFormat}.";
-        }
+        $givenDateTime = parseDateTime($value);
 
-        try {
-            $givenDateTime = new DateTime($value);
-
-            // Make sure that the given date is not less than the minimum date or greater than the maximum date.
-            if ($givenDateTime < $this->minDate || $givenDateTime > $this->maxDate) {
-                return "The field :{field} must be a date between the dates {$this->minDateFormat} and {$this->maxDateFormat}.";
-            }
-        } catch (DateMalformedStringException $e) {
-            // var_dump($e); exit;
-            return "The field :{field} must be a date between the dates {$this->minDateFormat} and {$this->maxDateFormat}.";
+        if ($givenDateTime === false || $givenDateTime < $this->minDate || $givenDateTime > $this->maxDate) {
+            return "The field :{field} must be a date between the dates {$this->minDateString} and {$this->maxDateString}.";
         }
 
         return true;

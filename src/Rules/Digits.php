@@ -40,8 +40,8 @@ class Digits extends AbstractRule
      */
     public function check(string $field, $value)
     {
-        if (!\is_numeric($value)) {
-            return "The field {$field} must be a valid numeric value.";
+        if (\filter_var($value, FILTER_VALIDATE_INT) === false) {
+            return "The field {$field} must contain exactly {$this->validDigitsCount} digits.";
         }
 
         if (varDigits($value) !== $this->validDigitsCount) {

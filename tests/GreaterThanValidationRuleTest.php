@@ -3,12 +3,12 @@
 declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
+use AdityaZanjad\Validator\Rules\Gt;
 use AdityaZanjad\Validator\Validator;
 use AdityaZanjad\Validator\Fluents\Input;
 use AdityaZanjad\Validator\Rules\Required;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\Attributes\CoversClass;
-use AdityaZanjad\Validator\Rules\GreaterThan;
 use PHPUnit\Framework\Attributes\CoversFunction;
 
 use function AdityaZanjad\Validator\validate;
@@ -17,7 +17,7 @@ use function AdityaZanjad\Validator\validate;
 #[CoversClass(Error::class)]
 #[CoversClass(Input::class)]
 #[CoversClass(Required::class)]
-#[CoversClass(GreaterThan::class)]
+#[CoversClass(Gt::class)]
 #[CoversFunction('\AdityaZanjad\Validator\validate')]
 class GreaterThanValidationRuleTest extends TestCase
 {

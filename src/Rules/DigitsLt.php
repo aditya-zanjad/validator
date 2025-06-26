@@ -12,7 +12,7 @@ use function AdityaZanjad\Validator\Utils\varDigits;
 /**
  * @version 1.0
  */
-class DigitsLessThan extends AbstractRule
+class DigitsLt extends AbstractRule
 {
     /**
      * @var int $maxThreshold
@@ -40,8 +40,8 @@ class DigitsLessThan extends AbstractRule
      */
     public function check(string $field, $value)
     {
-        if (!is_numeric($value)) {
-            return "The field {$field} must be a valid numeric value.";
+        if (filter_var($value, FILTER_VALIDATE_INT) === false) {
+            return "The field {$field} must contain less than {$this->maxThreshold} digits.";
         }
 
         if (varDigits($value) >= $this->maxThreshold) {

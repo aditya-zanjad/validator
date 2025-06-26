@@ -12,7 +12,7 @@ use function AdityaZanjad\Validator\Utils\varDigits;
 /**
  * @version 1.0
  */
-class DigitsLessThanOrEqual extends AbstractRule
+class DigitsLte extends AbstractRule
 {
     /**
      * @var int $maxAllowedDigits
@@ -28,7 +28,7 @@ class DigitsLessThanOrEqual extends AbstractRule
      */
     public function __construct($maxAllowedDigits)
     {
-        if (!filter_var($maxAllowedDigits, FILTER_VALIDATE_INT)) {
+        if (filter_var($maxAllowedDigits, FILTER_VALIDATE_INT) === false) {
             throw new Exception("[Developer][Exception]: The parameter passed to the validation rule [digits_lte] must be the valid integer.");
         }
 
@@ -40,8 +40,8 @@ class DigitsLessThanOrEqual extends AbstractRule
      */
     public function check(string $field, $value)
     {
-        if (!is_numeric($value)) {
-            return "The field {$field} must be a valid numeric value.";
+        if (filter_var($value, FILTER_VALIDATE_INT) === false) {
+            return "The field {$field} cannot contain more than {$this->maxAllowedDigits} digits.";
         }
 
         if (varDigits($value) > $this->maxAllowedDigits) {

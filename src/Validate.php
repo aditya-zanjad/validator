@@ -10,17 +10,25 @@ use AdityaZanjad\Validator\Rules\Email;
 use AdityaZanjad\Validator\Rules\Numeric;
 use AdityaZanjad\Validator\Rules\TypeFile;
 use AdityaZanjad\Validator\Rules\TypeJson;
-use AdityaZanjad\Validator\Rules\TypeArray;
-use AdityaZanjad\Validator\Rules\TypeString;
 use AdityaZanjad\Validator\Rules\TypeBoolean;
 use AdityaZanjad\Validator\Rules\TypeInteger;
+
+use function AdityaZanjad\Validator\Utils\parseDateTime;
 
 /**
  * @version 1.0
  */
 class Validate
 {
-    public static function __callStatic($name, $arguments)
+    /**
+     * Intercept static function return values for this class.
+     *
+     * @param   string  $name
+     * @param   array   $arguments
+     * 
+     * @return  bool
+     */
+    public static function __callStatic($name, $arguments): bool
     {
         $result = static::$name(...$arguments);
 
@@ -31,29 +39,57 @@ class Validate
         return true;
     }
 
+    /**
+     * Validate whether the given value is a string or not.
+     *
+     * @param   mixed     $value
+     * @param   string    $regex
+     * 
+     * @return  bool
+     */
     public static function isString($value, string $regex = ''): bool
     {
-        return (new TypeString($regex))->check('', $value);
+        if (!is_string($value)) {
+            return false;
+        }
+
+        if (!empty($regex) && preg_match($regex, $value) === false) {
+            return false;
+        }
+
+        return true;
     }
 
     public static function isArray($value)
     {
-        return (new TypeArray())->check('', $value);
+        if (!is_array($value)) {
+            return false;
+        }
+
+        return true;
     }
 
-    public static function isBoolean($value)
+    public static function isBoolean($value, array $expectedBooleans = [])
     {
-        return (new TypeBoolean())->check('', $value);
+        return (new TypeBoolean(...$expectedBooleans))->check('', $value);
     }
 
     public static function isInteger($value)
     {
-        return (new TypeInteger())->check('', $value);
+        if (filter_var($value, FILTER_VALIDATE_INT) === false) {
+            return false;
+        }
+
+        return true;
     }
 
     public static function isFloat($value)
     {
-        return (new Numeric())->check('', $value);
+        if (filter_var($value, FILTER_VALIDATE_FLOAT) === false) {
+            return false;
+        }
+
+        return true;
     }
 
     public static function isFile($value)
@@ -63,12 +99,28 @@ class Validate
 
     public static function isJson($value)
     {
-        return (new TypeJson())->check('', $value);
+        if (function_exists('json_validate')) {
+            return json_validate($value);
+        }
+
+        json_decode($value);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            return false;
+        }
+
+        return true;
     }
 
     public static function IsDate($value, string $format = '')
     {
-        return (new Date($format))->check('', $value);
+        $dateParsed = parseDateTime($value, $format);
+
+        if ($dateParsed === false) {
+            return false;
+        }
+
+        return true;
     }
 
     public static function isEmail($value)

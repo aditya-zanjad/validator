@@ -77,11 +77,11 @@ final class DateValidationRuleTest extends TestCase
             'xyz'   =>  '2025-06-25 10:20:20 1234!fda'
         ], [
             'abc'   =>  'date',
-            'def'   =>  'date',
+            'def'   =>  'date:d-m-Y',
             'ghi'   =>  'date',
-            'jkl'   =>  'date',
+            'jkl'   =>  'date:d m, Y',
             'mno'   =>  'date',
-            'pqr'   =>  'date',
+            'pqr'   =>  'date:m Y, d',
             'xyz'   =>  'date:Y-m-d'
         ]);
 

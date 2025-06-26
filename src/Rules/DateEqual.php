@@ -6,8 +6,9 @@ namespace AdityaZanjad\Validator\Rules;
 
 use DateTime;
 use Exception;
-use DateMalformedStringException;
 use AdityaZanjad\Validator\Base\AbstractRule;
+
+use function AdityaZanjad\Validator\Utils\parseDateTime;
 
 /**
  * @version 1.0
@@ -15,27 +16,28 @@ use AdityaZanjad\Validator\Base\AbstractRule;
 class DateEqual extends AbstractRule
 {
     /**
-     * @var string $equalDateFormat
+     * @var string $comparingDateString
      */
-    protected string $equalDateFormat;
+    protected string $comparingDateString;
 
     /**
-     * @var \DateTime $equalDate
+     * @var bool|\DateTime $comparingDate
      */
-    protected DateTime $equalDate;
+    protected $comparingDate;
 
     /**
      * Inject the data required to perform validation.
      *
-     * @param string $equalDateFormat
+     * @param string $comparingDateString
+     * 
+     * @throws \Exception
      */
-    public function __construct(string $equalDateFormat)
+    public function __construct(string $comparingDateString)
     {
-        try {
-            $this->equalDateFormat  =   $equalDateFormat;
-            $this->equalDate        =   new DateTime($equalDateFormat);
-        } catch (DateMalformedStringException $e) {
-            // var_dump($e); exit;
+        $this->comparingDateString  =   $comparingDateString;
+        $this->comparingDate        =   parseDateTime($comparingDateString);
+
+        if ($this->comparingDate === false) {
             throw new Exception("[Developer][Exception]: The validation rule [date_equal] must be provided with a valid equal date.");
         }
     }
@@ -45,19 +47,10 @@ class DateEqual extends AbstractRule
      */
     public function check(string $field, $value)
     {
-        if (!is_string($value)) {
-            return "The field :{field} must be a date before or equal to the date {$this->equalDateFormat}.";
-        }
+        $givenDateTime = parseDateTime($value);
 
-        try {
-            $givenDateTime = new DateTime($value);
-
-            if ($givenDateTime != $this->equalDate) {
-                return "The field :{field} must be a date before or equal to the date {$this->equalDateFormat}.";
-            }
-        } catch (DateMalformedStringException $e) {
-            // var_dump($e); exit;
-            return "The field :{field} must be a date before or equal to the date {$this->equalDateFormat}.";
+        if ($givenDateTime === false || $givenDateTime != $this->comparingDate) {
+            return "The field :{field} must be a date before or equal to the date {$this->comparingDateString}.";
         }
 
         return true;

@@ -3,12 +3,12 @@
 declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
+use AdityaZanjad\Validator\Rules\Lte;
 use AdityaZanjad\Validator\Validator;
 use AdityaZanjad\Validator\Fluents\Input;
 use AdityaZanjad\Validator\Rules\Required;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\Attributes\CoversClass;
-use AdityaZanjad\Validator\Rules\LessOrEqual;
 use PHPUnit\Framework\Attributes\CoversFunction;
 
 use function AdityaZanjad\Validator\validate;
@@ -17,7 +17,7 @@ use function AdityaZanjad\Validator\validate;
 #[CoversClass(Error::class)]
 #[CoversClass(Input::class)]
 #[CoversClass(Required::class)]
-#[CoversClass(LessOrEqual::class)]
+#[CoversClass(Lte::class)]
 #[CoversFunction('\AdityaZanjad\Validator\validate')]
 class LessThanOrEqualValidationRuleTest extends TestCase
 {

@@ -37,7 +37,7 @@ class Filled extends AbstractRule
                 return true;
 
             case 'NULL':
-                return "the field {$field} must not be empty or NULL";
+                return "the field {$field} must not be an empty or a NULL value.";
 
             default:
                 return "The field {$field} must not be empty.";

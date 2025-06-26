@@ -37,7 +37,7 @@ class TypeFile extends AbstractRule
                 break;
 
             default:
-                // No Action
+                $result = false;
                 break;
         }
 
@@ -48,25 +48,54 @@ class TypeFile extends AbstractRule
         return true;
     }
 
+    /**
+     * Validate the file if it's path is given.
+     *
+     * @param string $value
+     * 
+     * @return bool
+     */
     protected function validateFromPath(string $value): bool
     {
         return is_file($value) && is_readable($value);
     }
 
+    /**
+     * Validate the file from the given uploaded file array data.
+     *
+     * @param array $value
+     * 
+     * @return bool
+     */
     protected function validateFromUpload(array $value): bool
     {
-        return (isset($value['error']) && $value['error'] === UPLOAD_ERR_OK)
+        return (isset($value['error']) && $value['error'] === UPLOAD_ERR_OK) 
             || (isset($value['tmp_name']) && is_uploaded_file($value['tmp_name']));
     }
 
+    /**
+     * Validate the file from the '\SplFileInfo' object.
+     *
+     * @param \SplFileInfo $value
+     * 
+     * @return bool
+     */
     protected function validateFromObject($value): bool
     {
-        return class_exists('\\SplFileInfo')
+        return extension_loaded('SPL')
+            && class_exists(SplFileInfo::class)
             && $value instanceof SplFileInfo
             && $value->isFile()
             && $value->isReadable();
     }
 
+    /**
+     * Validate the file from the given file resource.
+     *
+     * @param mixed $value
+     * 
+     * @return bool
+     */
     protected function validateFromResource($value): bool
     {
         if (get_resource_type($value) !== 'stream') {

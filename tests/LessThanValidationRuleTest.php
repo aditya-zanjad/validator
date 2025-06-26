@@ -3,9 +3,9 @@
 declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
+use AdityaZanjad\Validator\Rules\Lt;
 use AdityaZanjad\Validator\Validator;
 use AdityaZanjad\Validator\Fluents\Input;
-use AdityaZanjad\Validator\Rules\LessThan;
 use AdityaZanjad\Validator\Rules\Required;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -17,7 +17,7 @@ use function AdityaZanjad\Validator\validate;
 #[CoversClass(Error::class)]
 #[CoversClass(Input::class)]
 #[CoversClass(Required::class)]
-#[CoversClass(LessThan::class)]
+#[CoversClass(Lt::class)]
 #[CoversFunction('\AdityaZanjad\Validator\validate')]
 class LessThanValidationRuleTest extends TestCase
 {

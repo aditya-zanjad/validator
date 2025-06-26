@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace AdityaZanjad\Validator\Rules;
 
-use DateTime;
-use Throwable;
 use AdityaZanjad\Validator\Base\AbstractRule;
 
-use function AdityaZanjad\Validator\Utils\varEvaluateType;
+use function AdityaZanjad\Validator\Utils\parseDateTime;
 
 /**
  * @version 1.0
@@ -19,13 +17,6 @@ class Date extends AbstractRule
      * @var string $format
      */
     protected string $format;
-
-    /**
-     * The error message to return on validation failure.
-     *
-     * @var string $error
-     */
-    protected string $error = 'The field :{field} must be a valid date.';
 
     /**
      * Inject the data required to perform validation.
@@ -42,34 +33,14 @@ class Date extends AbstractRule
      */
     public function check(string $field, $value)
     {
-        if (!\is_string($value)) {
-            return $this->error;
+        $givenDateTime = parseDateTime($value, $this->format);
+
+        if ($givenDateTime !== false) {
+            return true;
         }
 
-        if (!empty($this->format) && DateTime::createFromFormat($this->format, (string) $value) === false) {
-            return "The field :{field} must be a valid date in the format {$this->format}.";
-        }
-
-        try {
-            $evaluatedValue = varEvaluateType($value);
-
-            switch (\gettype($evaluatedValue)) {
-                case 'string':
-                    new DateTime($evaluatedValue);
-                    break;
-
-                case 'integer':
-                    new DateTime("@{$evaluatedValue}");
-                    break;
-
-                default:
-                    return $this->error;
-            }
-        } catch (Throwable $e) {
-            // var_dump($e); exit;
-            return $this->error;
-        }
-
-        return true;
+        return !empty($this->format) 
+            ? 'The field :{field} must be a valid date.' 
+            : "The field :{field} must be a valid date with the format: {$this->format}";
     }
 }
