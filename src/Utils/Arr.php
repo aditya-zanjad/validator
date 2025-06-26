@@ -25,8 +25,27 @@ function arr_first(array $arr)
         return $arr[\array_key_first($arr)];
     }
 
-    \reset($arr);
-    return \key($arr);
+    return \array_shift($arr);
+}
+
+/**
+ * Get the first element of the array.
+ *
+ * @param array<int|string, mixed> $arr
+ *
+ * @return mixed
+ */
+function arr_last(array $arr)
+{
+    if (empty($arr)) {
+        return null;
+    }
+
+    if (\function_exists('\\array_key_last')) {
+        return $arr[\array_key_last($arr)];
+    }
+
+    return \end($arr);
 }
 
 /**

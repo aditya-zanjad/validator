@@ -12,6 +12,7 @@ use AdityaZanjad\Validator\Base\AbstractRule;
 use AdityaZanjad\Validator\Interfaces\RequisiteRule;
 
 use function AdityaZanjad\Validator\Utils\arr_indexed;
+use function AdityaZanjad\Validator\Utils\arr_last;
 use function AdityaZanjad\Validator\Utils\str_contains_v2;
 
 /**
@@ -303,11 +304,68 @@ class Validator
             return true;
         }
 
-        // Instantiate & execute the validation rule.
-        $ruleParams     =   isset($rule[1]) ? \explode(',', $rule[1]) : [];
-        $ruleInstance   =   new $ruleClassName(...$ruleParams);
+        // Extract rule constructor arguments into the parsable format
+        $ruleParams = isset($rule[1])
+            ? $this->splitStringifiedArguments($rule[1])
+            : [];
 
-        return $ruleInstance->setInput($this->input)->check($field, $value);
+        return (new $ruleClassName(...$ruleParams))->setInput($this->input)->check($field, $value);
+    }
+
+    /**
+     * Split the comma-separated string arguments into an array of arguments.
+     *
+     * @param string $args
+     * 
+     * @return array<int, string>
+     */
+    protected function splitStringifiedArguments(string $args)
+    {
+        // Split the arguments using regex.
+        if (function_exists('\\preg_split')) {
+            return array_map(function ($arg) {
+                return \str_replace(['\\', '\\\\'], [',', '\\'], $arg);
+            }, \preg_split('/(?<!\\\\),/', $args));
+        }
+
+        $result     =   [];
+        $buffer     =   '';
+        $length     =   strlen($args);
+        $escaped    =   false;
+
+        for ($i = 0; $i < $length; $i++) {
+            $char = $args[$i];
+
+            if ($escaped) {
+                $buffer     .=  $char;
+                $escaped    =   false;
+
+                continue;
+            }
+
+            switch ($char) {
+                case '\\':
+                    $escaped = true;
+                    continue;
+
+                case ',':
+                    $result[]   =   $buffer;
+                    $buffer     =   '';
+                    continue;
+
+                default:
+                    $buffer .= $char;
+                    break;
+            }
+        }
+
+        $result[] = $buffer;
+
+        foreach ($result as &$part) {
+            $part = str_replace(['\\,', '\\\\'], [',', '\\'], $part);
+        }
+
+        return $result;
     }
 
     /**
