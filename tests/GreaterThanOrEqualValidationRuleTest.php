@@ -34,7 +34,7 @@ class GreaterThanOrEqualValidationRuleTest extends TestCase
           'ghi' =>  1,
           'jkl' =>  0
         ], [
-            'abc'   =>  'required|string|gte:b',
+            'abc'   =>  'required|string|gte:1',
             'def'   =>  'integer|gte:100',
             'ghi'   =>  'numeric|integer|gte:-100',
             'jkl'   =>  'lt:1|gte:-1'
@@ -57,12 +57,12 @@ class GreaterThanOrEqualValidationRuleTest extends TestCase
     public function testGreaterThanOrEqualValidationRuleFails(): void
     {
         $validator = validate([
-          'abc' =>  'a',
+          'abc' =>  'hi',
           'def' =>  '100',
           'ghi' =>  '-1',
           'jkl' =>  -100
         ], [
-            'abc'   =>  'required|string|gte:b',
+            'abc'   =>  'required|string|gte:3',
             'def'   =>  'integer|gt:101',
             'ghi'   =>  'numeric|integer|gt:0',
             'jkl'   =>  'lt:1|gt:-1'

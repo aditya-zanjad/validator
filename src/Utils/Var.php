@@ -16,15 +16,18 @@ use Exception;
  *
  * @return  int|float
  */
-function varSize(mixed $var): int|float
+function varSize($var)
 {
-    $varType = \gettype($var);
+    $evaluatedVar = varEvaluateType($var);
 
-    switch ($varType) {
+    switch (\gettype($evaluatedVar)) {
         case 'integer':
         case 'float':
         case 'double':
             return $var;
+
+        case 'boolean':
+            return ((bool) $var) ? 1 : 0;
 
         case 'string':
             return \strlen($var);
@@ -74,8 +77,12 @@ function varDigits($var): int
  *
  * @return mixed
  */
-function varEvaluateType(string $var)
+function varEvaluateType($var)
 {
+    if (!\is_string($var)) {
+        return $var;
+    }
+
     $varLowered = \strtolower($var);
 
     if ($var === '' || $varLowered == 'null') {

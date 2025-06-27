@@ -33,7 +33,7 @@ final class RequiredWithValidationRuleTest extends TestCase
             'ijk'   => ['this is a test array!'],
             'xyz'   =>  null,
         ], [
-            'abc'   =>  'required_with:ijk|numeric|integer|size:3',
+            'abc'   =>  'required_with:ijk|numeric|integer|size:123',
             'def'   =>  'required_with:ghi|numeric|integer|size:123456',
             'ghi'   =>  'required_with:ijk|string|min:9|max:12',
             'ijk'   =>  'required_with:abc,def,ghi|array|size:1',

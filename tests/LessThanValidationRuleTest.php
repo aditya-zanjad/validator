@@ -34,7 +34,7 @@ class LessThanValidationRuleTest extends TestCase
            0 => 0,
            -12345 => -12345
         ], [
-            'b'     =>  'lt:c',
+            'b'     =>  'lt:2',
            '123'    =>  'lt:124',
            0        =>  'lt:1',
            -12345   =>  'lt:0'
@@ -57,12 +57,12 @@ class LessThanValidationRuleTest extends TestCase
     public function testLessThanValidationRuleFails(): void
     {
         $validator = validate([
-           'b' => 'b',
+           'b' => 'Hello World!',
            123 => 123,
            0 => 0,
            -12345 => -12345
         ], [
-            'b'     =>  'lt:a',
+            'b'     =>  'lt:2',
            '123'    =>  'lt:120',
            0        =>  'lt:0',
            -12345   =>  'lt:-12345'

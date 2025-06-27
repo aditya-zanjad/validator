@@ -29,12 +29,12 @@ class LessThanOrEqualValidationRuleTest extends TestCase
     public function testLessThanOrEqualValidationRulePasses(): void
     {
         $validator = validate([
-          'abc' =>  'b',
+          'abc' =>  '3',
           'def' =>  99,
           'ghi' =>  '-1',
           'jkl' =>  -100
         ], [
-            'abc'   =>  'required|string|lte:b',
+            'abc'   =>  'required|string|lte:4',
             'def'   =>  'integer|lte:100',
             'ghi'   =>  'numeric|integer|lte:0',
             'jkl'   =>  'lte:1'
@@ -57,12 +57,12 @@ class LessThanOrEqualValidationRuleTest extends TestCase
     public function testLessThanOrEqualValidationRuleFails(): void
     {
         $validator = validate([
-          'abc' =>  'c',
+          'abc' =>  'Hello World!',
           'def' =>  101,
           'ghi' =>  '1',
           'jkl' =>  12341351
         ], [
-            'abc'   =>  'required|string|lte:b',
+            'abc'   =>  'required|string|lte:3',
             'def'   =>  'integer|lte:100',
             'ghi'   =>  'numeric|integer|lte:0',
             'jkl'   =>  'lte:1'

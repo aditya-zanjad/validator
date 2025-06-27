@@ -305,10 +305,14 @@ class Validator
         }
 
         // Extract rule constructor arguments into the parsable format
-        $ruleParams = isset($rule[1])
-            ? $this->splitStringifiedArguments($rule[1])
-            : [];
+        $ruleParams = isset($rule[1]) ? $this->splitStringifiedArguments($rule[1]) : [];
 
+        /**
+         * This steps involves doing the following things:
+         * [1] Initialize the validation rule class & pass the arguments to its constructor.
+         * [2] Set the input data instance which grants access to other input data being validated inside the rule class.
+         * [3] Perform the validation & return its result.
+         */
         return (new $ruleClassName(...$ruleParams))->setInput($this->input)->check($field, $value);
     }
 
@@ -346,12 +350,12 @@ class Validator
             switch ($char) {
                 case '\\':
                     $escaped = true;
-                    continue;
+                    continue 2;
 
                 case ',':
                     $result[]   =   $buffer;
                     $buffer     =   '';
-                    continue;
+                    continue 2;
 
                 default:
                     $buffer .= $char;
@@ -361,6 +365,7 @@ class Validator
 
         $result[] = $buffer;
 
+        // Now, unescape escaped commas and backslashes
         foreach ($result as &$part) {
             $part = str_replace(['\\,', '\\\\'], [',', '\\'], $part);
         }

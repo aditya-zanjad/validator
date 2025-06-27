@@ -26,12 +26,8 @@ class Lte extends AbstractRule
      */
     public function __construct($comparingSize)
     {
-        $comparingSizeIsInvalid = filter_var($comparingSize, FILTER_VALIDATE_INT) === false 
-            && filter_var($comparingSize, FILTER_VALIDATE_FLOAT) === false
-            && !is_string($comparingSize);
-
-        if ($comparingSizeIsInvalid) {
-            throw new Exception("[Developer][Exception]: The validation rule [lte] requires its parameter to be either an Integer, Float or a String.");
+        if (filter_var($comparingSize, FILTER_VALIDATE_INT) === false && filter_var($comparingSize, FILTER_VALIDATE_FLOAT) === false) {
+            throw new Exception("[Developer][Exception]: The validation rule [lte] requires its parameter to be either an Integer or a Float.");
         }
 
         $this->comparingSize = $comparingSize;

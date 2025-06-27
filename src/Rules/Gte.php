@@ -26,12 +26,8 @@ class Gte extends AbstractRule
      */
     public function __construct($comparingSize)
     {
-        $comparingSizeIsInvalid = filter_var($comparingSize, FILTER_VALIDATE_INT) === false 
-            && filter_var($comparingSize, FILTER_VALIDATE_FLOAT) === false
-            && !is_string($comparingSize);
-
-        if ($comparingSizeIsInvalid) {
-            throw new Exception("[Developer][Exception]: The validation rule [gte] requires its parameter to be either an Integer, Float or a String.");
+        if (filter_var($comparingSize, FILTER_VALIDATE_INT) === false && filter_var($comparingSize, FILTER_VALIDATE_FLOAT) === false) {
+            throw new Exception("[Developer][Exception]: The validation rule [gte] requires its parameter to be either an Integer or a Float.");
         }
 
         $this->comparingSize = $comparingSize;
@@ -42,6 +38,8 @@ class Gte extends AbstractRule
      */
     public function check(string $field, $value)
     {
+        $value = varSize($value);
+
         if (varSize($value) < $this->comparingSize) {
             return "The field :{field} must be greater than or equal to {$this->comparingSize}";
         }

@@ -29,12 +29,12 @@ class GreaterThanValidationRuleTest extends TestCase
     public function testGreaterThanValidationRulePasses(): void
     {
         $validator = validate([
-          'abc' =>  'c',
+          'abc' =>  'hello',
           'def' =>  '120',
           'ghi' =>  '1',
           'jkl' =>  0
         ], [
-            'abc'   =>  'required|string|gt:b',
+            'abc'   =>  'required|string|gt:3',
             'def'   =>  'integer|gt:100',
             'ghi'   =>  'numeric|integer|gt:0',
             'jkl'   =>  'lt:1|gt:-1'
@@ -62,7 +62,7 @@ class GreaterThanValidationRuleTest extends TestCase
           'ghi' =>  '-1',
           'jkl' =>  -100
         ], [
-            'abc'   =>  'required|string|gt:b',
+            'abc'   =>  'required|string|gt:1',
             'def'   =>  'integer|gt:100',
             'ghi'   =>  'numeric|integer|gt:0',
             'jkl'   =>  'lt:1|gt:-1'

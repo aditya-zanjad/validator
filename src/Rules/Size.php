@@ -33,7 +33,7 @@ class Size extends AbstractRule
     public function check(string $field, $value)
     {
         $size               =   varSize($value);
-        $valueSizeIsValid   =   $size === $this->validSize;
+        $valueSizeIsValid   =   $size === $this->validSize || $size == $this->validSize;
 
         if ($valueSizeIsValid) {
             return true;
