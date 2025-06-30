@@ -8,10 +8,12 @@ use AdityaZanjad\Validator\Rules\Url;
 use AdityaZanjad\Validator\Rules\Date;
 use AdityaZanjad\Validator\Rules\Email;
 use AdityaZanjad\Validator\Rules\Numeric;
+use AdityaZanjad\Validator\Rules\TypeArray;
 use AdityaZanjad\Validator\Rules\TypeFile;
 use AdityaZanjad\Validator\Rules\TypeJson;
 use AdityaZanjad\Validator\Rules\TypeBoolean;
 use AdityaZanjad\Validator\Rules\TypeInteger;
+use AdityaZanjad\Validator\Rules\TypeString;
 
 use function AdityaZanjad\Validator\Utils\parseDateTime;
 
@@ -32,11 +34,11 @@ class Validate
     {
         $result = static::$name(...$arguments);
 
-        if ($result !== true) {
-            return false;
+        if (\is_bool($result)) {
+            return $result;
         }
 
-        return true;
+        return false;
     }
 
     /**
@@ -49,24 +51,12 @@ class Validate
      */
     public static function isString($value, string $regex = ''): bool
     {
-        if (!is_string($value)) {
-            return false;
-        }
-
-        if (!empty($regex) && preg_match($regex, $value) === false) {
-            return false;
-        }
-
-        return true;
+        return (new TypeString($regex))->check('', $value);
     }
 
     public static function isArray($value)
     {
-        if (!is_array($value)) {
-            return false;
-        }
-
-        return true;
+        return (new TypeArray())->check('', $value);
     }
 
     public static function isBoolean($value, array $expectedBooleans = [])
@@ -97,15 +87,22 @@ class Validate
         return (new TypeFile())->check('', $value);
     }
 
-    public static function isJson($value)
+    public static function isJson($value, array $options = [])
     {
-        if (function_exists('json_validate')) {
-            return json_validate($value);
+        if (!is_string($value)) {
+            return false;
         }
 
-        json_decode($value);
+        $options['depth'] ??= 1024;
+        $options['flags'] ??= 0;
 
-        if (json_last_error() !== JSON_ERROR_NONE) {
+        if (\function_exists('\\json_validate')) {
+            return \json_validate($value, $options['depth'], $options['flags']);
+        }
+
+        \json_decode($value, true, $options['depth'], $options['flags']);
+
+        if (\json_last_error() !== JSON_ERROR_NONE) {
             return false;
         }
 
