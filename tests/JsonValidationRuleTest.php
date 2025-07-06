@@ -22,31 +22,76 @@ use function AdityaZanjad\Validator\validate;
 class JsonValidationRuleTest extends TestCase
 {
     /**
+     * To contain paths to the valid files.
+     *
+     * @var array $validFiles
+     */
+    protected array $validFiles = [];
+
+    /**
+     * @inheritDoc
+     */
+    public function setUp(): void
+    {
+        if (!is_dir(__DIR__ . DIRECTORY_SEPARATOR . 'json_files') && !is_file(__DIR__ . DIRECTORY_SEPARATOR . 'json_files')) {
+            mkdir(__DIR__ . DIRECTORY_SEPARATOR . 'json_files', 775, true);
+        }
+
+        $this->validFiles = [
+            'file_001'  =>  __DIR__ . DIRECTORY_SEPARATOR . 'json_files' . DIRECTORY_SEPARATOR . 'valid_001.json'
+        ];
+
+        file_put_contents($this->validFiles['file_001'], trim($this->makeTestJsonData()));
+
+        $this->validFiles['file_002'] = fopen($this->validFiles['file_001'], 'r');
+        $this->validFiles['file_003'] = file_get_contents($this->validFiles['file_001']);
+    }
+
+    /**
+     * Delete all the files/directories that were created before the execution of test cases.
+     *
+     * @return void
+     */
+    public function tearDown(): void
+    {
+        // Clear the fetched contents of the file
+        unset($this->validFiles['file_003']);
+
+        // Clear the 'fopened' file resource
+        $streamMetadata = stream_get_meta_data($this->validFiles['file_002']);
+        fclose($this->validFiles['file_002']);
+        unlink($streamMetadata['uri']);
+
+        // Remove the directory
+        rmdir(__DIR__ . DIRECTORY_SEPARATOR . 'json_files');
+    }
+
+    /**
      * Assert that the validation rule 'min:' succeeds.
      *
      * @return void
      */
     public function testJsonValidationRulePasses(): void
     {
-        $validator = validate([
-           'json_one'   =>  '{"name": {"first": "Aditya", "last": "Zanjad"}, "age": 31, "gender": "male", "married": false}',
-           'json_two'   =>  __DIR__ . '/test-files/valid_001.json',
-           'json_three' =>  fopen(__DIR__ . '/test-files/valid_002.json', 'r'),
-           'json_four'  =>  file_get_contents(__DIR__ . '/test-files/valid_001.json')
-        ], [
-            'json_one'      =>  'required|string|json',
-            'json_two'      =>  'required|file|json',
-            'json_three'    =>  'json',
-            'json_four'     =>  'json',
+        $validJson = array_merge(
+            [ 'json' => '{"name": {"first": "Aditya", "last": "Zanjad"}, "age": 31, "gender": "male", "married": false}'],
+            $this->validFiles
+        );
+
+        $validator = validate($validJson, [
+            'json'      =>  'required|string|json',
+            'file_001'  =>  'required|file|json',
+            'file_002'  =>  'json',
+            'file_003'  =>  'json',
         ]);
 
         $this->assertFalse($validator->failed());
         $this->assertEmpty($validator->errors()->all());
         $this->assertNull($validator->errors()->first());
-        $this->assertNull($validator->errors()->firstOf('json_one'));
-        $this->assertNull($validator->errors()->firstOf('json_two'));
-        $this->assertNull($validator->errors()->firstOf('json_three'));
-        $this->assertNull($validator->errors()->firstOf('json_four'));
+        $this->assertNull($validator->errors()->firstOf('json'));
+        $this->assertNull($validator->errors()->firstOf('file_001'));
+        $this->assertNull($validator->errors()->firstOf('file_002'));
+        $this->assertNull($validator->errors()->firstOf('file_003'));
     }
 
     /**
@@ -58,9 +103,9 @@ class JsonValidationRuleTest extends TestCase
     {
         $data = [
            'json_one'   =>  '{"name": {"first": "Aditya", "last": "Zanjad"}, "age": 31, "gender": "male", "married": false',
-           'json_two'   =>  __DIR__ . '/test-files/invalid_001.json',
-           'json_three' =>  fopen(__DIR__ . '/test-files/sample.txt', 'r'),
-           'json_four'  =>  file_get_contents(__DIR__ . '/test-files/sample.txt')
+           'json_two'   =>  __DIR__ . '/invalid_directory/invalid_001.json',
+           'json_three' =>  fopen(__DIR__ . '/invalid_directory/sample.txt', 'r'),
+           'json_four'  =>  file_get_contents(__DIR__ . '/invalid_directory/sample.txt')
         ];
 
         $rules = [
@@ -79,5 +124,40 @@ class JsonValidationRuleTest extends TestCase
         $this->assertNotNull($validator->errors()->firstOf('json_two'));
         $this->assertNotNull($validator->errors()->firstOf('json_three'));
         $this->assertNotNull($validator->errors()->firstOf('json_four'));
+    }
+
+     protected function makeTestJsonData(): string
+    {
+        return '
+            [{
+                "id": 1,
+                "first_name": "Jeanette",
+                "last_name": "Penddreth",
+                "email": "jpenddreth0@census.gov",
+                "gender": "Female",
+                "ip_address": "26.58.193.2"
+                }, {
+                "id": 2,
+                "first_name": "Giavani",
+                "last_name": "Frediani",
+                "email": "gfrediani1@senate.gov",
+                "gender": "Male",
+                "ip_address": "229.179.4.212"
+                }, {
+                "id": 3,
+                "first_name": "Noell",
+                "last_name": "Bea",
+                "email": "nbea2@imageshack.us",
+                "gender": "Female",
+                "ip_address": "180.66.162.255"
+                }, {
+                "id": 4,
+                "first_name": "Willard",
+                "last_name": "Valek",
+                "email": "wvalek3@vk.com",
+                "gender": "Male",
+                "ip_address": "67.76.188.26"
+            }]
+        ';
     }
 }

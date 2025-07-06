@@ -6,6 +6,7 @@ namespace AdityaZanjad\Validator\Utils;
 
 use DateTime;
 use Throwable;
+use DateMalformedStringException;
 
 /**
  * Attempt to parse the given datetime into the \DateTime object
@@ -29,6 +30,14 @@ function parseDateTime($value, string $format = '')
         if ($dateTime === false) {
             return false;
         }
+    } catch (DateMalformedStringException) {
+        $dateTime = strtotime($value);
+
+        if ($dateTime === false) {
+            return false;
+        }
+
+        return true;
     } catch (Throwable $e) {
         // var_dump($e); exit;
         return false;

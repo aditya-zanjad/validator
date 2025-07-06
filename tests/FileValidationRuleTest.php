@@ -10,6 +10,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversFunction;
 
 use function AdityaZanjad\Validator\validate;
+use function PHPUnit\Framework\directoryExists;
 
 #[CoversClass(Validator::class)]
 #[CoversClass(Error::class)]
@@ -19,16 +20,54 @@ use function AdityaZanjad\Validator\validate;
 final class FileValidationRuleTest extends TestCase
 {
     /**
+     * To contain paths to the valid files.
+     *
+     * @var array $validFiles
+     */
+    protected array $validFiles = [];
+
+    /**
+     * @inheritDoc
+     */
+    public function setUp(): void
+    {
+        if (!is_dir(__DIR__ . DIRECTORY_SEPARATOR . 'temp_files') && !is_file(__DIR__ . DIRECTORY_SEPARATOR . 'temp_files')) {
+            mkdir(__DIR__ . DIRECTORY_SEPARATOR . 'temp_files', 775, true);
+        }
+
+        $this->validFiles = [
+            'file_001'  =>  __DIR__ . DIRECTORY_SEPARATOR . 'temp_files' . DIRECTORY_SEPARATOR . 'valid_001.json',
+            'file_002'  =>  __DIR__ . DIRECTORY_SEPARATOR . 'temp_files' . DIRECTORY_SEPARATOR . 'sample.txt',
+        ];
+
+        file_put_contents($this->validFiles['file_001'], trim($this->makeTestJsonData()));
+        file_put_contents($this->validFiles['file_002'], trim($this->makeTestTextData()));
+
+        $this->validFiles['file_002'] = fopen($this->validFiles['file_002'], 'r');
+    }
+
+    /**
+     * Delete all the files/directories that were created before the execution of test cases.
+     *
+     * @return void
+     */
+    public function tearDown(): void
+    {
+        unlink($this->validFiles['file_001']);
+        $streamMetadata = stream_get_meta_data($this->validFiles['file_002']);
+        fclose($this->validFiles['file_002']);
+        unlink($streamMetadata['uri']);
+        rmdir(__DIR__ . DIRECTORY_SEPARATOR . 'temp_files');
+    }
+
+    /**
      * Assert that the validator fails when the given string is an invalid string.
      *
      * @return void
      */
     public function testFileValidationRulePasses(): void
     {
-        $validator = validate([
-            'file_001'  =>  __DIR__ . '/test-files/valid_001.json',
-            'file_002'  =>  fopen(__DIR__ . '/test-files/sample.txt', 'r'),
-        ], [
+        $validator = validate($this->validFiles, [
             'file_001' => 'file',
             'file_002' => 'file',
         ]);
@@ -47,17 +86,61 @@ final class FileValidationRuleTest extends TestCase
     public function testFileValidationRuleFails(): void
     {
         $validator = validate([
-            'file_002'  =>  '/json/valid_001.json',
-            'file_003'  =>  'This is a test string'
+            'file_002'  =>  '/invalid_directory/invalid_file.json',
+            'file_003'  =>  'This is a test string',
+            'file_004'  =>  @fopen('/path/to/invalid/file.txt', 'r'),
+            'file_005'  =>  file_get_contents('/path/to/invalid/file.txt')
         ], [
-            'file_001'  =>  'file',
+            'file_001'  =>  'required|file',
             'file_002'  =>  'file',
             'file_003'  =>  'file',
         ]);
 
         $this->assertTrue($validator->failed());
         $this->assertNotEmpty($validator->errors()->all());
+        $this->assertNotEmpty($validator->errors()->of('file_001'));
+        $this->assertIsArray($validator->errors()->of('file_001'));
         $this->assertNotEmpty($validator->errors()->firstOf('file_002'));
         $this->assertNotEmpty($validator->errors()->firstOf('file_003'));
+    }
+
+    protected function makeTestJsonData(): string
+    {
+        return '
+            [{
+                "id": 1,
+                "first_name": "Jeanette",
+                "last_name": "Penddreth",
+                "email": "jpenddreth0@census.gov",
+                "gender": "Female",
+                "ip_address": "26.58.193.2"
+                }, {
+                "id": 2,
+                "first_name": "Giavani",
+                "last_name": "Frediani",
+                "email": "gfrediani1@senate.gov",
+                "gender": "Male",
+                "ip_address": "229.179.4.212"
+                }, {
+                "id": 3,
+                "first_name": "Noell",
+                "last_name": "Bea",
+                "email": "nbea2@imageshack.us",
+                "gender": "Female",
+                "ip_address": "180.66.162.255"
+                }, {
+                "id": 4,
+                "first_name": "Willard",
+                "last_name": "Valek",
+                "email": "wvalek3@vk.com",
+                "gender": "Male",
+                "ip_address": "67.76.188.26"
+            }]
+        ';
+    }
+
+    protected function makeTestTextData(): string
+    {
+        return 'Hello World! 1234! Get on the dance floor!';
     }
 }

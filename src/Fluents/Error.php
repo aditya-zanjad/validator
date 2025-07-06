@@ -77,7 +77,7 @@ class Error
      *
      * @return null|string|array
      */
-    public function allOf(string $field)
+    public function Of(string $field)
     {
         if (!isset($this->errors[$field])) {
             return null;

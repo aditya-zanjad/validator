@@ -16,14 +16,14 @@ use function AdityaZanjad\Validator\validate;
 #[CoversClass(Input::class)]
 #[CoversClass(Date::class)]
 #[CoversFunction('\AdityaZanjad\Validator\validate')]
-final class DateValidationRuleTest extends TestCase
+final class DateBetweenValidationRuleTest extends TestCase
 {
     /**
      * Assert that the validator fails when the given string is an invalid string.
      *
      * @return void
      */
-    public function testDateValidationRulePasses(): void
+    public function testDateBetweenValidationRulePasses(): void
     {
         $validator = validate([
             'abc'   =>  '1994-05-11',
@@ -34,17 +34,17 @@ final class DateValidationRuleTest extends TestCase
             'pqr'   =>  '05/11/1994',
             'uvw'   =>  'May 11, 1994',
             'xyz'   =>  '1994/05/11',
-            'zyx'   =>  '1750687200'
+            'zyx'   =>  '783993600'
         ], [
-            'abc'   =>  'date',
-            'def'   =>  'date:d-m-Y',
-            'ghi'   =>  'date:m-d-Y',
-            'jkl'   =>  'date: d M, Y',
-            'mno'   =>  'date: d/m/Y',
-            'pqr'   =>  'date:m/d/Y',
-            'uvw'   =>  'date: F d, Y',
-            'xyz'   =>  'date:Y/m/d',
-            'zyx'   =>  'date'
+            'abc'   =>  'date|date_between:1994-05-10,1994-05-12',
+            'def'   =>  'date:d-m-Y|date_between:10-05-1994, 12-05-1994',
+            'ghi'   =>  'date:m-d-Y|date_between:05-10-1994, 05-12-1994',
+            'jkl'   =>  'date: d M, Y|date_between:10 May\, 1994, May 12\, 1994',
+            'mno'   =>  'date: d/m/Y|date_between: 10/05/1994, 12/05/1994',
+            'pqr'   =>  'date:m/d/Y|date_between:05/10/1994,05/12/1994',
+            'uvw'   =>  'date: F d, Y|date_between:May 10\, 1994, 12 May\, 1994',
+            'xyz'   =>  'date:Y/m/d|date_between:1994-05-10,1994-05-12',
+            'zyx'   =>  'date|date_between:781315200,786585600'
         ]);
 
         $this->assertFalse($validator->failed());
@@ -65,24 +65,28 @@ final class DateValidationRuleTest extends TestCase
      *
      * @return void
      */
-    public function testDateValidationRuleFails(): void
+    public function testDateBetweenValidationRuleFails(): void
     {
-        $validator = validate([
-            'abc'   =>  'this is a string.',
-            'def'   =>  -12311,
-            'ghi'   =>  'truth',
-            'jkl'   =>  new \stdClass(),
-            'mno'   =>  57832572.23478235,
-            'pqr'   =>  1234,
-            'xyz'   =>  '2025-06-25 10:20:20 1234!fda'
+       $validator = validate([
+            'abc'   =>  '1994-05-13',
+            'def'   =>  '15-05-1994',
+            'ghi'   =>  '05-25-1994',
+            'jkl'   =>  '01 May, 1994',
+            'mno'   =>  '09/05/1994',
+            'pqr'   =>  '05/08/1994',
+            'uvw'   =>  'May 14, 1994',
+            'xyz'   =>  '1994/05/16',
+            'zyx'   =>  '768614400'
         ], [
-            'abc'   =>  'date',
-            'def'   =>  'date:d-m-Y',
-            'ghi'   =>  'date',
-            'jkl'   =>  'date:d m, Y',
-            'mno'   =>  'date',
-            'pqr'   =>  'date:m Y, d',
-            'xyz'   =>  'date:Y-m-d'
+            'abc'   =>  'date|date_between:1994-05-10,1994-05-12',
+            'def'   =>  'date:d-m-Y|date_between:10-05-1994, 12-05-1994',
+            'ghi'   =>  'date:m-d-Y|date_between:05-10-1994, 05-12-1994',
+            'jkl'   =>  'date: d M, Y|date_between:10 May\, 1994, May 12\, 1994',
+            'mno'   =>  'date: d/m/Y|date_between: 10/05/1994, 12/05/1994',
+            'pqr'   =>  'date:m/d/Y|date_between:05/10/1994,05/12/1994',
+            'uvw'   =>  'date: F d, Y|date_between:May 10\, 1994, 12 May\, 1994',
+            'xyz'   =>  'date:Y/m/d|date_between:1994-05-10,1994-05-12',
+            'zyx'   =>  'date|date_between:781315200,786585600'
         ]);
 
         $this->assertTrue($validator->failed());
@@ -93,6 +97,8 @@ final class DateValidationRuleTest extends TestCase
         $this->assertNotEmpty($validator->errors()->firstOf('jkl'));
         $this->assertNotEmpty($validator->errors()->firstOf('mno'));
         $this->assertNotEmpty($validator->errors()->firstOf('pqr'));
+        $this->assertNotEmpty($validator->errors()->firstOf('uvw'));
         $this->assertNotEmpty($validator->errors()->firstOf('xyz'));
+        $this->assertNotEmpty($validator->errors()->firstOf('zyx'));
     }
 }
