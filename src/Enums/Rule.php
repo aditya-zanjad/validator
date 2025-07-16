@@ -32,6 +32,7 @@ use AdityaZanjad\Validator\Rules\DigitsLt;
 use AdityaZanjad\Validator\Rules\Required;
 use AdityaZanjad\Validator\Rules\TypeFile;
 use AdityaZanjad\Validator\Rules\TypeJson;
+use AdityaZanjad\Validator\Rules\DateEqual;
 use AdityaZanjad\Validator\Rules\DigitsGte;
 use AdityaZanjad\Validator\Rules\DigitsLte;
 use AdityaZanjad\Validator\Rules\TypeArray;
@@ -67,7 +68,7 @@ class Rule extends Enum
     public const JSON                   =   TypeJson::class;
     public const SIZE                   =   Size::class;
     public const ARRAY                  =   TypeArray::class;
-    public const EQUAL                  =   Equal::class;
+    public const EQ                     =   Equal::class;
     public const EMAIL                  =   Email::class;
     public const MIMES                  =   Mime::class;
     public const REGEX                  =   Regex::class;
@@ -76,6 +77,7 @@ class Rule extends Enum
     public const STRING                 =   TypeString::class;
     public const NOT_IN                 =   NotIn::class;
     public const BOOLEAN                =   TypeBoolean::class;
+    public const DATE_EQ                =   DateEqual::class;
     public const DATE_GT                =   DateGt::class;
     public const DATE_LT                =   DateLt::class;
     public const INTEGER                =   TypeInteger::class;

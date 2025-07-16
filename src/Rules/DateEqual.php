@@ -50,7 +50,7 @@ class DateEqual extends AbstractRule
         $givenDateTime = parseDateTime($value);
 
         if ($givenDateTime === false || $givenDateTime != $this->comparingDate) {
-            return "The field :{field} must be a date before or equal to the date {$this->comparingDateString}.";
+            return "The field :{field} must be a date equal to the date {$this->comparingDateString}.";
         }
 
         return true;

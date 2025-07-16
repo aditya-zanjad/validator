@@ -19,6 +19,8 @@ use function PHPUnit\Framework\directoryExists;
 #[CoversFunction('\AdityaZanjad\Validator\validate')]
 final class FileValidationRuleTest extends TestCase
 {
+    protected string $tempDirPath;
+
     /**
      * To contain paths to the valid files.
      *
@@ -31,17 +33,24 @@ final class FileValidationRuleTest extends TestCase
      */
     public function setUp(): void
     {
-        if (!is_dir(__DIR__ . DIRECTORY_SEPARATOR . 'temp_files') && !is_file(__DIR__ . DIRECTORY_SEPARATOR . 'temp_files')) {
-            mkdir(__DIR__ . DIRECTORY_SEPARATOR . 'temp_files', 775, true);
+        $this->tempDirPath = __DIR__ . DIRECTORY_SEPARATOR . 'temp';
+
+        if (!is_dir($this->tempDirPath)) {
+            mkdir($this->tempDirPath, 0775, true);
         }
 
+        chmod($this->tempDirPath, 0775);
+
         $this->validFiles = [
-            'file_001'  =>  __DIR__ . DIRECTORY_SEPARATOR . 'temp_files' . DIRECTORY_SEPARATOR . 'valid_001.json',
-            'file_002'  =>  __DIR__ . DIRECTORY_SEPARATOR . 'temp_files' . DIRECTORY_SEPARATOR . 'sample.txt',
+            'file_001'  =>  $this->tempDirPath . DIRECTORY_SEPARATOR . 'valid_001.json',
+            'file_002'  =>  $this->tempDirPath . DIRECTORY_SEPARATOR . 'sample.txt',
         ];
 
         file_put_contents($this->validFiles['file_001'], trim($this->makeTestJsonData()));
         file_put_contents($this->validFiles['file_002'], trim($this->makeTestTextData()));
+
+        chmod($this->validFiles['file_001'], 0775);
+        chmod($this->validFiles['file_002'], 0775);
 
         $this->validFiles['file_002'] = fopen($this->validFiles['file_002'], 'r');
     }
@@ -57,7 +66,7 @@ final class FileValidationRuleTest extends TestCase
         $streamMetadata = stream_get_meta_data($this->validFiles['file_002']);
         fclose($this->validFiles['file_002']);
         unlink($streamMetadata['uri']);
-        rmdir(__DIR__ . DIRECTORY_SEPARATOR . 'temp_files');
+        rmdir($this->tempDirPath);
     }
 
     /**

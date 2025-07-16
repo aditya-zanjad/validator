@@ -21,6 +21,8 @@ use function AdityaZanjad\Validator\validate;
 #[CoversFunction('\AdityaZanjad\Validator\validate')]
 class JsonValidationRuleTest extends TestCase
 {
+    protected string $tempDirPath;
+
     /**
      * To contain paths to the valid files.
      *
@@ -33,18 +35,24 @@ class JsonValidationRuleTest extends TestCase
      */
     public function setUp(): void
     {
-        if (!is_dir(__DIR__ . DIRECTORY_SEPARATOR . 'json_files') && !is_file(__DIR__ . DIRECTORY_SEPARATOR . 'json_files')) {
-            mkdir(__DIR__ . DIRECTORY_SEPARATOR . 'json_files', 775, true);
+        $this->tempDirPath = __DIR__ . DIRECTORY_SEPARATOR . 'temp';
+
+        if (!is_dir($this->tempDirPath)) {
+            mkdir($this->tempDirPath, 775, true);
         }
 
+        chmod($this->tempDirPath, 0775);
+
         $this->validFiles = [
-            'file_001'  =>  __DIR__ . DIRECTORY_SEPARATOR . 'json_files' . DIRECTORY_SEPARATOR . 'valid_001.json'
+            'file_001'  =>  $this->tempDirPath . DIRECTORY_SEPARATOR . 'valid_001.json'
         ];
 
         file_put_contents($this->validFiles['file_001'], trim($this->makeTestJsonData()));
 
-        $this->validFiles['file_002'] = fopen($this->validFiles['file_001'], 'r');
-        $this->validFiles['file_003'] = file_get_contents($this->validFiles['file_001']);
+        chmod($this->validFiles['file_001'], 0775);
+
+        $this->validFiles['file_002']   =   fopen($this->validFiles['file_001'], 'r');
+        $this->validFiles['file_003']   =   file_get_contents($this->validFiles['file_001']);
     }
 
     /**
@@ -63,7 +71,7 @@ class JsonValidationRuleTest extends TestCase
         unlink($streamMetadata['uri']);
 
         // Remove the directory
-        rmdir(__DIR__ . DIRECTORY_SEPARATOR . 'json_files');
+        rmdir($this->tempDirPath);
     }
 
     /**

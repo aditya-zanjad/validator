@@ -13,7 +13,7 @@ use DateMalformedStringException;
  *
  * @param   int|string  $value
  * @param   string      $format
- * 
+ *
  * @return  bool|\DateTime
  */
 function parseDateTime($value, string $format = '')
@@ -23,14 +23,15 @@ function parseDateTime($value, string $format = '')
     }
 
     try {
-        $dateTime = !empty($format) 
-            ? DateTime::createFromFormat($format, $value) 
+        $dateTime = !empty($format)
+            ? DateTime::createFromFormat($format, $value)
             : new DateTime($value);
 
         if ($dateTime === false) {
             return false;
         }
-    } catch (DateMalformedStringException) {
+    } catch (DateMalformedStringException $e) {
+        // var_dump($e); exit;
         $dateTime = strtotime($value);
 
         if ($dateTime === false) {

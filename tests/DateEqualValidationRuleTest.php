@@ -5,8 +5,8 @@ declare(strict_types=1);
 use PHPUnit\Framework\TestCase;
 use AdityaZanjad\Validator\Validator;
 use AdityaZanjad\Validator\Fluents\Input;
+use AdityaZanjad\Validator\Rules\DateEqual;
 use PHPUnit\Framework\Attributes\CoversClass;
-use AdityaZanjad\Validator\Rules\DateBetween;
 use PHPUnit\Framework\Attributes\CoversFunction;
 
 use function AdityaZanjad\Validator\validate;
@@ -14,16 +14,16 @@ use function AdityaZanjad\Validator\validate;
 #[CoversClass(Validator::class)]
 #[CoversClass(Error::class)]
 #[CoversClass(Input::class)]
-#[CoversClass(DateBetween::class)]
+#[CoversClass(DateEqual::class)]
 #[CoversFunction('\AdityaZanjad\Validator\validate')]
-final class DateBetweenValidationRuleTest extends TestCase
+final class DateEqualValidationRuleTest extends TestCase
 {
     /**
      * Assert that the validator fails when the given string is an invalid string.
      *
      * @return void
      */
-    public function testDateBetweenValidationRulePasses(): void
+    public function testDateEqualValidationRulePasses(): void
     {
         $validator = validate([
             'abc'   =>  '1994-05-11',
@@ -34,17 +34,19 @@ final class DateBetweenValidationRuleTest extends TestCase
             'pqr'   =>  '05/11/1994',
             'uvw'   =>  'May 11, 1994',
             'xyz'   =>  '1994/05/11',
-            'zyx'   =>  '783993600'
+            'zyx'   =>  '768614400',
+            'wvu'   =>  '768614400',
         ], [
-            'abc'   =>  'date|date_between:1994-05-10,1994-05-12',
-            'def'   =>  'date:d-m-Y|date_between:10-05-1994, 12-05-1994',
-            'ghi'   =>  'date:m-d-Y|date_between:05-10-1994, 05-12-1994',
-            'jkl'   =>  'date: d M, Y|date_between:10 May\, 1994, May 12\, 1994',
-            'mno'   =>  'date: d/m/Y|date_between: 10/05/1994, 12/05/1994',
-            'pqr'   =>  'date:m/d/Y|date_between:05/10/1994,05/12/1994',
-            'uvw'   =>  'date: F d, Y|date_between:May 10\, 1994, 12 May\, 1994',
-            'xyz'   =>  'date:Y/m/d|date_between:1994-05-10,1994-05-12',
-            'zyx'   =>  'date|date_between:781315200,786585600'
+            'abc'   =>  'date|date_eq:1994-05-11',
+            'def'   =>  'date:d-m-Y|date_eq:11-05-1994',
+            'ghi'   =>  'date:m-d-Y|date_eq:05-11-1994',
+            'jkl'   =>  'date: d M, Y|date_eq:11 May\, 1994',
+            'mno'   =>  'date: d/m/Y|date_eq: 11/05/1994    ',
+            'pqr'   =>  'date:m/d/Y|date_eq:05/11/1994',
+            'uvw'   =>  'date: F d, Y|date_eq:May 11\, 1994',
+            'xyz'   =>  'date:Y/m/d|date_eq:768614400',
+            'zyx'   =>  'date|date_eq:1994-05-11',
+            'wvu'   =>  'date|date_eq:768614400'
         ]);
 
         $this->assertFalse($validator->failed());
@@ -58,6 +60,7 @@ final class DateBetweenValidationRuleTest extends TestCase
         $this->assertEmpty($validator->errors()->firstOf('uvw'));
         $this->assertEmpty($validator->errors()->firstOf('xyz'));
         $this->assertEmpty($validator->errors()->firstOf('zyx'));
+        $this->assertEmpty($validator->errors()->firstOf('wvu'));
     }
 
     /**
@@ -65,28 +68,28 @@ final class DateBetweenValidationRuleTest extends TestCase
      *
      * @return void
      */
-    public function testDateBetweenValidationRuleFails(): void
+    public function testDateEqualValidationRuleFails(): void
     {
        $validator = validate([
-            'abc'   =>  '1994-05-13',
-            'def'   =>  '15-05-1994',
-            'ghi'   =>  '05-25-1994',
-            'jkl'   =>  '01 May, 1994',
-            'mno'   =>  '09/05/1994',
-            'pqr'   =>  '05/08/1994',
-            'uvw'   =>  'May 14, 1994',
-            'xyz'   =>  '1994/05/16',
-            'zyx'   =>  '768614400'
+            'abc'   =>  '1994-05-11',
+            'def'   =>  '11-05-1994',
+            'ghi'   =>  '05-11-1994',
+            'jkl'   =>  '11 May, 1994',
+            'mno'   =>  '11/05/1994',
+            'pqr'   =>  '05/11/1994',
+            'uvw'   =>  'May 11, 1994',
+            'xyz'   =>  '1994/05/11',
+            'zyx'   =>  '783993600'
         ], [
-            'abc'   =>  'date|date_between:1994-05-10,1994-05-12',
-            'def'   =>  'date:d-m-Y|date_between:10-05-1994, 12-05-1994',
-            'ghi'   =>  'date:m-d-Y|date_between:05-10-1994, 05-12-1994',
-            'jkl'   =>  'date: d M, Y|date_between:10 May\, 1994, May 12\, 1994',
-            'mno'   =>  'date: d/m/Y|date_between: 10/05/1994, 12/05/1994',
-            'pqr'   =>  'date:m/d/Y|date_between:05/10/1994,05/12/1994',
-            'uvw'   =>  'date: F d, Y|date_between:May 10\, 1994, 12 May\, 1994',
-            'xyz'   =>  'date:Y/m/d|date_between:1994-05-10,1994-05-12',
-            'zyx'   =>  'date|date_between:781315200,786585600'
+            'abc'   =>  'date|date_eq:1994-05-12',
+            'def'   =>  'date:d-m-Y|date_eq:10-05-1994',
+            'ghi'   =>  'date:m-d-Y|date_eq:09-11-1994',
+            'jkl'   =>  'date: d M, Y|date_eq:11 Aug\, 1994',
+            'mno'   =>  'date: d/m/Y|date_eq: 11/12/1994    ',
+            'pqr'   =>  'date:m/d/Y|date_eq:05/11/1995',
+            'uvw'   =>  'date: F d, Y|date_eq:Sep 12\, 2015',
+            'xyz'   =>  'date:Y/m/d|date_eq:1994-06-12',
+            'zyx'   =>  'date|date_eq:1752664339'
         ]);
 
         $this->assertTrue($validator->failed());

@@ -233,7 +233,7 @@ class Validator
                 continue;
             }
 
-            $path = (string) $path;
+            $stringifiedPath = (string) $path;
 
             foreach ($rules as $index => $rule) {
                 $result = null;
@@ -241,11 +241,11 @@ class Validator
                 // Evaluate the validation rule & obtain its result.
                 switch (\gettype($rule)) {
                     case 'string':
-                        $result = $this->executeRuleFromString($rule, $index, $path, $this->input->get($path));
+                        $result = $this->executeRuleFromString($rule, $index, $stringifiedPath, $this->input->get($stringifiedPath));
                         break;
 
                     case 'object':
-                        $result = $this->executeRuleFromInstance($rule, $path, $this->input->get($path));
+                        $result = $this->executeRuleFromInstance($rule, $stringifiedPath, $this->input->get($stringifiedPath));
                         break;
 
                     default:
@@ -253,14 +253,14 @@ class Validator
                 }
 
                 if (!\is_bool($result) && !\is_string($result)) {
-                    throw new Exception("[Developer][Exception]: The validation rule at the index [{$index}] for the field [{$path}] must return either a [boolean] OR a [string] value.");
+                    throw new Exception("[Developer][Exception]: The validation rule at the index [{$index}] for the field [{$stringifiedPath}] must return either a [boolean] OR a [string] value.");
                 }
 
                 if ($result === true) {
                     continue;
                 }
 
-                $this->errors->add($path, $this->messages["{$path}.{$rule}"] ?? $result);
+                $this->errors->add($stringifiedPath, $this->messages["{$stringifiedPath}.{$rule}"] ?? $result);
 
                 if ($this->shouldStopOnFailure) {
                     break 2;
@@ -325,7 +325,7 @@ class Validator
     protected function splitStringifiedArguments(string $args)
     {
         // Split the arguments using regex.
-        if (function_exists('\\preg_split')) {
+        if (\function_exists('\\preg_split')) {
             return array_map(function ($arg) {
                 return \str_replace(['\\', '\\\\'], [',', '\\'], $arg);
             }, \preg_split('/(?<!\\\\),/', $args));
@@ -366,7 +366,7 @@ class Validator
 
         // Now, unescape escaped commas and backslashes
         foreach ($result as &$part) {
-            $part = str_replace(['\\,', '\\\\'], [',', '\\'], $part);
+            $part = \str_replace(['\\,', '\\\\'], [',', '\\'], $part);
         }
 
         return $result;
