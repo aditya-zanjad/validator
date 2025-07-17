@@ -66,12 +66,13 @@ function arr_dot(array $arr): array
             $result = [];
 
             foreach ($arr as $key => $value) {
-                if (\is_array($value)) {
-                    foreach ($fn($value, "{$context}{$key}.") as $nestedKey => $nestedValue) {
-                        $result[$nestedKey] = $nestedValue;
-                    }
-                } else {
+                if (!\is_array($value)) {
                     $result["{$context}{$key}."] = $value;
+                    continue;
+                }
+
+                foreach ($fn($value, "{$context}{$key}.") as $nestedKey => $nestedValue) {
+                    $result[$nestedKey] = $nestedValue;
                 }
             }
 
@@ -104,7 +105,7 @@ function arr_dot(array $arr): array
  * Get the nested array paths in the form of dot notations.
  *
  * @param   array<int|string, mixed> $arr
- * 
+ *
  * @return  array<int, int|string>
  */
 function arr_dot_paths(array $arr): array
@@ -122,11 +123,11 @@ function arr_dot_paths(array $arr): array
 
                 if (\is_array($value)) {
                     $nested =   $fn($value, "{$path}.");
-                    $result =   array_merge($result, $nested);
-                    
+                    $result =   \array_merge($result, $nested);
+
                     continue;
                 }
-                
+
                 $result[] = $path;
             }
 
@@ -268,14 +269,14 @@ function arr_indexed(array $arr): bool
         return \array_is_list($arr);
     }
 
-    return \array_keys($arr) === \range(0, count($arr) - 1);
+    return \array_keys($arr) === \range(0, \count($arr) - 1);
 }
 
 /**
  * Get the first key of an array.
  *
  * @param array $arr
- * 
+ *
  * @return null|int|string
  */
 function arr_first_key(array $arr)
@@ -315,7 +316,7 @@ function arr_map_v2(array $arr, callable $fn): array
             throw new Exception("[Developer][Exception]: The callback function must return an array.");
         }
 
-        $firstKey           =   function_exists('\\array_key_first') ? \array_key_first($result) : key($result);
+        $firstKey           =   \function_exists('\\array_key_first') ? \array_key_first($result) : \key($result);
         $mapped[$firstKey]  =   $result[$firstKey];
     }
 

@@ -15,24 +15,24 @@ use function AdityaZanjad\Validator\Utils\parseDateTime;
 class DateGt extends AbstractRule
 {
     /**
-     * @var string $gtDateString
+     * @var string $comparingDateString
      */
-    protected string $gtDateString;
+    protected string $comparingDateString;
 
     /**
-     * @var bool|\DateTime $gtDate
+     * @var bool|\DateTime $comparingDate
      */
-    protected $gtDate;
+    protected $comparingDate;
 
     /**
      * Inject the data required to perform validation.
      *
-     * @param string $gtDateString
+     * @param string $comparingDateString
      */
-    public function __construct(string $gtDateString)
+    public function __construct(string $comparingDateString)
     {
-        $this->gtDateString =   $gtDateString;
-        $this->gtDate       =   parseDateTime($gtDateString);
+        $this->comparingDateString  =   $comparingDateString;
+        $this->comparingDate        =   parseDateTime($comparingDateString);
     }
 
     /**
@@ -42,8 +42,8 @@ class DateGt extends AbstractRule
     {
         $givenDateTime = parseDateTime($value);
 
-        if ($givenDateTime === false || $givenDateTime <= $this->gtDate) {
-            return "The field :{field} must be a valid date greater than: {$this->gtDateString}";
+        if ($givenDateTime === false || $givenDateTime <= $this->comparingDate) {
+            return "The field :{field} must be a valid date greater than: {$this->comparingDateString}";
         }
 
         return true;

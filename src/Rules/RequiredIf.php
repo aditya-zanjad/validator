@@ -28,7 +28,7 @@ class RequiredIf extends AbstractRule implements RequisiteRule
     /**
      * Inject necessary dependencies into the class.
      *
-     * @param callable($field, $value, \AdityaZanjad\Validator\Validator\Input $input): bool|string $entity
+     * @param callable(string $field, $value, \AdityaZanjad\Validator\Validator\Input $input): bool|string $entity
      */
     public function __construct(...$entity)
     {
@@ -41,8 +41,8 @@ class RequiredIf extends AbstractRule implements RequisiteRule
     public function check(string $field, $value)
     {
         // If the constructor was provided with a callback function, we evaluate this callback & return its result as it is.
-        if (is_callable($this->entity[0])) {
-            return call_user_func($this->entity[0], $field, $value, $this->input);
+        if (\is_callable($this->entity[0])) {
+            return \call_user_func($this->entity[0], $field, $value, $this->input);
         }
 
         // Obtain the necessary data required to validate the field.
@@ -56,21 +56,21 @@ class RequiredIf extends AbstractRule implements RequisiteRule
          * 'null' gets evaluated NULL, 
          * '123' gets evaluated to integer 123 & so on.
          */
-        $otherFieldExpectedValues = array_map(function ($val) { 
+        $otherFieldExpectedValues = \array_map(function ($val) { 
             return varEvaluateType($val); 
-        }, array_slice($this->entity, 1));
+        }, \array_slice($this->entity, 1));
 
         // If value of the other field is not equal to any of its expected values, then there is no need to proceed further.
-        if (!in_array($otherFieldValue, $otherFieldExpectedValues, true)) {
+        if (!\in_array($otherFieldValue, $otherFieldExpectedValues, true)) {
             return true;
         }
 
         // If the dependent field has one of the specified values & if the current field is not present.
-        if (!is_null($value)) {
+        if (!\is_null($value)) {
             return true;
         }
 
-        if (is_null($otherFieldValue)) {
+        if (\is_null($otherFieldValue)) {
             $otherFieldValue = 'null';
         }
 

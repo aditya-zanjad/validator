@@ -46,6 +46,7 @@ function varSize($var)
                     return \strlen($var);
             }
 
+            // no break
         default:
             throw new Exception("[Developer][Exception]: The given parameter has an invalid data type.");
             break;
@@ -55,19 +56,23 @@ function varSize($var)
 /**
  * Find out the number of digits in a number.
  *
- * @param   int|float $var
- * 
+ * @param   int|float|string $var
+ *
  * @throws  \Exception
  *
  * @return  int
  */
-function varDigits($var): int
+function varDigits(int|float|string $var): int
 {
     if (filter_var($var, FILTER_VALIDATE_INT) === false || filter_var($var, FILTER_VALIDATE_FLOAT) === false) {
         throw new Exception("[Developer][Exception]: The parameter must be either an Integer OR a Float value.");
     }
 
-    return $var !== 0 ? (int) (\log($var, 10) + 1) : 1;
+    if ($var === 0) {
+        return 1;
+    }
+
+    return (int) (\log($var, 10) + 1);
 }
 
 /**
@@ -84,8 +89,9 @@ function varEvaluateType($var)
     }
 
     $varLowered = \strtolower($var);
+    $varTrimmed = \str_replace(' ', '', $var);
 
-    if ($var === '' || $varLowered == 'null') {
+    if ($varTrimmed === '' || $varLowered == 'null') {
         return null;
     }
 

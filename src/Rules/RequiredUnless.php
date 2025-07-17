@@ -39,9 +39,9 @@ class RequiredUnless extends AbstractRule implements RequisiteRule
          * 'null' gets evaluated NULL, 
          * '123' gets evaluated to integer 123 & so on.
          */
-        $this->otherFieldExpectedValues = array_map(function ($value) {
+        $this->otherFieldExpectedValues = \array_map(function ($value) {
             return varEvaluateType($value);
-        }, array_values($otherFieldExpectedValues));
+        }, \array_values($otherFieldExpectedValues));
     }
 
     /**
@@ -50,8 +50,8 @@ class RequiredUnless extends AbstractRule implements RequisiteRule
     public function check(string $field, $value)
     {
         $otherFieldValue            =   $this->input->get($this->otherField);
-        $currentFieldIsPresent      =   !is_null($value);
-        $otherFieldHasExpectedValue =   in_array($otherFieldValue, $this->otherFieldExpectedValues);
+        $currentFieldIsPresent      =   !\is_null($value);
+        $otherFieldHasExpectedValue =   \in_array($otherFieldValue, $this->otherFieldExpectedValues);
 
         // If the other field does not equal to any of the expected values & the current is present [i.e. not missing or not NULL]
         if (!$otherFieldHasExpectedValue && $currentFieldIsPresent) {
@@ -67,11 +67,11 @@ class RequiredUnless extends AbstractRule implements RequisiteRule
          * If any of the expected values is/are NULL, we want to convert them to a 
          * string 'NULL' in order to represent them in the error message.
          */
-        $joinedOtherFieldExpectedValues = array_map(function ($value) {
-            return !is_null($value) ? $value : '[NULL]';
+        $otherFieldExpectedValues = \array_map(function ($value) {
+            return !\is_null($value) ? $value : '[NULL]';
         }, $this->otherFieldExpectedValues);
 
-        $implodedOtherFieldExpectedValues = implode(', ', $joinedOtherFieldExpectedValues);
+        $implodedOtherFieldExpectedValues = \implode(', ', $otherFieldExpectedValues);
         return "The field {$field} is required if the field {$this->otherField} is not equal to any of these values: {$implodedOtherFieldExpectedValues}.";
     }
 }

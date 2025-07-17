@@ -34,18 +34,18 @@ class RequiredWithoutAll extends AbstractRule implements RequisiteRule
      */
     public function check(string $field, $value)
     {
-        $currentFieldIsPresent = !is_null($value);
+        $currentFieldIsPresent = !\is_null($value);
 
-        $depedentFieldsPresenceStatus = array_map(function ($field) {
+        $otherFieldsPresences = array_map(function ($field) {
             return $this->input->notNull($field);
         }, $this->otherFields);
 
-        $otherFieldsArePresent = (bool) array_product($depedentFieldsPresenceStatus);
+        $allOtherFieldsArePresent = (bool) \array_product($otherFieldsPresences);
 
         // The input field should be present only if other fields are missing and vice versa.
-        if (!$currentFieldIsPresent && !$otherFieldsArePresent) {
-            $joinedOtherFields = implode(', ', $this->otherFields);
-            return "The field {$field} is required when all these other fields are missing: {$joinedOtherFields}.";
+        if (!$currentFieldIsPresent && !$allOtherFieldsArePresent) {
+            $implodedOtherFields = \implode(', ', $this->otherFields);
+            return "The field {$field} is required when all these other fields are missing: {$implodedOtherFields}.";
         }
 
         return true;

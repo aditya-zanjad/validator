@@ -23,9 +23,7 @@ function parseDateTime($value, string $format = '')
     }
 
     try {
-        $dateTime = !empty($format)
-            ? DateTime::createFromFormat($format, $value)
-            : new DateTime($value);
+        $dateTime = !empty($format) ? DateTime::createFromFormat($format, $value) : new DateTime($value);
 
         if ($dateTime === false) {
             return false;

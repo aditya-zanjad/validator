@@ -35,15 +35,15 @@ class RequiredWithAll extends AbstractRule implements RequisiteRule
         // If any of the dependent fields is not filled OR not equal to null, the validation
         // will return true. However, if the all the dependent fields are present & if the
         // current field is missing, a validation error message will be returned.
-        foreach ($this->otherFields as $dependentField) {
-            if ($this->input->isNull($dependentField)) {
+        foreach ($this->otherFields as $otherField) {
+            if ($this->input->isNull($otherField)) {
                 $allOtherFieldsArePresent = false;
             }
         }
 
-        if ($allOtherFieldsArePresent && is_null($value)) {
-            $joinedOtherFields = implode(', ', $this->otherFields);
-            return "The field {$field} is required when these fields are present: {$joinedOtherFields}.";
+        if ($allOtherFieldsArePresent && \is_null($value)) {
+            $implodedOtherFields = \implode(', ', $this->otherFields);
+            return "The field {$field} is required when these fields are present: {$implodedOtherFields}.";
         }
 
         return true;

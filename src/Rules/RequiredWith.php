@@ -30,14 +30,14 @@ class RequiredWith extends AbstractRule implements RequisiteRule
      */
     public function check(string $field, $value)
     {
-        $currentFieldIsMissing = is_null($value);
+        $currentFieldIsMissing = \is_null($value);
 
         // If any of the dependent field is not filled i.e. not equal to null, the validation
         // will return true. However, if the all the dependent fields are present & if the
         // current field is missing, a validation error message will be returned.
-        foreach ($this->otherFields as $dependentField) {
-            if ($this->input->notNull($dependentField) && $currentFieldIsMissing) {
-                return "The field {$field} is required when the field {$dependentField} is present.";
+        foreach ($this->otherFields as $otherField) {
+            if ($this->input->notNull($otherField) && $currentFieldIsMissing) {
+                return "The field {$field} is required when the field {$otherField} is present.";
             }
         }
 

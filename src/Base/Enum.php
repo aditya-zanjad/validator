@@ -4,13 +4,24 @@ declare(strict_types=1);
 
 namespace AdityaZanjad\Validator\Base;
 
+use Exception;
 use ReflectionClass;
 
 /**
  * @version 2.0
  */
-class Enum extends NonInstantiable
+class Enum
 {
+    /**
+     * Make this class & its child classes completely non-instantiable.
+     * 
+     * @throws \Exception
+     */
+    final public function __construct()
+    {
+        throw new Exception("[Developer][Exception]: The class [" . static::class . "] is a non-instantiable one.");
+    }
+
     /**
      * Get a list of all of the constants defined in the current class.
      *

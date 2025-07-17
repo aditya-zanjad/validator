@@ -56,7 +56,7 @@ class Validator
 
     /**
      * To check whether the validation has been already performed or not.
-     * 
+     *
      * @var bool $alreadyValidated
      */
     protected bool $alreadyValidated;
@@ -211,7 +211,7 @@ class Validator
 
     /**
      * Perform the validation process.
-     * 
+     *
      * @throws \Exception
      *
      * @return static
@@ -253,7 +253,7 @@ class Validator
                 }
 
                 if (!\is_bool($result) && !\is_string($result)) {
-                    throw new Exception("[Developer][Exception]: The validation rule at the index [{$index}] for the field [{$stringifiedPath}] must return either a [boolean] OR a [string] value.");
+                    throw new Exception("[Developer][Exception]: The validation rule at the index [{$index}] for the field [{$stringifiedPath}] must return either a [BOOLEAN] OR a [STRING] value.");
                 }
 
                 if ($result === true) {
@@ -299,7 +299,7 @@ class Validator
         }
 
         // Check whether or not the current validation rule should be evaluated.
-        if (!$this->shouldExecuteRule($ruleClassName, $field)) {
+        if ($this->isRuleExecutionAllowed($ruleClassName, $field) === false) {
             return true;
         }
 
@@ -319,7 +319,7 @@ class Validator
      * Split the comma-separated string arguments into an array of arguments.
      *
      * @param string $args
-     * 
+     *
      * @return array<int, string>
      */
     protected function splitStringifiedArguments(string $args)
@@ -331,10 +331,10 @@ class Validator
             }, \preg_split('/(?<!\\\\),/', $args));
         }
 
-        $result     =   [];
-        $buffer     =   '';
-        $length     =   strlen($args);
-        $escaped    =   false;
+        $cleanedArgs    =   [];
+        $buffer         =   '';
+        $length         =   strlen($args);
+        $escaped        =   false;
 
         for ($i = 0; $i < $length; $i++) {
             $char = $args[$i];
@@ -352,7 +352,7 @@ class Validator
                     continue 2;
 
                 case ',':
-                    $result[]   =   $buffer;
+                    $cleanedArgs[]   =   $buffer;
                     $buffer     =   '';
                     continue 2;
 
@@ -362,14 +362,12 @@ class Validator
             }
         }
 
-        $result[] = $buffer;
+        $cleanedArgs[] = $buffer;
 
         // Now, unescape escaped commas and backslashes
-        foreach ($result as &$part) {
-            $part = \str_replace(['\\,', '\\\\'], [',', '\\'], $part);
-        }
-
-        return $result;
+        return array_map(function ($arg) {
+            return \str_replace(['\\,', '\\\\'], [',', '\\'], $arg);
+        }, $cleanedArgs);
     }
 
     /**
@@ -385,8 +383,8 @@ class Validator
      */
     protected function executeRuleFromInstance($rule, string $field, $value)
     {
-        if (!$this->shouldExecuteRule($rule, $field)) {
-            return null;
+        if ($this->isRuleExecutionAllowed($rule, $field) === false) {
+            return true;
         }
 
         if ($rule instanceof AbstractRule) {
@@ -408,7 +406,7 @@ class Validator
      *
      * @return  bool
      */
-    protected function shouldExecuteRule($rule, string $field): bool
+    protected function isRuleExecutionAllowed($rule, string $field): bool
     {
         $inputIsPresent = $this->input->notNull($field);
 

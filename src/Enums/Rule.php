@@ -55,6 +55,7 @@ use AdityaZanjad\Validator\Rules\RequiredWithoutAll;
  */
 class Rule extends Enum
 {
+    public const EQ                     =   Equal::class;
     public const GT                     =   Gt::class;
     public const IN                     =   In::class;
     public const LT                     =   Lt::class;
@@ -68,7 +69,6 @@ class Rule extends Enum
     public const JSON                   =   TypeJson::class;
     public const SIZE                   =   Size::class;
     public const ARRAY                  =   TypeArray::class;
-    public const EQ                     =   Equal::class;
     public const EMAIL                  =   Email::class;
     public const MIMES                  =   Mime::class;
     public const REGEX                  =   Regex::class;
