@@ -49,9 +49,6 @@ final class FileValidationRuleTest extends TestCase
         file_put_contents($this->validFiles['file_001'], trim($this->makeTestJsonData()));
         file_put_contents($this->validFiles['file_002'], trim($this->makeTestTextData()));
 
-        chmod($this->validFiles['file_001'], 0775);
-        chmod($this->validFiles['file_002'], 0775);
-
         $this->validFiles['file_002'] = fopen($this->validFiles['file_002'], 'r');
     }
 

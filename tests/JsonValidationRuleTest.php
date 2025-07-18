@@ -38,7 +38,7 @@ class JsonValidationRuleTest extends TestCase
         $this->tempDirPath = __DIR__ . DIRECTORY_SEPARATOR . 'temp';
 
         if (!is_dir($this->tempDirPath)) {
-            mkdir($this->tempDirPath, 775, true);
+            mkdir($this->tempDirPath, 0775, true);
         }
 
         chmod($this->tempDirPath, 0775);
@@ -48,8 +48,6 @@ class JsonValidationRuleTest extends TestCase
         ];
 
         file_put_contents($this->validFiles['file_001'], trim($this->makeTestJsonData()));
-
-        chmod($this->validFiles['file_001'], 0775);
 
         $this->validFiles['file_002']   =   fopen($this->validFiles['file_001'], 'r');
         $this->validFiles['file_003']   =   file_get_contents($this->validFiles['file_001']);
