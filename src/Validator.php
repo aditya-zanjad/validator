@@ -326,9 +326,7 @@ class Validator
     {
         // Split the arguments using regex.
         if (\function_exists('\\preg_split')) {
-            return array_map(function ($arg) {
-                return \str_replace(['\\', '\\\\'], [',', '\\'], $arg);
-            }, \preg_split('/(?<!\\\\),/', $args));
+            return array_map(fn ($arg) => \str_replace('\\,', ',', $arg), \preg_split('/(?<!\\\\),/', $args));
         }
 
         $cleanedArgs    =   [];
@@ -352,8 +350,8 @@ class Validator
                     continue 2;
 
                 case ',':
-                    $cleanedArgs[]   =   $buffer;
-                    $buffer     =   '';
+                    $cleanedArgs[]  =   $buffer;
+                    $buffer         =   '';
                     continue 2;
 
                 default:
