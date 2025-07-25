@@ -7,50 +7,84 @@ namespace AdityaZanjad\Validator\Rules;
 use AdityaZanjad\Validator\Base\AbstractRule;
 use AdityaZanjad\Validator\Interfaces\RequisiteRule;
 
+use function AdityaZanjad\Validator\Utils\varEvaluateType;
+
 /**
  * @version 1.0
  */
 class RequiredUnless extends AbstractRule implements RequisiteRule
 {
     /**
-     * @var string $dependentField
+     * @var string $message
      */
-    protected string $dependentField;
+    protected string $message;
 
     /**
-     * @var mixed $validDependentValues
+     * @var string $otherField
      */
-    protected mixed $validDependentValues;
+    protected string $otherField;
 
     /**
-     * @param   string  $dependentField
-     * @param   mixed   $validDependentValues
+     * @var array<int, mixed> $otherFieldExpectedValues
      */
-    public function __construct(string $dependentField, mixed $validDependentValues)
+    protected array $otherFieldExpectedValues;
+
+    /**
+     * @param   string  $otherField
+     * @param   string  ...$otherFieldExpectedValues
+     */
+    public function __construct(string $otherField, string ...$otherFieldExpectedValues)
     {
-        $this->dependentField       =   $dependentField;
-        $this->validDependentValues =   $validDependentValues;
+        $this->otherField = $otherField;
+
+        /**
+         * Evaluate the given values for the other field to their respective data types.
+         * 
+         * Examples: 
+         * 'null' gets evaluated NULL, 
+         * '123' gets evaluated to integer 123 & so on.
+         */
+        $this->otherFieldExpectedValues = \array_map(function ($value) {
+            return varEvaluateType($value);
+        }, \array_values($otherFieldExpectedValues));
     }
 
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool|string
+    public function check(string $field, $value): bool
     {
-        $currentFieldIsPresent  =   $this->input->exists($field);
-        $dependentFieldValue    =   $this->input->get($this->dependentField);
+        $otherFieldValue            =   $this->input->get($this->otherField);
+        $currentFieldIsPresent      =   !\is_null($value);
+        $otherFieldHasExpectedValue =   \in_array($otherFieldValue, $this->otherFieldExpectedValues);
 
-        /**
-         * If the dependent field's value does not equal to any of its provided
-         * value and the current field is missing as well, then the
-         * validation fails.
-         */
-        foreach ($this->validDependentValues as $validValue) {
-            if ($dependentFieldValue == $validValue && $currentFieldIsPresent) {
-                return "The field {$field} is required only if the field {$this->dependentField} is not equal to: {$validValue}.";
-            }
+        // If the other field does not equal to any of the expected values & the current is present [i.e. not missing or not NULL]
+        if (!$otherFieldHasExpectedValue && $currentFieldIsPresent) {
+            return true;
         }
 
-        return true;
+        // Other field equals one of the expected values & the current field is missing [i.e. is missing or is NULL]
+        if ($otherFieldHasExpectedValue && !$currentFieldIsPresent) {
+            return true;
+        }
+
+        /**
+         * If any of the expected values is/are NULL, we want to convert them to a 
+         * string 'NULL' in order to represent them in the error message.
+         */
+        $otherFieldExpectedValues = \array_map(function ($value) {
+            return !\is_null($value) ? $value : '[NULL]';
+        }, $this->otherFieldExpectedValues);
+
+        $this->message = "The field {$field} is required if the field {$this->otherField} is not equal to any of these values: " . \implode(', ', $otherFieldExpectedValues);
+        return false;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return $this->message;
     }
 }

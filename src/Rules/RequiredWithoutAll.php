@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AdityaZanjad\Validator\Rules;
 
-use AdityaZanjad\Validator\Core\Utils\Arr;
 use AdityaZanjad\Validator\Base\AbstractRule;
 use AdityaZanjad\Validator\Interfaces\RequisiteRule;
 
@@ -14,37 +13,56 @@ use AdityaZanjad\Validator\Interfaces\RequisiteRule;
 class RequiredWithoutAll extends AbstractRule implements RequisiteRule
 {
     /**
+     * @var string $message
+     */
+    protected string $message;
+
+    /**
      * The dependent fields against which we want to check the existence of the current field.
      *
-     * @var array<int, string> $dependentFields
+     * @var array<int, string> $otherFields
      */
-    protected array $dependentFields;
+    protected array $otherFields;
 
     /**
      * Inject necessary dependencies into the class.
      *
-     * @param string ...$dependentFields
+     * @param string ...$otherFields
      */
-    public function __construct(string ...$dependentFields)
+    public function __construct(string ...$otherFields)
     {
-        $this->dependentFields = $dependentFields;
+        $this->otherFields = $otherFields;
     }
 
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool|string
+    public function check(string $field, $value): bool
     {
-        $currentFieldExists     =   $this->input->exists($field);
-        $dependentFieldsExist   =   Arr::mapFn($this->dependentFields, fn ($field) => $this->input->exists($field));
-        $dependentFieldExists   =   (bool) array_product($dependentFieldsExist);
+        $currentFieldIsPresent = !\is_null($value);
 
-        // The input field should be present only if
-        if ($currentFieldExists && $dependentFieldExists) {
-            $dependentFields = implode(', ', $this->dependentFields);
-            return "The field {$field} must be present only when all the other fields are missing: {$dependentFields}.";
+        $allOtherFieldsArePresent = array_reduce($this->otherFields, function ($carry, $field) {
+            return $carry && $this->input->notNull($field);
+        }, true);
+
+        if ($allOtherFieldsArePresent && $currentFieldIsPresent) {
+            $this->message = "The field {$field} is required without all these fields: " . \implode(', ', $this->otherFields);
+            return false;
+        }
+
+        if (!$allOtherFieldsArePresent && !$currentFieldIsPresent) {
+            $this->message = "The field {$field} is required when these fields are missing: " . \implode(', ', $this->otherFields);
+            return false;
         }
 
         return true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return $this->message;
     }
 }

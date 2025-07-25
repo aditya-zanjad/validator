@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace AdityaZanjad\Validator\Rules;
 
-use AdityaZanjad\Validator\Traits\VarHelpers;
 use AdityaZanjad\Validator\Base\AbstractRule;
+
+use function AdityaZanjad\Validator\Utils\varSize;
 
 /**
  * @version 1.0
  */
 class Min extends AbstractRule
 {
-    use VarHelpers;
-
     /**
      * @var int $minAllowedSize
      */
@@ -32,12 +31,16 @@ class Min extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool|string
+    public function check(string $field, $value): bool
     {
-        if ($this->varSize($value) < $this->minAllowedSize) {
-            return "The field {$field} cannot be less than {$this->minAllowedSize}.";
-        }
+        return varSize($value) >= $this->minAllowedSize;
+    }
 
-        return true;
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return "The field :{field} cannot be less than {$this->minAllowedSize}.";
     }
 }

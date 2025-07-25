@@ -6,15 +6,14 @@ namespace AdityaZanjad\Validator\Rules;
 
 use Exception;
 use AdityaZanjad\Validator\Base\AbstractRule;
-use AdityaZanjad\Validator\Traits\VarHelpers;
+
+use function AdityaZanjad\Validator\Utils\varDigits;
 
 /**
  * @version 1.0
  */
 class Digits extends AbstractRule
 {
-    use VarHelpers;
-
     /**
      * @var int $validDigitsCount
      */
@@ -29,8 +28,8 @@ class Digits extends AbstractRule
      */
     public function __construct($validDigitsCount)
     {
-        if (!filter_var($validDigitsCount, FILTER_VALIDATE_INT)) {
-            throw new Exception("[Developer][Exception]: The parameter to the validation rule [" . static::class . "] must be either an Integer OR a String.");
+        if (!\filter_var($validDigitsCount, FILTER_VALIDATE_INT)) {
+            throw new Exception("[Developer][Exception]: The parameter passed to the validation rule [digits] must be a valid integer.");
         }
 
         $this->validDigitsCount = (int) $validDigitsCount;
@@ -39,16 +38,16 @@ class Digits extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool|string
+    public function check(string $field, $value): bool
     {
-        if (!is_numeric($value)) {
-            return "The field {$field} must be a valid numeric value.";
-        }
+        return \filter_var($value, FILTER_VALIDATE_INT) !== false && varDigits($value) === $this->validDigitsCount;
+    }
 
-        if ($this->varDigits($value) !== $this->validDigitsCount) {
-            return "The field {$field} must contain exactly {$this->validDigitsCount} digits.";
-        }
-
-        return true;
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return "The field :{field} must contain exactly {$this->validDigitsCount} digits.";
     }
 }

@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace AdityaZanjad\Validator\Rules;
 
+use Exception;
 use AdityaZanjad\Validator\Base\AbstractRule;
+
+use function AdityaZanjad\Validator\Utils\varSize;
 
 /**
  * @version 1.0
@@ -12,31 +15,37 @@ use AdityaZanjad\Validator\Base\AbstractRule;
 class LessThan extends AbstractRule
 {
     /**
-     * @var array<int, mixed> $entities
+     * @var int|string $comparingSize
      */
-    protected array $entities;
+    protected $comparingSize;
 
     /**
      * Inject the dependencies required to execute the validation logic in this rule.
      *
-     * @param mixed ...$entities
+     * @param mixed ...$comparingSize
      */
-    public function __construct(mixed ...$entities)
+    public function __construct($comparingSize)
     {
-        $this->entities = $entities;
+        if (filter_var($comparingSize, FILTER_VALIDATE_INT) === false && filter_var($comparingSize, FILTER_VALIDATE_FLOAT) === false) {
+            throw new Exception("[Developer][Exception]: The validation rule [lt] requires its parameter to be either an Integer or a Float.");
+        }
+
+        $this->comparingSize = $comparingSize;
     }
 
     /**
      * @inheritDoc
      */
-    public function check(string $fieldPath, mixed $value): bool|string
+    public function check(string $field, $value): bool
     {
-        foreach ($this->entities as $entity) {
-            if ($value >= $entity) {
-                return "The field {$fieldPath} must not be greater than {$entity}.";
-            }
-        }
+        return varSize($value) < $this->comparingSize;
+    }
 
-        return true;
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return "The field :{field} must be less than {$this->comparingSize}";
     }
 }

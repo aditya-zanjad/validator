@@ -14,12 +14,16 @@ class Email extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool|string
+    public function check(string $field, $value): bool
     {
-        if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-            return "The field {$field} must be a valid email address.";
-        }
+        return filter_var($value, FILTER_VALIDATE_EMAIL) !== false;
+    }
 
-        return true;
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return "The field :{field} must be a valid email address.";
     }
 }

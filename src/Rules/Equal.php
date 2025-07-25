@@ -5,38 +5,38 @@ declare(strict_types=1);
 namespace AdityaZanjad\Validator\Rules;
 
 use AdityaZanjad\Validator\Base\AbstractRule;
-use AdityaZanjad\Validator\Traits\VarHelpers;
 
 /**
  * @version 1.0
  */
 class Equal extends AbstractRule
 {
-    use VarHelpers;
+    /**
+     * @var string $comparingData
+     */
+    protected string $comparingData;
 
     /**
-     * @var mixed $data
+     * @param string $data
      */
-    protected mixed $data;
-
-    /**
-     *
-     * @param mixed $data
-     */
-    public function __construct(mixed $data)
+    public function __construct(string $data)
     {
-        $this->data = is_string($data) ? $this->varEvaluateType($data) : $data;
+        $this->comparingData = $data;
     }
 
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool|string
+    public function check(string $field, $value): bool
     {
-        if ($value !== $this->data) {
-            return "The field {$field} must be equal to {$this->data}.";
-        }
+        return $value == $this->comparingData;
+    }
 
-        return true;
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return "The field :{field} must be equal to {$this->comparingData}.";
     }
 }

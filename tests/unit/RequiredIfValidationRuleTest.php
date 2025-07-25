@@ -1,28 +1,30 @@
 <?php
 
+declare(strict_types=1);
+
 use PHPUnit\Framework\TestCase;
-use AdityaZanjad\Validator\Input;
 use AdityaZanjad\Validator\Validator;
+use AdityaZanjad\Validator\Fluents\Input;
 use PHPUnit\Framework\Attributes\UsesClass;
 use AdityaZanjad\Validator\Rules\RequiredIf;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversFunction;
 
-use function AdityaZanjad\Validator\Utils\validate;
+use function AdityaZanjad\Validator\validate;
 
 #[UsesClass(Validator::class)]
 #[CoversClass(Error::class)]
 #[CoversClass(Input::class)]
 #[CoversClass(RequiredIf::class)]
-#[CoversFunction('\AdityaZanjad\Validator\Utils\validate')]
-class RequiredIfRuleTest extends TestCase
+#[CoversFunction('\AdityaZanjad\Validator\validate')]
+class RequiredIfValidationRuleTest extends TestCase
 {
     /**
      * Validate that the 'required_if' validation rule returns a validation error.
      *
      * @return void
      */
-    public function testRequiredIfValidationFails(): void
+    public function testAssertionsPass(): void
     {
         $validator = validate([
             'abc' => 123,
@@ -43,7 +45,7 @@ class RequiredIfRuleTest extends TestCase
      *
      * @return void
      */
-    public function testRequiredIfValidationSucceeds(): void
+    public function testAssertionsFail(): void
     {
         $validator = validate([
             'abc'   =>  123,

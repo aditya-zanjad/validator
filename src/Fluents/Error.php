@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace AdityaZanjad\Validator;
+namespace AdityaZanjad\Validator\Fluents;
 
 use Exception;
 
@@ -46,17 +46,9 @@ class Error
      *
      * @return  static
      */
-    public function add(string $field, $message = false): static
+    public function add(string $field, string $message): static
     {
-        if ($message === false) {
-            $message = 'The field :{field} is invalid.';
-        }
-
-        if (!is_string($message)) {
-            throw new Exception("[Developer][Exception]: The validation error message must be either a STRING or a BOOLEAN value.");
-        }
-
-        $this->errors[$field][] = str_replace(':{field}', $field, $message);
+        $this->errors[$field][] = $message;
         return $this;
     }
 
@@ -77,7 +69,7 @@ class Error
      *
      * @return null|string|array
      */
-    public function allOf(string $field)
+    public function Of(string $field)
     {
         if (!isset($this->errors[$field])) {
             return null;

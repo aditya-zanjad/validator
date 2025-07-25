@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace AdityaZanjad\Validator;
+namespace AdityaZanjad\Validator\Fluents;
 
-use function AdityaZanjad\Validator\Utils\arr_dot;
 use function AdityaZanjad\Validator\Utils\arr_get;
 use function AdityaZanjad\Validator\Utils\arr_exists;
 use function AdityaZanjad\Validator\Utils\arr_filled;
-use function AdityaZanjad\Validator\Utils\arr_not_null;
+use function AdityaZanjad\Validator\Utils\arr_nulled;
+use function AdityaZanjad\Validator\Utils\arr_dot_paths;
 
 /**
  * @version 1.0
@@ -36,8 +36,7 @@ class Input
      */
     public function __construct(array $data)
     {
-        $this->data     =   $data;
-        $this->paths    =   array_keys(arr_dot($this->data));
+        $this->data = $data;
     }
 
     /**
@@ -53,10 +52,14 @@ class Input
     /**
      * Get all of the array paths in the dot notation form.
      *
-     * @return array<int, string>
+     * @return array<int, int|string>
      */
-    public function allPaths(): array
+    public function keys(): array
     {
+        if (!isset($this->paths)) {
+            $this->paths = array_keys(arr_dot_paths($this->data));
+        }
+
         return $this->paths;
     }
 
@@ -93,7 +96,7 @@ class Input
      */
     public function isNull(string $path): bool
     {
-        return !arr_not_null($this->data, $path);
+        return arr_nulled($this->data, $path);
     }
 
     /**
@@ -105,7 +108,7 @@ class Input
      */
     public function notNull(string $path): bool
     {
-        return arr_not_null($this->data, $path);
+        return !arr_nulled($this->data, $path);
     }
 
     /**

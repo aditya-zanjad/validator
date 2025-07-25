@@ -4,17 +4,13 @@ declare(strict_types=1);
 
 namespace AdityaZanjad\Validator\Rules;
 
-use AdityaZanjad\Validator\Core\Utils\Arr;
 use AdityaZanjad\Validator\Base\AbstractRule;
-use AdityaZanjad\Validator\Traits\VarHelpers;
 
 /**
  * @version 1.0
  */
 class In extends AbstractRule
 {
-    use VarHelpers;
-
     /**
      * Valid values for the given input field.
      *
@@ -29,19 +25,23 @@ class In extends AbstractRule
      */
     public function __construct(...$params)
     {
-        $this->params = Arr::mapFn($params, fn ($param) => is_string($param) ? trim($param) : $param);
+        // Make certain transformations to the provided data before actual comparison.
+        $this->params = array_map(fn ($param) => is_string($param) ? trim($param) : $param, $params);
     }
 
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool|string
+    public function check(string $field, $value): bool
     {
-        if (!in_array($value, $this->params)) {
-            $validValues = implode(', ', $this->params);
-            return "The field {$field} must be one of these values: {$validValues}.";
-        }
+        return in_array($value, $this->params);
+    }
 
-        return true;
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return "The field :{field} must be set to one of these values: " . implode(', ', $this->params);
     }
 }

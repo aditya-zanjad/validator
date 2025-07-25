@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AdityaZanjad\Validator\Base;
 
-use AdityaZanjad\Validator\Input;
+use AdityaZanjad\Validator\Fluents\Input;
 
 /**
  * @version 1.0
@@ -14,21 +14,31 @@ abstract class AbstractRule
     /**
      * An instance that'll allow access to all of the input data.
      *
-     * @var \AdityaZanjad\Validator\Input $input
+     * @var \AdityaZanjad\Validator\Fluents\Input $input
      */
     protected Input $input;
 
     /**
      * Set an instance that'll make all of the input data accessible in the current class.
      *
-     * @param \AdityaZanjad\Validator\Input $input
+     * @param \AdityaZanjad\Validator\Fluents\Input $input
      *
      * @return static
      */
-    final public function setInput(Input $input): static
+    public function setInput(Input $input): static
     {
         $this->input = $input;
         return $this;
+    }
+
+    /**
+     * Get the validation error message.
+     * 
+     * @return string
+     */
+    public function message(): string
+    {
+        return 'The field :{field} is invalid.';
     }
 
     /**
@@ -37,7 +47,7 @@ abstract class AbstractRule
      * @param   string  $field  =>  A dot notation path to the field inside the input data.
      * @param   mixed   $value  =>  Value of the input field.
      *
-     * @return  bool|string
+     * @return  bool
      */
-    abstract public function check(string $field, mixed $value);
+    abstract public function check(string $field, $value): bool;
 }

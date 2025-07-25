@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace AdityaZanjad\Validator\Rules;
 
+use finfo;
 use Exception;
-use Throwable;
-use AdityaZanjad\Validator\Core\Utils\Arr;
-use AdityaZanjad\Validator\Enums\MimeType;
 use AdityaZanjad\Validator\Base\AbstractRule;
-use AdityaZanjad\Validator\Traits\VarHelpers;
 
 /**
  * @version 1.0
  */
 class Mime extends AbstractRule
 {
-    use VarHelpers;
+    /**
+     * @var string $message
+     */
+    protected string $message;
 
     /**
      * @var array<int, string> $givenMimeTypes
@@ -32,57 +32,61 @@ class Mime extends AbstractRule
             throw new Exception("[Developer][Exception]: The validation rule [" . static::class . "] must be provided with at least one parameter.");
         }
 
-        $this->givenMimeTypes = Arr::mapFn($givenMimeTypes, fn ($mime) => trim($mime));
+        $this->givenMimeTypes = \array_map(fn ($mime) => \trim($mime), $givenMimeTypes);
     }
 
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool|string
+    public function check(string $field, $value): bool
     {
-        // First, we'll check that the supplied list of MIME types is a valid one.
-        $mimeTypes          =   array_unique(MimeType::values());
-        $invalidMimeTypes   =   array_diff($this->givenMimeTypes, $mimeTypes);
+        $valueMimeType = null;
 
-        if (!empty($invalidMimeTypes)) {
-            $invalidMimeTypesImploded = implode(',', $invalidMimeTypes);
-            return "The field [$field] has invalid list of MIME types for the rule [mime]: {$invalidMimeTypesImploded}.";
-        }
+        switch (\gettype($value)) {
+            case 'string':
+                if (\is_file($value) && \is_readable($value)) {
+                    $valueMimeType = \mime_content_type($value);
+                    break;
+                }
 
-        /**
-         * If only a path is given to the file, we'll need to open it obtain
-         * important information about it to validate its MIME type.
-         */
-        $file = null;
+                $finfo          =   new finfo();
+                $valueMimeType  =   $finfo->buffer($value, FILEINFO_MIME_TYPE);
+                break;
 
-        if (is_string($value) && file_exists($value)) {
-            try {
-                $file = fopen($value, 'r');
-            } catch (Throwable $e) {
-                // dd($e);
-                return "The file [{$field}] must be accessible to figure out its MIME type.";
-            }
-        }
+            case 'resource':
+                $metadata = \stream_get_meta_data($value);
 
-        // Make sure that the file has been properly loaded.
-        if (!is_resource($file)) {
-            return "The field {$field} must be a valid file.";
-        }
+                if ($metadata['wrapper_type'] !== 'plainfile') {
+                    $this->message = "The field {$field} must be a valid file.";
+                    return false;
+                }
 
-        $metadata       =   stream_get_meta_data($file);
-        $valueMimeType  =   mime_content_type($file);
+                $valueMimeType = \mime_content_type($metadata['uri']);
 
-        fclose($file);
+                if ($valueMimeType === false) {
+                    $finfo          =   new finfo();
+                    $valueMimeType  =   $finfo->file($metadata['uri'], FILEINFO_MIME_TYPE);
+                }
+                break;
 
-        if (!in_array($metadata['wrapper_type'], ['plainfile'])) {
-            return "The field {$field} must be a valid file.";
+            default:
+                throw new Exception("[Developer][Exception]: The field :{field} must be a valid file.");
+                break;
         }
 
         if (!in_array($valueMimeType, $this->givenMimeTypes)) {
-            $validMimeTypesImploded = implode(', ', $this->givenMimeTypes);
-            return "The field [$field] must have one of these MIME types: {$validMimeTypesImploded}";
+            $this->message = "The field [$field] must have one of these MIME types: " . implode(', ', $this->givenMimeTypes);
+            return false;
         }
 
         return true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return $this->message;
     }
 }

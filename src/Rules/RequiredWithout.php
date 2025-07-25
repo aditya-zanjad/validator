@@ -13,36 +13,50 @@ use AdityaZanjad\Validator\Interfaces\RequisiteRule;
 class RequiredWithout extends AbstractRule implements RequisiteRule
 {
     /**
+     * @var string $message
+     */
+    protected string $message;
+
+    /**
      * The dependent fields against which we want to check the existence of the current field.
      *
-     * @var array<int, string> $dependentFieldValues
+     * @var array<int, string> $otherFields
      */
-    protected array $dependentFieldValues;
+    protected array $otherFields;
 
     /**
      * Inject necessary dependencies into the class.
      *
-     * @param string ...$dependentFieldValues
+     * @param string ...$otherFields
      */
-    public function __construct(string ...$dependentFieldValues)
+    public function __construct(string ...$otherFields)
     {
-        $this->dependentFieldValues = $dependentFieldValues;
+        $this->otherFields = $otherFields;
     }
 
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool|string
+    public function check(string $field, $value): bool
     {
-        $currentFieldExists = $this->input->exists($field);
+        $currentFieldIsPresent = !\is_null($value);
 
-        // The current field is required only iff any of the dependent fields is not present in the input.
-        foreach ($this->dependentFieldValues as $dependentFieldValue) {
-            if (!$this->input->exists($dependentFieldValue) && !$currentFieldExists) {
-                return "The field {$field} is required when the field {$dependentFieldValue} is missing.";
+        // The current field is required iff any of the dependent fields is not present in the input.
+        foreach ($this->otherFields as $otherField) {
+            if ($this->input->notNull($otherField) && $currentFieldIsPresent) {
+                $this->message = "The field {$field} is required without the field {$otherField}.";
+                return false;
             }
         }
 
         return true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return $this->message;
     }
 }

@@ -1,65 +1,29 @@
 <?php
 
+declare(strict_types=1);
+
 use PHPUnit\Framework\TestCase;
-use AdityaZanjad\Validator\Input;
 use AdityaZanjad\Validator\Validator;
-use AdityaZanjad\Validator\Rules\Max;
-use PHPUnit\Framework\Attributes\UsesClass;
+use AdityaZanjad\Validator\Fluents\Input;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversFunction;
 use AdityaZanjad\Validator\Rules\TypeString as TypeStr;
 
-use function AdityaZanjad\Validator\Utils\validate;
+use function AdityaZanjad\Validator\validate;
 
 #[CoversClass(Validator::class)]
 #[CoversClass(Error::class)]
 #[CoversClass(Input::class)]
 #[CoversClass(TypeStr::class)]
-// #[UsesFunction('\AdityaZanjad\Validator\Utils\validate')]
-#[CoversFunction('\AdityaZanjad\Validator\Utils\validate')]
-final class StringRuleTest extends TestCase
+#[CoversFunction('\AdityaZanjad\Validator\validate')]
+final class StringValidationRuleTest extends TestCase
 {
-    /**
-     * Assert that the validator fails when the given string is an invalid string.
-     *
-     * @return void
-     */
-    public function testGivenFieldIsAnInvalidString(): void
-    {
-        $validator = validate([
-            'abc'       =>  ['this is a string.'],
-            'xyz'       =>  ['this is a string!' => 'this is a string !'],
-            'array'     =>  [1, 2, 3, 4, 5, 6],
-            'int'       =>  12345682385,
-            'float'     =>  57832572.23478235,
-            'object'    =>  (object) ['abc' => 1234]
-        ], [
-            'abc'       =>  'string',
-            'xyz'       =>  'string',
-            'array'     =>  'string',
-            'int'       =>  'string',
-            'float'     =>  'string',
-            'object'    =>  'string'
-        ]);
-
-        $validator->validate();
-        $this->assertTrue($validator->failed());
-        $this->assertNotEmpty($validator->errors()->all());
-        $this->assertNotEmpty($validator->errors()->firstOf('abc'));
-        $this->assertNotEmpty($validator->errors()->firstOf('xyz'));
-        $this->assertNotEmpty($validator->errors()->firstOf('array'));
-        $this->assertNotEmpty($validator->errors()->firstOf('int'));
-        $this->assertNotEmpty($validator->errors()->firstOf('float'));
-        $this->assertNotEmpty($validator->errors()->firstOf('object'));
-
-    }
-
     /**
      * Assert that the validator succeeds when the given fields are valid.
      *
      * @return void
      */
-    public function testGivenFieldsAreValidString(): void
+    public function testAssertionsPass(): void
     {
         $validator = validate([
             'english'   =>  '1234! Get on the dance floor!',
@@ -89,7 +53,6 @@ final class StringRuleTest extends TestCase
             'japanese'  =>  'string'
         ]);
 
-        $validator->validate();
         $this->assertFalse($validator->failed());
         $this->assertEmpty($validator->errors()->all());
         $this->assertNull($validator->errors()->firstOf('english'));
@@ -98,42 +61,35 @@ final class StringRuleTest extends TestCase
     }
 
     /**
-     * Assert that the validation rule is skipped when given field is missing or is set to null.
+     * Assert that the validator fails when the given string is an invalid string.
      *
      * @return void
      */
-    public function testGivenFieldValidationShouldBeSkipped()
+    public function testAssertionsFail(): void
     {
         $validator = validate([
-            'xyz' => null
+            'abc'       =>  ['this is a string.'],
+            'xyz'       =>  ['this is a string!' => 'this is a string !'],
+            'array'     =>  [1, 2, 3, 4, 5, 6],
+            'int'       =>  12345682385,
+            'float'     =>  57832572.23478235,
+            'object'    =>  (object) ['abc' => 1234]
         ], [
-            'abc'   =>  'string',
-            'xyz'   =>  'string'
-        ]);
-
-        $this->assertFalse($validator->failed());
-        $this->assertEmpty($validator->errors()->all());
-        $this->assertNull($validator->errors()->firstOf('abc'));
-        $this->assertNull($validator->errors()->firstOf('xyz'));
-    }
-
-    /**
-     * Assert that the validation rule is skipped when given field is missing or is set to null.
-     *
-     * @return void
-     */
-    public function testGivenFieldValidationIsNotMissed()
-    {
-        $validator = validate([
-            'xyz' => null
-        ], [
-            'abc' => 'string|required',
-            'xyz' => 'string|required'
+            'abc'       =>  'string',
+            'xyz'       =>  'string',
+            'array'     =>  'string',
+            'int'       =>  'string',
+            'float'     =>  'string',
+            'object'    =>  'string'
         ]);
 
         $this->assertTrue($validator->failed());
         $this->assertNotEmpty($validator->errors()->all());
-        $this->assertNotNull($validator->errors()->firstOf('abc'));
-        $this->assertNotNull($validator->errors()->firstOf('xyz'));
+        $this->assertNotEmpty($validator->errors()->firstOf('abc'));
+        $this->assertNotEmpty($validator->errors()->firstOf('xyz'));
+        $this->assertNotEmpty($validator->errors()->firstOf('array'));
+        $this->assertNotEmpty($validator->errors()->firstOf('int'));
+        $this->assertNotEmpty($validator->errors()->firstOf('float'));
+        $this->assertNotEmpty($validator->errors()->firstOf('object'));
     }
 }

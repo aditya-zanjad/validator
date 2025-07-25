@@ -1,5 +1,6 @@
 {
     "name": "aditya-zanjad/validator",
+    "description": "This is simple dependency-free validation package written in pure PHP pretty much inspired by Laravel's built-in validator. That's all for now.",
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -14,9 +15,11 @@
             "AdityaZanjad\\Validator\\": "src/"
         },
         "files": [
+            "src/Presets.php",
             "src/Utils/Arr.php",
             "src/Utils/Str.php",
-            "src/Utils/Validator.php"
+            "src/Utils/Var.php",
+            "src/Utils/Date.php"
         ]
     },
     "require-dev": {

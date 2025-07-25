@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace AdityaZanjad\Validator\Rules;
 
-use AdityaZanjad\Validator\Traits\VarHelpers;
+use Exception;
 use AdityaZanjad\Validator\Base\AbstractRule;
+
+use function AdityaZanjad\Validator\Utils\varSize;
 
 /**
  * @version 1.0
  */
 class Max extends AbstractRule
 {
-    use VarHelpers;
-
     /**
      * @var int $maxAllowedSize
      */
@@ -22,22 +22,34 @@ class Max extends AbstractRule
     /**
      * Inject the dependencies required to execute the validation logic in this rule.
      *
-     * @param int $maxAllowedSize
+     * @param   int|string $maxAllowedSize
+     * 
+     * @throws  \Exception
      */
-    public function __construct(int|string $maxAllowedSize)
+    public function __construct($maxAllowedSize)
     {
+        $filtered = filter_var($maxAllowedSize, FILTER_VALIDATE_INT);
+
+        if (!$filtered && $filtered !== 0) {
+            throw new Exception("[Developer][Exception]: The value passed to the validation rule [max] must be an integer.");
+        }
+
         $this->maxAllowedSize = (int) $maxAllowedSize;
     }
 
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool|string
+    public function check(string $field, $value): bool
     {
-        if ($this->varSize($value) > $this->maxAllowedSize) {
-            return "The field {$field} cannot be more than {$this->maxAllowedSize}.";
-        }
+        return varSize($value) <= $this->maxAllowedSize;
+    }
 
-        return true;
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return "The field :{field} cannot be more than {$this->maxAllowedSize}.";
     }
 }

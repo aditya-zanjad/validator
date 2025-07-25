@@ -13,34 +13,48 @@ use AdityaZanjad\Validator\Interfaces\RequisiteRule;
 class RequiredWith extends AbstractRule implements RequisiteRule
 {
     /**
-     * @var array $dependentFields
+     * @var string $message
      */
-    protected array $dependentFields;
+    protected string $message;
 
     /**
-     * @param string $dependentFields
+     * @var array $otherFields
      */
-    public function __construct(string ...$dependentFields)
+    protected array $otherFields;
+
+    /**
+     * @param string $otherFields
+     */
+    public function __construct(string ...$otherFields)
     {
-        $this->dependentFields = $dependentFields;
+        $this->otherFields = $otherFields;
     }
 
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool|string
+    public function check(string $field, $value): bool
     {
-        $currentFieldIsMissing = !$this->input->exists($field);
+        $currentFieldIsMissing = \is_null($value);
 
         // If any of the dependent field is not filled i.e. not equal to null, the validation
         // will return true. However, if the all the dependent fields are present & if the
         // current field is missing, a validation error message will be returned.
-        foreach ($this->dependentFields as $dependentField) {
-            if ($this->input->exists($dependentField) && $currentFieldIsMissing) {
-                return "The field {$field} is required along with the field {$dependentField}.";
+        foreach ($this->otherFields as $otherField) {
+            if ($this->input->notNull($otherField) && $currentFieldIsMissing) {
+                $this->message = "The field {$field} is required when the field {$otherField} is present.";
+                return false;
             }
         }
 
         return true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return $this->message;
     }
 }

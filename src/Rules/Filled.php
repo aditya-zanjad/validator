@@ -12,18 +12,34 @@ use AdityaZanjad\Validator\Base\AbstractRule;
 class Filled extends AbstractRule
 {
     /**
+     * @var string $message
+     */
+    protected string $message = 'The field :{field} is invalid.';
+
+    /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool|string
+    public function check(string $field, $value): bool
     {
-        if ($value === '' || $value === []) {
-            return "The field {$field} must not be empty.";
+        if (!empty($value) || filter_var($value, FILTER_VALIDATE_BOOL)) {
+            return true;
         }
 
-        if (is_file($value) && in_array(filesize($value), [0, false])) {
-            return "The file {$field} must not be empty.";
-        }
+        $this->message = match (gettype($value)) {
+            'string'    =>  is_file($value) && in_array(filesize($value), [0, false]) ? "The file :{field} must not be empty." : "The string :{field} must not be empty.",
+            'array'     =>  "The array :{field} must not be empty.",
+            'NULL'      =>  "the field :{field} must not be an empty or a NULL value.",
+            'default'   =>  "The field :{field} must not be empty.",
+        };
 
-        return true;
+        return false;
+    }
+
+    /**
+    * @inheritDoc
+    */
+    public function message(): string
+    {
+        return $this->message;
     }
 }

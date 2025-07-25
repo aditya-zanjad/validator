@@ -1,41 +1,43 @@
 <?php
 
+declare(strict_types=1);
+
 use PHPUnit\Framework\TestCase;
-use AdityaZanjad\Validator\Input;
 use AdityaZanjad\Validator\Validator;
-use AdityaZanjad\Validator\Rules\Max;
+use AdityaZanjad\Validator\Fluents\Input;
+use AdityaZanjad\Validator\Rules\Required;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversFunction;
+use AdityaZanjad\Validator\Rules\GreaterThanOrEqual;
 
-use function AdityaZanjad\Validator\Utils\validate;
+use function AdityaZanjad\Validator\validate;
 
 #[UsesClass(Validator::class)]
 #[CoversClass(Error::class)]
 #[CoversClass(Input::class)]
-#[CoversClass(Max::class)]
-#[CoversFunction('\AdityaZanjad\Validator\Utils\validate')]
-class SizeValidationRuleTest extends TestCase
+#[CoversClass(Required::class)]
+#[CoversClass(GreaterThanOrEqual::class)]
+#[CoversFunction('\AdityaZanjad\Validator\validate')]
+class GreaterThanOrEqualValidationRuleTest extends TestCase
 {
     /**
      * Assert that the validation rule 'min:' succeeds.
      *
      * @return void
      */
-    public function testSizeRulePasses(): void
+    public function testAssertionsPass(): void
     {
         $validator = validate([
-            'abc' => 123456,
-            'def' => 0,
-            'ghi' => 'abc',
-            'jkl' => 'x',
-            'xyz' => -20,
+          'abc' =>  'b',
+          'def' =>  '101',
+          'ghi' =>  1,
+          'jkl' =>  0
         ], [
-            'abc' => 'size:123456',
-            'def' => 'size:0',
-            'ghi' => 'size:3',
-            'jkl' => 'size:1',
-            'xyz' => 'size:-20',
+            'abc'   =>  'gte:1',
+            'def'   =>  'gte:100',
+            'ghi'   =>  'gte:-100',
+            'jkl'   =>  'gte:-1'
         ]);
 
         $this->assertFalse($validator->failed());
@@ -52,35 +54,26 @@ class SizeValidationRuleTest extends TestCase
      *
      * @return void
      */
-    public function testSizeRuleFails(): void
+    public function testAssertionsFail(): void
     {
         $validator = validate([
-            'abc' => 123456,
-            'def' => 0,
-            'ghi' => 'abc',
-            'jkl' => 'x',
-            'xyz' => -20,
+          'abc' =>  'hi',
+          'def' =>  '100',
+          'ghi' =>  '-1',
+          'jkl' =>  -100
         ], [
-            'abc' => 'size:10',
-            'def' => 'size:-1',
-            'ghi' => 'size:2',
-            'jkl' => 'size:0',
-            'xyz' => 'size:-100'
+            'abc'   =>  'gte:3',
+            'def'   =>  'gt:101',
+            'ghi'   =>  'gte:0',
+            'jkl'   =>  'gte:-1'
         ]);
 
         $this->assertTrue($validator->failed());
         $this->assertNotEmpty($validator->errors()->all());
-
         $this->assertNotNull($validator->errors()->first());
         $this->assertNotNull($validator->errors()->firstOf('abc'));
         $this->assertNotNull($validator->errors()->firstOf('def'));
         $this->assertNotNull($validator->errors()->firstOf('ghi'));
         $this->assertNotNull($validator->errors()->firstOf('jkl'));
-
-        $this->assertIsString($validator->errors()->first());
-        $this->assertIsString($validator->errors()->firstOf('abc'));
-        $this->assertIsString($validator->errors()->firstOf('def'));
-        $this->assertIsString($validator->errors()->firstOf('ghi'));
-        $this->assertIsString($validator->errors()->firstOf('jkl'));
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AdityaZanjad\Validator\Utils;
 
 use Exception;
@@ -19,21 +21,39 @@ function arr_first(array $arr)
         return null;
     }
 
-    $firstKey = array_key_first($arr);
+    if (\function_exists('\\array_key_first')) {
+        return $arr[\array_key_first($arr)];
+    }
 
-    if (is_null($firstKey)) {
+    return \array_shift($arr);
+}
+
+/**
+ * Get the first element of the array.
+ *
+ * @param array<int|string, mixed> $arr
+ *
+ * @return mixed
+ */
+function arr_last(array $arr)
+{
+    if (empty($arr)) {
         return null;
     }
 
-    return $arr[$firstKey];
+    if (\function_exists('\\array_key_last')) {
+        return $arr[\array_key_last($arr)];
+    }
+
+    return \end($arr);
 }
 
 /**
  * Convert the given multi-dimensional array structure to dot notation path array structure.
  *
- * @param   array<int|string, mixed> $arr
+ * @param array<int|string, mixed> $arr
  *
- * @return  array<int|string, mixed>
+ * @return array<int|string, mixed>
  */
 function arr_dot(array $arr): array
 {
@@ -41,21 +61,96 @@ function arr_dot(array $arr): array
         return $arr;
     }
 
-    $arr    =   new RecursiveArrayIterator($arr);
-    $arr    =   new RecursiveIteratorIterator($arr, RecursiveIteratorIterator::SELF_FIRST);
+    if (!\class_exists(RecursiveArrayIterator::class) || !\class_exists(RecursiveIteratorIterator::class)) {
+        $fn = function (array $arr, string $context = '') use (&$fn) {
+            $result = [];
 
+            foreach ($arr as $key => $value) {
+                if (!\is_array($value)) {
+                    $result["{$context}{$key}."] = $value;
+                    continue;
+                }
+
+                foreach ($fn($value, "{$context}{$key}.") as $nestedKey => $nestedValue) {
+                    $result[$nestedKey] = $nestedValue;
+                }
+            }
+
+            return $result;
+        };
+
+        return $fn($arr);
+    }
+
+    $arr        =   new RecursiveArrayIterator($arr);
+    $arr        =   new RecursiveIteratorIterator($arr, RecursiveIteratorIterator::SELF_FIRST);
     $result     =   [];
     $nestedKeys =   [];
 
     foreach ($arr as $key => $value) {
         $nestedKeys[$arr->getDepth()] = $key;
 
-        if (is_array($value) && !empty($value)) {
+        if (\is_array($value) && !empty($value)) {
             continue;
         }
 
-        $nestedKeys                         =   array_slice($nestedKeys, 0, $arr->getDepth() + 1);
-        $result[implode('.', $nestedKeys)]  =   $value;
+        $nestedKeys                         =   \array_slice($nestedKeys, 0, $arr->getDepth() + 1);
+        $result[\implode('.', $nestedKeys)] =   $value;
+    }
+
+    return $result;
+}
+
+/**
+ * Get the nested array paths in the form of dot notations.
+ *
+ * @param   array<int|string, mixed> $arr
+ *
+ * @return  array<int, int|string>
+ */
+function arr_dot_paths(array $arr): array
+{
+    if (empty($arr)) {
+        return $arr;
+    }
+
+    if (!\class_exists(RecursiveArrayIterator::class) || !\class_exists(RecursiveIteratorIterator::class)) {
+        $fn = function (array $arr, $context = '') use (&$fn) {
+            $result = [];
+
+            foreach ($arr as $key => $value) {
+                $path = "{$context}{$key}";
+
+                if (\is_array($value)) {
+                    $nested =   $fn($value, "{$path}.");
+                    $result =   \array_merge($result, $nested);
+
+                    continue;
+                }
+
+                $result[] = $path;
+            }
+
+            return $result;
+        };
+
+        return $fn($arr);
+    }
+
+    $arr        =   new RecursiveArrayIterator($arr);
+    $arr        =   new RecursiveIteratorIterator($arr, RecursiveIteratorIterator::SELF_FIRST);
+    $result     =   [];
+    $nestedKeys =   [];
+
+    foreach ($arr as $key => $value) {
+        $nestedKeys[$arr->getDepth()] = $key;
+
+        if (\is_array($value) && !empty($value)) {
+            continue;
+        }
+
+        $nestedKeys =   \array_slice($nestedKeys, 0, $arr->getDepth() + 1);
+        $result[]   =   \implode('.', $nestedKeys);
     }
 
     return $result;
@@ -64,51 +159,49 @@ function arr_dot(array $arr): array
 /**
  * Check if the given dot notation array exists or not OR is equal to Null or not in the given array.
  *
- * @param   array<int|string, mixed>    &$arr
+ * @param   array<int|string, mixed>    $arr
  * @param   string                      $path
  *
  * @return  bool
  */
-function arr_exists(array &$arr, string $path): bool
+function arr_exists(array $arr, string $path): bool
 {
-    $path = explode('.', $path);
+    $ref    =   &$arr;
+    $keys   =   \explode('.', $path);
 
-    foreach ($path as $param) {
-        if (!array_key_exists($param, $arr)) {
+    foreach ($keys as $key) {
+        if (!\array_key_exists($key, $ref) || !\is_array($ref[$key])) {
             return false;
         }
 
-        $arr = &$arr[$param];
+        $ref = &$ref[$key];
     }
 
     return true;
 }
 
 /**
- * Check that a particular dot notation array path exists and its value is not equal to NULL.
+ * Check if a particular dot notation path exists or not and/or if its value is equal to NULL or not.
  *
- * @param   array<int|string, mixed>    &$arr
+ * @param   array<int|string, mixed>    $arr
  * @param   string                      $path
  *
  * @return  bool
  */
-function arr_not_null(array &$arr, string $path): bool
+function arr_nulled(array $arr, string $path): bool
 {
-    $path = explode('.', $path);
+    $ref    =   &$arr;
+    $keys   =   \explode('.', $path);
 
-    foreach ($path as $param) {
-        if (!array_key_exists($param, $arr)) {
-            return false;
+    foreach ($keys as $key) {
+        if (!isset($ref[$key])) {
+            return true;
         }
 
-        $arr = &$arr[$param];
-
-        if (is_null($arr)) {
-            return false;
-        }
+        $ref = &$ref[$key];
     }
 
-    return true;
+    return false;
 }
 
 /**
@@ -121,14 +214,14 @@ function arr_not_null(array &$arr, string $path): bool
  */
 function arr_get(array &$arr, string $path): mixed
 {
-    $path = explode('.', $path);
+    $keys = \explode('.', $path);
 
-    foreach ($path as $param) {
-        if (!isset($arr[$param])) {
+    foreach ($keys as $key) {
+        if (!isset($arr[$key])) {
             return null;
         }
 
-        $arr = &$arr[$param];
+        $arr = &$arr[$key];
     }
 
     return $arr;
@@ -144,16 +237,16 @@ function arr_get(array &$arr, string $path): mixed
  */
 function arr_filled(array $arr, string $path): bool
 {
-    $ref        =   &$arr;
-    $pathKeys   =   explode('.', $path);
+    $ref    =   &$arr;
+    $keys   =   \explode('.', $path);
 
-    foreach ($pathKeys as $pathKey) {
+    foreach ($keys as $key) {
         // The field must be set & not empty.
-        if (!isset($ref[$pathKey]) || empty($ref[$pathKey])) {
+        if (!isset($ref[$key]) || empty($ref[$key])) {
             return false;
         }
 
-        $ref = &$ref[$pathKey];
+        $ref = &$ref[$key];
     }
 
     return true;
@@ -172,18 +265,18 @@ function arr_indexed(array $arr): bool
         return true;
     }
 
-    if (function_exists('array_is_list')) {
-        return array_is_list($arr);
+    if (\function_exists('\\array_is_list')) {
+        return \array_is_list($arr);
     }
 
-    return array_keys($arr) === range(0, count($arr) - 1);
+    return \array_keys($arr) === \range(0, \count($arr) - 1);
 }
 
 /**
  * Get the first key of an array.
  *
  * @param array $arr
- * 
+ *
  * @return null|int|string
  */
 function arr_first_key(array $arr)
@@ -192,12 +285,12 @@ function arr_first_key(array $arr)
         return null;
     }
 
-    if (function_exists('array_key_first')) {
-        return array_key_first($arr);
+    if (\function_exists('\\array_key_first')) {
+        return \array_key_first($arr);
     }
 
-    reset($arr);
-    return key($arr);
+    \reset($arr);
+    return \key($arr);
 }
 
 /**
@@ -208,7 +301,7 @@ function arr_first_key(array $arr)
  *
  * @return  array<int|string, mixed>
  */
-function arr_map_with_keys(array $arr, callable $fn): array
+function arr_map_v2(array $arr, callable $fn): array
 {
     if (empty($arr)) {
         return [];
@@ -219,11 +312,12 @@ function arr_map_with_keys(array $arr, callable $fn): array
     foreach ($arr as $key => $value) {
         $result = $fn($value, $key);
 
-        if (!is_array($result)) {
+        if (!\is_array($result)) {
             throw new Exception("[Developer][Exception]: The callback function must return an array.");
         }
 
-        $mapped[arr_first_key($result)] = arr_first($result);
+        $firstKey           =   \function_exists('\\array_key_first') ? \array_key_first($result) : \key($result);
+        $mapped[$firstKey]  =   $result[$firstKey];
     }
 
     return $mapped;
