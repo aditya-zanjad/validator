@@ -12,29 +12,31 @@ use AdityaZanjad\Validator\Base\AbstractRule;
 class Equal extends AbstractRule
 {
     /**
-     * @var string $data
+     * @var string $comparingData
      */
-    protected string $data;
+    protected string $comparingData;
 
     /**
      * @param string $data
      */
     public function __construct(string $data)
     {
-        $this->data = $data;
+        $this->comparingData = $data;
     }
 
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value)
+    public function check(string $field, $value): bool
     {
-        $dataToMatchWith = $this->data[0];
+        return $value == $this->comparingData;
+    }
 
-        if ($value != $dataToMatchWith) {
-            return "The field {$field} must be equal to {$dataToMatchWith}.";
-        }
-
-        return true;
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return "The field :{field} must be equal to {$this->comparingData}.";
     }
 }

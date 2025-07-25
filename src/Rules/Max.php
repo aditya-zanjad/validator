@@ -40,12 +40,16 @@ class Max extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value)
+    public function check(string $field, $value): bool
     {
-        if (varSize($value) > $this->maxAllowedSize) {
-            return "The field {$field} cannot be more than {$this->maxAllowedSize}.";
-        }
+        return varSize($value) <= $this->maxAllowedSize;
+    }
 
-        return true;
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return "The field :{field} cannot be more than {$this->maxAllowedSize}.";
     }
 }

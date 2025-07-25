@@ -49,18 +49,21 @@ class DigitsBetween extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value)
+    public function check(string $field, $value): bool
     {
         if (filter_var($value, FILTER_VALIDATE_INT) === false) {
-            return "The field {$field} must contain the digits between {$this->minDigits} & {$this->maxDigits} digits.";;
+            return false;
         }
 
-        $digitsInValue = varDigits($value);
+        $digitsInGivenValue = varDigits($value);
+        return $digitsInGivenValue >= $this->minDigits && $digitsInGivenValue <= $this->maxDigits;
+    }
 
-        if ($digitsInValue < $this->minDigits || $digitsInValue > $this->maxDigits) {
-            return "The field {$field} must contain the digits between {$this->minDigits} & {$this->maxDigits} digits.";
-        }
-
-        return true;
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return "The field :{field} must contain the digits between {$this->minDigits} & {$this->maxDigits} digits.";
     }
 }

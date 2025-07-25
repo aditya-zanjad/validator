@@ -13,6 +13,11 @@ use AdityaZanjad\Validator\Interfaces\RequisiteRule;
 class RequiredWithAll extends AbstractRule implements RequisiteRule
 {
     /**
+     * @var string $message
+     */
+    protected string $message;
+
+    /**
      * @var array $otherFields
      */
     protected array $otherFields;
@@ -28,7 +33,7 @@ class RequiredWithAll extends AbstractRule implements RequisiteRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value)
+    public function check(string $field, $value): bool
     {
         $allOtherFieldsArePresent = true;
 
@@ -42,10 +47,19 @@ class RequiredWithAll extends AbstractRule implements RequisiteRule
         }
 
         if ($allOtherFieldsArePresent && \is_null($value)) {
-            $implodedOtherFields = \implode(', ', $this->otherFields);
-            return "The field {$field} is required when these fields are present: {$implodedOtherFields}.";
+            $this->message = "The field {$field} is required when these fields are present: " . \implode(', ', $this->otherFields);
+
+            return false;
         }
 
         return true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return $this->message;
     }
 }

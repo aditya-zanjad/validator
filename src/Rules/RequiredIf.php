@@ -15,6 +15,11 @@ use function AdityaZanjad\Validator\Utils\varEvaluateType;
 class RequiredIf extends AbstractRule implements RequisiteRule
 {
     /**
+     * @var string $message
+     */
+    protected string $message;
+
+    /**
      * The data on which we want to operate on the determine if the validation rules passes or fails.
      *
      * If it's an array, it'll contain data for a particular field against which we want to validate
@@ -38,7 +43,7 @@ class RequiredIf extends AbstractRule implements RequisiteRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value)
+    public function check(string $field, $value): bool
     {
         // If the constructor was provided with a callback function, we evaluate this callback & return its result as it is.
         if (\is_callable($this->entity[0])) {
@@ -74,6 +79,15 @@ class RequiredIf extends AbstractRule implements RequisiteRule
             $otherFieldValue = 'null';
         }
 
-        return "The field {$field} is required when the field {$otherField} is set to {$otherFieldValue}.";
+        $this->message = "The field {$field} is required when the field {$otherField} is set to {$otherFieldValue}.";
+        return false;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return $this->message;
     }
 }

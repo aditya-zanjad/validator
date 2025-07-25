@@ -13,6 +13,11 @@ use AdityaZanjad\Validator\Interfaces\RequisiteRule;
 class RequiredWith extends AbstractRule implements RequisiteRule
 {
     /**
+     * @var string $message
+     */
+    protected string $message;
+
+    /**
      * @var array $otherFields
      */
     protected array $otherFields;
@@ -28,7 +33,7 @@ class RequiredWith extends AbstractRule implements RequisiteRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value)
+    public function check(string $field, $value): bool
     {
         $currentFieldIsMissing = \is_null($value);
 
@@ -37,10 +42,19 @@ class RequiredWith extends AbstractRule implements RequisiteRule
         // current field is missing, a validation error message will be returned.
         foreach ($this->otherFields as $otherField) {
             if ($this->input->notNull($otherField) && $currentFieldIsMissing) {
-                return "The field {$field} is required when the field {$otherField} is present.";
+                $this->message = "The field {$field} is required when the field {$otherField} is present.";
+                return false;
             }
         }
 
         return true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return $this->message;
     }
 }

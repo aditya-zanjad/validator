@@ -15,6 +15,11 @@ use function AdityaZanjad\Validator\Utils\varEvaluateType;
 class Size extends AbstractRule
 {
     /**
+     * @var string $message
+     */
+    protected string $message;  
+
+    /**
      * @var $validSize
      */
     protected $validSize;
@@ -30,7 +35,7 @@ class Size extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value)
+    public function check(string $field, $value): bool
     {
         $size               =   varSize($value);
         $valueSizeIsValid   =   $size === $this->validSize || $size == $this->validSize;
@@ -42,23 +47,33 @@ class Size extends AbstractRule
         // Depending on the data type of the current value, we'll dynamically prepare the error message.
         switch (gettype($value)) {
             case 'array':
-                return "The array {$field} must contain exactly {$this->validSize} elements.";
+                $this->message = "The array {$field} must contain exactly {$this->validSize} elements.";
 
             case 'string':
-                return "The string {$field} must contain exactly {$this->validSize} elements.";
+                $this->message = "The string {$field} must contain exactly {$this->validSize} elements.";
 
             case 'resource':
-                return "The resource {$field} must be of the length {$this->validSize} bytes.";
+                $this->message = "The resource {$field} must be of the length {$this->validSize} bytes.";
 
             case 'float':
             case 'double':
-                return "The field {$field} must be equal to the float value {$this->validSize}.";
+                $this->message = "The field {$field} must be equal to the float value {$this->validSize}.";
 
             case 'integer':
-                return "The field {$field} must be equal to the integer value {$this->validSize}.";
+                $this->message = "The field {$field} must be equal to the integer value {$this->validSize}.";
 
             default:
-                return "The size of the field {$field} must be equal to {$this->validSize}.";
+                $this->message = "The size of the field {$field} must be equal to {$this->validSize}.";
         }
+
+        return false;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return $this->message;
     }
 }

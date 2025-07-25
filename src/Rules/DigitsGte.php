@@ -38,16 +38,24 @@ class DigitsGte extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value)
+    public function check(string $field, $value): bool
     {
-        if (filter_var($value, FILTER_VALIDATE_INT) === false) {
-            return "The field {$field} must contain minimum {$this->minimumDigitsRequired} digits.";
+        if (filter_var($value, FILTER_VALIDATE_INT) === false || filter_var($value, FILTER_VALIDATE_FLOAT) === false) {
+            return false;
         }
 
-        if (varDigits($value) > $this->minimumDigitsRequired) {
-            return "The field {$field} must contain minimum {$this->minimumDigitsRequired} digits.";
+        if (varDigits($value) < $this->minimumDigitsRequired) {
+            return false;
         }
 
         return true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return "The field :{field} must contain minimum {$this->minimumDigitsRequired} digits.";
     }
 }

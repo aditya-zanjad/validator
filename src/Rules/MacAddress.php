@@ -16,16 +16,16 @@ class MacAddress extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value)
+    public function check(string $field, $value): bool
     {
-        if (!is_string($value)) {
-            return 'The field :{field} must be a valid MAC address.';
-        }
+        return is_string($value) && filter_var($value, FILTER_VALIDATE_MAC) !== false; 
+    }
 
-        if (function_exists('\\filter_var') && filter_var($value, FILTER_VALIDATE_MAC) === false) {
-            return 'The field :{field} must be a valid MAC address.';
-        }
-
-        return true;
+    /**
+     * @return string
+     */
+    public function message(): string
+    {
+        return 'The field :{field} must be a valid MAC address.';
     }
 }

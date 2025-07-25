@@ -43,14 +43,17 @@ class DateLt extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value)
+    public function check(string $field, $value): bool
     {
         $givenDateTime = parseDateTime($value);
+        return $givenDateTime !== false && $givenDateTime < $this->ltDate;
+    }
 
-        if ($givenDateTime === false || $givenDateTime >= $this->ltDate) {
-            return "The field :{field} must be a valid date before the date {$this->ltDateString}.";
-        }
-
-        return true;
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return "The field :{field} must be a valid date before the date {$this->ltDateString}.";
     }
 }

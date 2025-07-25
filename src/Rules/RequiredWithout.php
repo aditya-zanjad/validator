@@ -13,6 +13,11 @@ use AdityaZanjad\Validator\Interfaces\RequisiteRule;
 class RequiredWithout extends AbstractRule implements RequisiteRule
 {
     /**
+     * @var string $message
+     */
+    protected string $message;
+
+    /**
      * The dependent fields against which we want to check the existence of the current field.
      *
      * @var array<int, string> $otherFields
@@ -32,21 +37,26 @@ class RequiredWithout extends AbstractRule implements RequisiteRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value)
+    public function check(string $field, $value): bool
     {
-        $currentFieldIsMissing = \is_null($value);
-
-        if (!$currentFieldIsMissing) {
-            return true;
-        }
+        $currentFieldIsPresent = !\is_null($value);
 
         // The current field is required iff any of the dependent fields is not present in the input.
         foreach ($this->otherFields as $otherField) {
-            if ($this->input->isNull($otherField) && !$currentFieldIsMissing) {
-                return "The field {$field} is required without the field {$otherField}.";
+            if ($this->input->notNull($otherField) && $currentFieldIsPresent) {
+                $this->message = "The field {$field} is required without the field {$otherField}.";
+                return false;
             }
         }
 
         return true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return $this->message;
     }
 }

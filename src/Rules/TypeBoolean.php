@@ -27,11 +27,11 @@ class TypeBoolean extends AbstractRule
     protected array $expectedBooleans = [];
 
     /**
-     * @param   int|string ...$expectedBooleans
+     * @param   bool|int|string ...$expectedBooleans
      * 
      * @throws  \Exception
      */
-    public function __construct(...$expectedBooleans)
+    public function __construct(bool|int|string ...$expectedBooleans)
     {
         if (empty($expectedBooleans)) {
             $this->expectedBooleans = $this->validBooleans;
@@ -48,15 +48,22 @@ class TypeBoolean extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value)
+    public function check(string $field, $value): bool
     {
         $transformedValue = is_string($value) ? strtolower($value) : $value;
 
         if (!in_array($transformedValue, $this->expectedBooleans, true)) {
-            $implodedExpectedBooleans = implode(', ', $this->expectedBooleans);
-            return "The field :{field} must be one of these boolean values: {$implodedExpectedBooleans}.";
+            return false;
         }
 
         return true;
+    }
+
+    /**
+     * @return string
+     */
+    public function message(): string
+    {
+        return "The field :{field} must be one of these boolean values: " . \implode(', ', $this->expectedBooleans);
     }
 }

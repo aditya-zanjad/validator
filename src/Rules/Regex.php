@@ -29,12 +29,16 @@ class Regex extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value)
+    public function check(string $field, $value): bool
     {
-        if (!preg_match($this->regex, $value, $matches)) {
-            return "The field {$field} must match the regular expression {$this->regex}.";
-        }
+        return !in_array(preg_match($this->regex, $value, $matches), [0, false]);
+    }
 
-        return true;
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return "The field :{field} must match the regular expression {$this->regex}.";
     }
 }

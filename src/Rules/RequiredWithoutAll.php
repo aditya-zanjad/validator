@@ -13,6 +13,11 @@ use AdityaZanjad\Validator\Interfaces\RequisiteRule;
 class RequiredWithoutAll extends AbstractRule implements RequisiteRule
 {
     /**
+     * @var string $message
+     */
+    protected string $message;
+
+    /**
      * The dependent fields against which we want to check the existence of the current field.
      *
      * @var array<int, string> $otherFields
@@ -32,22 +37,32 @@ class RequiredWithoutAll extends AbstractRule implements RequisiteRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value)
+    public function check(string $field, $value): bool
     {
         $currentFieldIsPresent = !\is_null($value);
 
-        $otherFieldsPresences = array_map(function ($field) {
-            return $this->input->notNull($field);
-        }, $this->otherFields);
+        $allOtherFieldsArePresent = array_reduce($this->otherFields, function ($carry, $field) {
+            return $carry && $this->input->notNull($field);
+        }, true);
 
-        $allOtherFieldsArePresent = (bool) \array_product($otherFieldsPresences);
+        if ($allOtherFieldsArePresent && $currentFieldIsPresent) {
+            $this->message = "The field {$field} is required without all these fields: " . \implode(', ', $this->otherFields);
+            return false;
+        }
 
-        // The input field should be present only if other fields are missing and vice versa.
-        if (!$currentFieldIsPresent && !$allOtherFieldsArePresent) {
-            $implodedOtherFields = \implode(', ', $this->otherFields);
-            return "The field {$field} is required when all these other fields are missing: {$implodedOtherFields}.";
+        if (!$allOtherFieldsArePresent && !$currentFieldIsPresent) {
+            $this->message = "The field {$field} is required when these fields are missing: " . \implode(', ', $this->otherFields);
+            return false;
         }
 
         return true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return $this->message;
     }
 }

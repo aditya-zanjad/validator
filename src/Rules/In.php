@@ -25,21 +25,23 @@ class In extends AbstractRule
      */
     public function __construct(...$params)
     {
-        $this->params = array_map(function ($param) {
-            return is_string($param) ? trim($param) : $param;
-        }, $params);
+        // Make certain transformations to the provided data before actual comparison.
+        $this->params = array_map(fn ($param) => is_string($param) ? trim($param) : $param, $params);
     }
 
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value)
+    public function check(string $field, $value): bool
     {
-        if (!in_array($value, $this->params)) {
-            $validValues = implode(', ', $this->params);
-            return "The field :{field} must be set to one of these values: {$validValues}.";
-        }
+        return in_array($value, $this->params);
+    }
 
-        return true;
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return "The field :{field} must be set to one of these values: " . implode(', ', $this->params);
     }
 }

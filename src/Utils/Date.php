@@ -40,6 +40,8 @@ function parseDateTime($value, string $format = '')
         }
     } catch (DateMalformedStringException $e) {
         // var_dump($e); exit;
+
+        // If attempting to parse the date fails, attempt to parse it from the predefined formats.
         $formats = makeDateTimeFormats();
 
         foreach ($formats as $format) {
@@ -50,7 +52,7 @@ function parseDateTime($value, string $format = '')
             }
         }
     } catch (Throwable $e) {
-        // var_dump($e); exit;        
+        // var_dump($e); exit;
     }
 
     return false;
@@ -58,9 +60,9 @@ function parseDateTime($value, string $format = '')
 
 /**
  * Get a list of formats based on which we should parse the date if parsing fails.
- * 
+ *
  * @param string $date
- * 
+ *
  * @return array<int, string>
  */
 function makeDateTimeFormats()

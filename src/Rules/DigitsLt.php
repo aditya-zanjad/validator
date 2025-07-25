@@ -38,16 +38,24 @@ class DigitsLt extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value)
+    public function check(string $field, $value): bool
     {
-        if (filter_var($value, FILTER_VALIDATE_INT) === false) {
-            return "The field {$field} must contain less than {$this->maxThreshold} digits.";
+        if (filter_var($value, FILTER_VALIDATE_INT) === false || filter_var($value, FILTER_VALIDATE_FLOAT) === false) {
+            return false;
         }
 
         if (varDigits($value) >= $this->maxThreshold) {
-            return "The field {$field} must contain less than {$this->maxThreshold} digits.";
+            return false;
         }
 
         return true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return "The field :{field} must contain less than {$this->maxThreshold} digits.";
     }
 }

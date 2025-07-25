@@ -32,12 +32,22 @@ abstract class AbstractRule
     }
 
     /**
+     * Get the validation error message.
+     * 
+     * @return string
+     */
+    public function message(): string
+    {
+        return 'The field :{field} is invalid.';
+    }
+
+    /**
      * Perform the validation logic on the given input field value.
      *
      * @param   string  $field  =>  A dot notation path to the field inside the input data.
      * @param   mixed   $value  =>  Value of the input field.
      *
-     * @return  bool|string
+     * @return  bool
      */
-    abstract public function check(string $field, $value);
+    abstract public function check(string $field, $value): bool;
 }

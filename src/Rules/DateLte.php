@@ -38,14 +38,17 @@ class DateLte extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value)
+    public function check(string $field, $value): bool
     {
         $givenDateTime = parseDateTime($value);
+        return $givenDateTime !== false && $givenDateTime <= $this->lteDate;
+    }
 
-        if ($givenDateTime === false || $givenDateTime > $this->lteDate) {
-            return "The field :{field} must be a date less than or equal to: {$this->lteDateString}";
-        }
-
-        return true;
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return "The field :{field} must be a date less than or equal to: {$this->lteDateString}";
     }
 }

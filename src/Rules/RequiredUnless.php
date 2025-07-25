@@ -15,6 +15,11 @@ use function AdityaZanjad\Validator\Utils\varEvaluateType;
 class RequiredUnless extends AbstractRule implements RequisiteRule
 {
     /**
+     * @var string $message
+     */
+    protected string $message;
+
+    /**
      * @var string $otherField
      */
     protected string $otherField;
@@ -47,7 +52,7 @@ class RequiredUnless extends AbstractRule implements RequisiteRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value)
+    public function check(string $field, $value): bool
     {
         $otherFieldValue            =   $this->input->get($this->otherField);
         $currentFieldIsPresent      =   !\is_null($value);
@@ -71,7 +76,15 @@ class RequiredUnless extends AbstractRule implements RequisiteRule
             return !\is_null($value) ? $value : '[NULL]';
         }, $this->otherFieldExpectedValues);
 
-        $implodedOtherFieldExpectedValues = \implode(', ', $otherFieldExpectedValues);
-        return "The field {$field} is required if the field {$this->otherField} is not equal to any of these values: {$implodedOtherFieldExpectedValues}.";
+        $this->message = "The field {$field} is required if the field {$this->otherField} is not equal to any of these values: " . \implode(', ', $otherFieldExpectedValues);
+        return false;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return $this->message;
     }
 }

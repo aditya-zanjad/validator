@@ -63,14 +63,20 @@ class DateBetween extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value)
+    public function check(string $field, $value): bool
     {
         $givenDateTime = parseDateTime($value);
 
-        if ($givenDateTime === false || $givenDateTime < $this->minDate || $givenDateTime > $this->maxDate) {
-            return "The field :{field} must be a date between the dates {$this->minDateString} and {$this->maxDateString}.";
-        }
+        return $givenDateTime !== false 
+            && $givenDateTime >= $this->minDate 
+            && $givenDateTime <= $this->maxDate;
+    }
 
-        return true;
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return "The field :{field} must be a date between the dates {$this->minDateString} and {$this->maxDateString}.";
     }
 }

@@ -15,12 +15,16 @@ class Required extends AbstractRule implements RequisiteRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value)
+    public function check(string $field, $value): bool
     {
-        if ($this->input->isNull($field)) {
-            return "The field {$field} is required.";
-        }
+        return $this->input->notNull($field);
+    }
 
-        return true;
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return "The field :{field} is required.";
     }
 }

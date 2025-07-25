@@ -38,14 +38,17 @@ class DateGt extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value)
+    public function check(string $field, $value): bool
     {
         $givenDateTime = parseDateTime($value);
+        return $givenDateTime !== false && $givenDateTime > $this->comparingDate;
+    }
 
-        if ($givenDateTime === false || $givenDateTime <= $this->comparingDate) {
-            return "The field :{field} must be a valid date greater than: {$this->comparingDateString}";
-        }
-
-        return true;
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return "The field :{field} must be a valid date greater than: {$this->comparingDateString}";
     }
 }

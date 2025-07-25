@@ -14,6 +14,11 @@ use AdityaZanjad\Validator\Base\AbstractRule;
 class Mime extends AbstractRule
 {
     /**
+     * @var string $message
+     */
+    protected string $message;
+
+    /**
      * @var array<int, string> $givenMimeTypes
      */
     protected array $givenMimeTypes;
@@ -27,15 +32,13 @@ class Mime extends AbstractRule
             throw new Exception("[Developer][Exception]: The validation rule [" . static::class . "] must be provided with at least one parameter.");
         }
 
-        $this->givenMimeTypes = \array_map(function ($mime) {
-            return \trim($mime);
-        }, $givenMimeTypes);
+        $this->givenMimeTypes = \array_map(fn ($mime) => \trim($mime), $givenMimeTypes);
     }
 
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value)
+    public function check(string $field, $value): bool
     {
         $valueMimeType = null;
 
@@ -54,7 +57,8 @@ class Mime extends AbstractRule
                 $metadata = \stream_get_meta_data($value);
 
                 if ($metadata['wrapper_type'] !== 'plainfile') {
-                    return "The field {$field} must be a valid file.";
+                    $this->message = "The field {$field} must be a valid file.";
+                    return false;
                 }
 
                 $valueMimeType = \mime_content_type($metadata['uri']);
@@ -71,10 +75,18 @@ class Mime extends AbstractRule
         }
 
         if (!in_array($valueMimeType, $this->givenMimeTypes)) {
-            $validMimeTypesImploded = implode(', ', $this->givenMimeTypes);
-            return "The field [$field] must have one of these MIME types: {$validMimeTypesImploded}";
+            $this->message = "The field [$field] must have one of these MIME types: " . implode(', ', $this->givenMimeTypes);
+            return false;
         }
 
         return true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return $this->message;
     }
 }

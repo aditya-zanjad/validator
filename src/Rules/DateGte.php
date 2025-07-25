@@ -43,14 +43,17 @@ class DateGte extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value)
+    public function check(string $field, $value): bool
     {
         $givenDateTime = parseDateTime($value);
+        return $givenDateTime !== false && $givenDateTime >= $this->gteDate;
+    }
 
-        if ($givenDateTime === false || $givenDateTime < $this->gteDate) {
-            return "The field :{field} must be a valid date greater than or equal to: {$this->gteDateString}";
-        }
-
-        return true;
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return "The field :{field} must be a valid date greater than or equal to: {$this->gteDateString}";
     }
 }

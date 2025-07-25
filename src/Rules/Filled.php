@@ -12,35 +12,34 @@ use AdityaZanjad\Validator\Base\AbstractRule;
 class Filled extends AbstractRule
 {
     /**
+     * @var string $message
+     */
+    protected string $message = 'The field :{field} is invalid.';
+
+    /**
      * @inheritDoc
      */
-    public function check(string $field, $value)
+    public function check(string $field, $value): bool
     {
-        $valueIsFilled = !empty($value);
-
-        if (is_string($value) && is_file($value) && in_array(filesize($value), [0, false])) {
-            return "The file {$field} must not be empty.";
-        }
-
-        if ($valueIsFilled) {
+        if (!empty($value) || filter_var($value, FILTER_VALIDATE_BOOL)) {
             return true;
         }
 
-        switch (gettype($value)) {
-            case 'string':
-                return "The string {$field} must not be empty.";
+        $this->message = match (gettype($value)) {
+            'string'    =>  is_file($value) && in_array(filesize($value), [0, false]) ? "The file :{field} must not be empty." : "The string :{field} must not be empty.",
+            'array'     =>  "The array :{field} must not be empty.",
+            'NULL'      =>  "the field :{field} must not be an empty or a NULL value.",
+            'default'   =>  "The field :{field} must not be empty.",
+        };
 
-            case 'array':
-                return "The array {$field} must not be empty.";
+        return false;
+    }
 
-            case 'boolean':
-                return true;
-
-            case 'NULL':
-                return "the field {$field} must not be an empty or a NULL value.";
-
-            default:
-                return "The field {$field} must not be empty.";
-        }
+    /**
+    * @inheritDoc
+    */
+    public function message(): string
+    {
+        return $this->message;
     }
 }

@@ -31,12 +31,16 @@ class Min extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value)
+    public function check(string $field, $value): bool
     {
-        if (varSize($value) < $this->minAllowedSize) {
-            return "The field {$field} cannot be less than {$this->minAllowedSize}.";
-        }
+        return varSize($value) >= $this->minAllowedSize;
+    }
 
-        return true;
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return "The field :{field} cannot be less than {$this->minAllowedSize}.";
     }
 }

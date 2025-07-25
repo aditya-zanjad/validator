@@ -12,6 +12,11 @@ use AdityaZanjad\Validator\Base\AbstractRule;
 class Same extends AbstractRule
 {
     /**
+     * @var string $message
+     */
+    protected string $message;
+
+    /**
      * @var string $comparingField
      */
     protected string $comparingField;
@@ -27,12 +32,21 @@ class Same extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value)
+    public function check(string $field, $value): bool
     {
         if ($value !== $this->input->get($this->comparingField)) {
-            return "The value of the field :{field} must be the same as that of the field {$this->comparingField}.";
+            $this->message = "The value of the field :{field} must be the same as that of the field {$this->comparingField}.";
+            return false;
         }
 
         return true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return $this->message;
     }
 }

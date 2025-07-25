@@ -33,13 +33,16 @@ class NotIn extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value)
+    public function check(string $field, $value): bool
     {
-        if (\in_array($value, $this->params)) {
-            $validValues = implode(', ', $this->params);
-            return "The field :{field} must not be any of these values: {$validValues}.";
-        }
+        return \in_array($value, $this->params);
+    }
 
-        return true;
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return "The field :{field} must not be any of these values: " . implode(', ', $this->params);
     }
 }

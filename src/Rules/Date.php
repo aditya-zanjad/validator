@@ -31,16 +31,21 @@ class Date extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value)
+    public function check(string $field, $value): bool
     {
         $givenDateTime = parseDateTime($value, $this->format);
+        return $givenDateTime !== false ? true : false;
+    }
 
-        if ($givenDateTime !== false) {
-            return true;
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        if (empty($this->format)) {
+            return 'The field :{field} must be a valid date.';
         }
 
-        return !empty($this->format) 
-            ? 'The field :{field} must be a valid date.' 
-            : "The field :{field} must be a valid date with the format: {$this->format}";
+        return "The field :{field} must be a valid date with the format: {$this->format}";
     }
 }

@@ -14,12 +14,16 @@ class TypeArray extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value)
+    public function check(string $field, $value): bool
     {
-        if (!is_array($value)) {
-            return "The field {$field} must be an array.";
-        }
+        return is_array($value);
+    }
 
-        return true;
+    /**
+     * @return string
+     */
+    public function message(): string
+    {
+        return 'The field :{field} must be an array.';
     }
 }

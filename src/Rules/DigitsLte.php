@@ -38,16 +38,24 @@ class DigitsLte extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value)
+    public function check(string $field, $value): bool
     {
-        if (filter_var($value, FILTER_VALIDATE_INT) === false) {
-            return "The field {$field} cannot contain more than {$this->maxAllowedDigits} digits.";
+        if (filter_var($value, FILTER_VALIDATE_INT) === false || filter_var($value, FILTER_VALIDATE_FLOAT) === false) {
+            return false;
         }
 
-        if (varDigits($value) > $this->maxAllowedDigits) {
-            return "The field {$field} cannot contain more than {$this->maxAllowedDigits} digits.";
+        if (varDigits($value) <= $this->maxAllowedDigits) {
+            return false;
         }
 
         return true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return "The field :{field} cannot contain more than {$this->maxAllowedDigits} digits.";
     }
 }
