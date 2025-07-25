@@ -234,7 +234,14 @@ class Validator
                     default     =>  throw new Exception("[Developer][Exception]: The field {$field} is provided with an invalid rule at the index [{$index}]")
                 };
 
-                if (!$this->shouldAllowRuleExecution($rule, $field)) {
+                /**
+                 * Check if the validation rule should be evaluated or not.
+                 *
+                 * The validation rule should be evaluated based on the following conditions:
+                 * [1] The validation rule is set to run mandatorily regardless of whether the input field is present or not.
+                 * [2] The given input field is not equal to NULL.
+                 */
+                if ($this->input->isNull($field) && !\in_array(RequisiteRule::class, \class_implements($rule))) {
                     continue;
                 }
 
@@ -374,23 +381,6 @@ class Validator
         return array_map(function ($arg) {
             return \str_replace(['\\,', '\\\\'], [',', '\\'], $arg);
         }, $cleanedArgs);
-    }
-
-    /**
-     * Check if the validation rule should be evaluated or not.
-     *
-     * The validation rule should be evaluated based on the following conditions:
-     * [1] The validation rule is set to run mandatorily regardless of whether the input field is present or not.
-     * [2] The given input field is not equal to NULL.
-     *
-     * @param   string|\AdityaZanjad\Validator\Abstracts\AbstractRule|callable(string $field, mixed $value): bool|string    $rule
-     * @param   string                                                                                                      $field
-     *
-     * @return  bool
-     */
-    protected function shouldAllowRuleExecution($rule, string $field): bool
-    {
-        return $this->input->notNull($field) || \in_array(RequisiteRule::class, \class_implements($rule));
     }
 
     /**
