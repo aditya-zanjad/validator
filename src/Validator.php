@@ -68,9 +68,6 @@ class Validator
      */
     public function __construct(array $input, array $rules, array $messages = [])
     {
-        // Move the internal pointer at the start of array.
-        reset($rules);
-
         // Initialize/transform the supplied constructor arguments before utilizing them.
         $this->input    =   new Input($input);
         $this->rules    =   $rules;
@@ -109,6 +106,7 @@ class Validator
             throw new Exception("[Developer][Exception]: The validation for this instance has been already performed once.");
         }
 
+        reset($this->rules);
         $field = null;
 
         // Keep looping & validating each field until there are no more rules left in the array.
@@ -138,18 +136,20 @@ class Validator
                 continue;
             }
 
+            // Start evaluating rules for the current field.
             foreach ($rules as $index => $rule) {
+                // If the rules are specified in the 
                 if (\is_string($rule)) {
                     $rule = $this->makeRuleInstanceFromString($rule, $index, $field);
                 }
 
-                if (\is_callable($rule)) {
-                    $rule = new Callback($rule);
-                }
-
-                // If the input field is equal to NULL & the rule is not set to be run mandatorily.
+                // The rule being equal to NULL simply means that input is NULL/missing & the rule is not set to evaluate mandatorily.
                 if (\is_null($rule)) {
                     continue;
+                }
+
+                if (\is_callable($rule)) {
+                    $rule = new Callback($rule);
                 }
 
                 if (!$rule instanceof AbstractRule) {
@@ -290,93 +290,12 @@ class Validator
         }
 
         // If the rule was provided with the constructor arguments.
-        $ruleArgs = \preg_split('/(?<!\\\\),/', $rule[1]);
-        $ruleArgs = array_map(fn($arg) => \str_replace('\\,', ',', $arg), $ruleArgs);
-
-        return new $ruleClassName(...$ruleArgs);
-    }
-
-    /**
-     * Evaluate the instance rule & return its result.
-     *
-     * @param   \AdityaZanjad\Validator\Abstracts\AbstractRule|callable(string $field, mixed $value, \AdityaZanjad\Validator\Fluents\Input $input): bool|string.
-     * @param   string
-     * @param   mixed
-     *
-     * @throws  \Exception
-     *
-     * @return  null|\AdityaZanjad\Validator\Base\AbstractRule
-     */
-    protected function makeRuleInstanceFromObject($rule, int $index, string $field): ?AbstractRule
-    {
-        if ($this->input->isNull($field) && !$rule instanceof RequisiteRule) {
-            return null;
-        }
-
-        if (\is_callable($rule)) {
-            return new Callback($rule);
-        }
-
-        if (!$rule instanceof AbstractRule) {
-            // TODO => Add a logic for detecting the wildcard field path.
-            throw new Exception("[Developer][Exception]: The field {$field} has an invalid rule at the index [{$index}]");
-        }
-
-        return $rule;
-    }
-
-    /**
-     * Split the comma-separated string arguments into an array of arguments.
-     *
-     * @param string $args
-     *
-     * @return array<int, string>
-     */
-    protected function splitStringifiedArguments(string $args)
-    {
-        // Split the arguments using regex.
-        if (\function_exists('\\preg_split')) {
-            // $args = \preg_split('/(?<!\\\\),/', $args);
-            return array_map(fn($arg) => \str_replace('\\,', ',', $arg), \preg_split('/(?<!\\\\),/', $args));
-        }
-
-        $cleanedArgs    =   [];
-        $buffer         =   '';
-        $length         =   \strlen($args);
-        $escaped        =   false;
-
-        for ($i = 0; $i < $length; $i++) {
-            $char = $args[$i];
-
-            if ($escaped) {
-                $buffer     .=  $char;
-                $escaped    =   false;
-
-                continue;
-            }
-
-            switch ($char) {
-                case '\\':
-                    $escaped = true;
-                    continue 2;
-
-                case ',':
-                    $cleanedArgs[]  =   $buffer;
-                    $buffer         =   '';
-                    continue 2;
-
-                default:
-                    $buffer .= $char;
-                    break;
-            }
-        }
-
-        $cleanedArgs[] = $buffer;
-
-        // Now, unescape escaped commas and backslashes
-        return array_map(function ($arg) {
-            return \str_replace(['\\,', '\\\\'], [',', '\\'], $arg);
-        }, $cleanedArgs);
+        return new $ruleClassName(
+            ...\array_map(
+                fn($arg) => \str_replace('\\,', ',', $arg),
+                \preg_split('/(?<!\\\\),/', $rule[1])
+            )
+        );
     }
 
     /**
