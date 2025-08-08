@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AdityaZanjad\Validator\Rules;
 
 use Exception;
+use InvalidArgumentException;
 use AdityaZanjad\Validator\Base\AbstractRule;
 
 /**
@@ -22,12 +23,12 @@ class Callback extends AbstractRule
     /**
      * To contain & execute the callback function.
      *
-     * @var callable $fn
+     * @var callable(string $field, mixed $value, \AdityaZanjad\Validator\Fluents\Input $input): bool $fn
      */
     protected $fn;
 
     /**
-     * @param callable(string $field, mixed $value, \AdityaZanjad\Validator\Fluents\Input $input): bool|string $fn
+     * @param callable(string $field, mixed $value, \AdityaZanjad\Validator\Fluents\Input $input): bool $fn
      */
     public function __construct(callable $fn)
     {
@@ -41,10 +42,15 @@ class Callback extends AbstractRule
      */
     public function check(string $field, $value): bool
     {
-        $result = ($this->fn)($field, $value, $this->input);
+        try {
+            $result = ($this->fn)($field, $value, $this->input);
+        } catch (InvalidArgumentException $e) {
+            // var_dump($e); exit;
+            throw new Exception("[Developer][Exception]: Make sure that arguments are passed appropriately to the callback validation rule(s) for the field [{$field}]");
+        }
 
         if (\is_string($result)) {
-            $this->message = $result;   
+            $this->message = $result;
             return false;
         }
 
