@@ -46,10 +46,8 @@ function varSize($var)
                     return \strlen($var);
             }
 
-            // no break
         default:
             throw new Exception("[Developer][Exception]: The given parameter has an invalid data type.");
-            break;
     }
 }
 
@@ -65,7 +63,7 @@ function varSize($var)
 function varDigits(int|float|string $var): int
 {
     if (filter_var($var, FILTER_VALIDATE_INT) === false || filter_var($var, FILTER_VALIDATE_FLOAT) === false) {
-        throw new Exception("[Developer][Exception]: The parameter must be either an Integer OR a Float value.");
+        throw new Exception("[Developer][Exception]: The parameter must be either an [INTEGER] OR [FLOAT] value.");
     }
 
     if ($var === 0) {

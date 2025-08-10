@@ -38,11 +38,17 @@ class TypeBoolean extends AbstractRule
             return $this;
         }
 
-        $invalidValues = array_diff($this->validBooleans, $expectedBooleans);
+        $this->expectedBooleans = array_map(function ($value) {
+            if (is_string($value)) {
+                $value = strtolower($value);
+            }
 
-        if (!empty($invalidValues)) {
-            throw new Exception("[Developer][Exception]: The validation rule [boolean] accepts only these arguments: true (bool), false (bool), true (string), false (string), 1 (int), 0 (int), 1 (string), 0 (string), on (string), off (string).");
-        }
+            if (!in_array($value, $this->validBooleans)) {
+                throw new Exception("[Developer][Exception]: The validation rule [boolean] considers only these arguments as valid: [(bool) true], [(bool) false], [(string) true], [(string) false], [(int) 1], [(int) 0], [(string) 1], [(string) 0], [(string) on], [(string) off].");
+            }
+
+            return $value;
+        }, $expectedBooleans);
     }
 
     /**

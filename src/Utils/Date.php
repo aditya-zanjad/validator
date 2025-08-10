@@ -18,13 +18,12 @@ use DateMalformedStringException;
  */
 function parseDateTime($value, string $format = '')
 {
-    if (filter_var($value, FILTER_VALIDATE_INT) !== false) {
-        $value = "@{$value}";
-    }
-
     if (!is_string($value)) {
         return false;
     }
+
+    // *** NOTE => Commented temporarily. Might be needed in the future ***
+    // $timezone = new DateTimeZone(ini_get('date.timezone') ?: date_default_timezone_get());
 
     try {
         if (empty($format)) {

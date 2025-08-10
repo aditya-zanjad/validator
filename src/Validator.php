@@ -73,7 +73,8 @@ class Validator
     {
         // Initialize/transform the supplied constructor arguments before utilizing them.
         $this->input    =   new Input($input);
-        $this->rules    =   $this->preprocessRules($rules);
+        // $this->rules    =   $this->preprocessRules($rules);
+        $this->rules    =   $rules;
         $this->messages =   $messages;
 
         // Set other necessary data to their default options.
@@ -221,45 +222,99 @@ class Validator
     {
         // Do not allow performing the same validation more than once.
         if ($this->alreadyValidated) {
-            throw new Exception("[Developer][Exception]: The validation for this instance has been already performed once.");
+            throw new Exception("[Developer][Exception]: The validation has been already performed for this instance.");
         }
 
-        foreach ($this->rules as $field => $rules) {
-            $field = (string) $field;
+        // reset($this->rules);
+        // $field = null;
+
+        while (!is_null($field = key($this->rules))) {
+            $field  =   (string) $field;
+            $rules  =   current($this->rules);
+
+            if (is_string($rules)) {
+                $rules = explode('|', $rules);
+            }
+
+            if (!is_array($rules)) {
+                throw new Exception("[Developer][Exception]: The field [{$field}] must have validation rules specified either in [STRING] or [ARRAY] format.");
+            }
+
+            if (str_contains_v2($field, '*')) {
+                $this->rules = \array_merge($this->rules, $this->resolveWildCardsPath($field, $rules));
+                next($this->rules);
+                continue;
+            }
 
             foreach ($rules as $index => $rule) {
-                $rule = match (gettype($rule)) {
-                    'string'    =>  $this->makeRuleInstanceFromString($rule, $index, $field),
-                    'object'    =>  $this->makeRuleInstanceFromObject($rule, $index, $field),
-                    default     =>  throw new Exception("[Developer][Exception]: The field {$field} is provided with an invalid rule at the index [{$index}]")
-                };
+                $value = $this->input->get($field);
 
-                /**
-                 * Check if the validation rule should be evaluated or not.
-                 *
-                 * The validation rule should be evaluated based on the following conditions:
-                 * [1] The validation rule is set to run mandatorily regardless of whether the input field is present or not.
-                 * [2] The given input field is not equal to NULL.
-                 */
-                if ($this->input->isNull($field) && !\in_array(RequisiteRule::class, \class_implements($rule))) {
+                if (is_string($rule)) {
+                    $rule = $this->makeRuleInstanceFromString($rule, $index, $field);
+
+                    if (is_null($rule)) {
+                        next($this->rules);
+                        continue;
+                    }
+                }
+
+                if (is_callable($rule)) {
+                    if (is_null($value)) {
+                        next($this->rules);
+                        continue;
+                    }
+
+                    $rule = new Callback($rule);
+                }
+
+                if (!$rule instanceof AbstractRule) {
+                    throw new Exception("[Developer][Exception]: The field [{$field}] has an invalid rule specified at the index [{$index}]");
+                }
+
+                if (is_null($value) && !$rule instanceof RequisiteRule) {
+                    next($this->rules);
                     continue;
                 }
 
-                if ($rule->setInput($this->input)->check($field, $this->input->get($field))) {
+                if ($rule->setInput($this->input)->check($field, $value)) {
+                    next($this->rules);
                     continue;
                 }
 
-                // Make necessary transformations to the error message.
-                $validationError    =  $this->messages[$field] ?? $rule->message();
-                $validationError    =  str_replace(':{field}', $field, $validationError);
-
-                $this->errors->add($field, $validationError);
+                // Register the error message.
+                $this->errors->add($field, str_replace(':{field}', $field, $this->messages[$field] ?? $rule->message()));
 
                 if ($this->shouldStopOnFailure) {
                     break 2;
                 }
+
+                next($this->rules);
             }
         }
+
+        // foreach ($this->rules as $field => $rules) {
+        //     $field = (string) $field;
+
+        //     foreach ($rules as $index => $rule) {
+        //         $rule = match (gettype($rule)) {
+        //             'string'    =>  $this->makeRuleInstanceFromString($rule, $index, $field),
+        //             'object'    =>  $this->makeRuleInstanceFromObject($rule, $index, $field),
+        //             default     =>  throw new Exception("[Developer][Exception]: The field {$field} is provided with an invalid rule at the index [{$index}]")
+        //         };
+
+        //         // The validation should be skipped if the input field is missing.
+        //         if (is_null($rule) || $rule->setInput($this->input)->check($field, $this->input->get($field))) {
+        //             continue;
+        //         }
+
+        //         // Make necessary transformations to the error message.
+        //         $this->errors->add($field, str_replace(':{field}', $field, $this->messages[$field] ?? $rule->message()));
+
+        //         if ($this->shouldStopOnFailure) {
+        //             break 2;
+        //         }
+        //     }
+        // }
 
         $this->alreadyValidated = true;
         return $this;
@@ -273,60 +328,62 @@ class Validator
      *
      * @throws  \Exception
      *
-     * @return  \AdityaZanjad\Validator\Base\AbstractRule
+     * @return  null|\AdityaZanjad\Validator\Base\AbstractRule
      */
-    protected function makeRuleInstanceFromString(string $rule, int $ruleIndex, string $field): AbstractRule
+    protected function makeRuleInstanceFromString($rule, int $ruleIndex, string $field): ?AbstractRule
     {
         if (empty($rule)) {
             throw new Exception("[Developer][Exception]: The validation rule [{$rule}] at the index [{$ruleIndex}] for field [{$field}] must not be empty.");
         }
 
         // Extract the important data from the given parameters to execute the validation rule.
-        $rule           =   \explode(':', $rule);
-        $ruleName       =   $rule[0];
-        $ruleClassName  =   Rule::valueOf($ruleName);
+        $rule       =   \explode(':', $rule);
+        $rule[0]    =   Rule::valueOf($rule[0]);
 
-        if (\is_null($ruleClassName)) {
-            throw new Exception("[Developer][Exception]: The field [{$field}] has an invalid validation rule [{$ruleName}] at the index [{$ruleIndex}].");
+        if (\is_null($rule[0])) {
+            throw new Exception("[Developer][Exception]: The field [{$field}] has an invalid validation rule [{$rule[0]}] at the index [{$ruleIndex}].");
         }
 
-        // Extract rule constructor arguments into the parsable format
-        $ruleParams = isset($rule[1])
-            ? $this->splitStringifiedArguments($rule[1])
-            : [];
+        // If the field is equal to NULL & the validation rule is not mandatory to run.
+        if ($this->input->isNull($field) && !\in_array(RequisiteRule::class, class_implements($rule[0]))) {
+            return null;
+        }
 
-        /**
-         * This steps involves doing the following things:
-         * [1] Initialize the validation rule class & pass the arguments to its constructor.
-         * [2] Set the input data instance which grants access to other input data being validated inside the rule class.
-         * [3] Perform the validation & return its result.
-         */
-        return new $ruleClassName(...$ruleParams);
+        // If no arguments were provided to the validation rule.
+        if (!isset($rule[1])) {
+            return new $rule[0](...[]);
+        }
+
+        return new $rule[0](...$this->makeRuleArgumentsFromString($rule[1]));
     }
 
     /**
      * Evaluate the instance rule & return its result.
      *
-     * @param   \AdityaZanjad\Validator\Abstracts\AbstractRule|callable(string $field, mixed $value, \AdityaZanjad\Validator\Fluents\Input $input): bool|string.
+     * @param   \AdityaZanjad\Validator\Abstracts\AbstractRule|callable(string $field, mixed $value, \AdityaZanjad\Validator\Fluents\Input $input): bool|string
+     * @param   int
      * @param   string
-     * @param   mixed
      *
      * @throws  \Exception
      *
-     * @return  \AdityaZanjad\Validator\Base\AbstractRule
+     * @return  null|\AdityaZanjad\Validator\Base\AbstractRule
      */
-    protected function makeRuleInstanceFromObject($rule, int $index, string $field): AbstractRule
+    protected function makeRuleInstanceFromObject($rule, int $index, string $field): ?AbstractRule
     {
-        if ($rule instanceof AbstractRule) {
-            return $rule;
+        // If the input value is equal to NULL & the validation rule is not mandatory to run.
+        if ($this->input->isNull($field) && !$rule instanceof RequisiteRule) {
+            return null;
         }
-
+        
         if (\is_callable($rule)) {
             return new Callback($rule);
         }
 
-        // TODO => Add a logic for detecting the wildcard field path.
-        throw new Exception("[Developer][Exception]: The field {$field} has an invalid rule at the index [{$index}]");
+        if (!$rule instanceof AbstractRule) {
+            throw new Exception("[Developer][Exception]: The field [{$field}] is provided with an invalid validation rule at the index [{$index}].");
+        }
+        
+        return $rule;
     }
 
     /**
@@ -336,7 +393,7 @@ class Validator
      *
      * @return array<int, string>
      */
-    protected function splitStringifiedArguments(string $args)
+    protected function makeRuleArgumentsFromString(string $args)
     {
         // Split the arguments using regex.
         if (\function_exists('\\preg_split')) {
