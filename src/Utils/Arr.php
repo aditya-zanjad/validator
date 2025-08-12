@@ -253,26 +253,6 @@ function arr_filled(array $arr, string $path): bool
 }
 
 /**
- * Check if the given array is an indexed array or not.
- *
- * @param array<int|string, mixed> $arr
- *
- * @return bool
- */
-function arr_indexed(array $arr): bool
-{
-    if (empty($arr)) {
-        return true;
-    }
-
-    if (\function_exists('\\array_is_list')) {
-        return \array_is_list($arr);
-    }
-
-    return \array_keys($arr) === \range(0, \count($arr) - 1);
-}
-
-/**
  * Get the first key of an array.
  *
  * @param array $arr

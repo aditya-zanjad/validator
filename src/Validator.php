@@ -48,16 +48,16 @@ class Validator
     /**
      * Useful in deciding whether or not to stop the validator on first failure.
      *
-     * @var bool $shouldStopOnFailure
+     * @var bool $stopOnFail
      */
-    protected bool $shouldStopOnFailure;
+    protected bool $stopOnFail;
 
     /**
      * To check whether the validation has been already performed or not.
      *
-     * @var bool $alreadyValidated
+     * @var bool $validated
      */
-    protected bool $alreadyValidated;
+    protected bool $validated;
 
     /**
      * Inject all the necessary parameters to perform the validation.
@@ -68,15 +68,13 @@ class Validator
      */
     public function __construct(array $input, array $rules, array $messages = [])
     {
-        // Initialize/transform the supplied constructor arguments before utilizing them.
-        $this->input    =   new Input($input);
-        $this->rules    =   $this->reorganizeRules($rules);
-        $this->messages =   $messages;
-
-        // Set other necessary data to their default options.
-        $this->errors               =   new Error();
-        $this->shouldStopOnFailure  =   false;
-        $this->alreadyValidated     =   false;
+        // Initialize & Transform certain values before performing the actual validation.
+        $this->input        =   new Input($input);
+        $this->rules        =   $this->prepareRules($rules);
+        $this->messages     =   $messages;
+        $this->errors       =   new Error();
+        $this->stopOnFail   =   false;
+        $this->validated    =   false;
     }
 
     /**
@@ -86,7 +84,7 @@ class Validator
      * 
      * @return array<string, string|array<int|string, string|AbstractRule|callable(string $field, mixed $value): bool>>
      */
-    protected function reorganizeRules(array $givenRules): array
+    protected function prepareRules(array $givenRules): array
     {
         foreach ($givenRules as $field => $rules) {
             // If the rules are given in the form of a string, convert them into 
@@ -196,9 +194,9 @@ class Validator
      *
      * @return \AdityaZanjad\Validator\Validator
      */
-    public function stopOnFirstFailure(bool $shouldStop = true): static
+    public function abortOnFail(bool $shouldStop = true): static
     {
-        $this->shouldStopOnFailure = $shouldStop;
+        $this->stopOnFail = $shouldStop;
         return $this;
     }
 
@@ -212,7 +210,7 @@ class Validator
     public function validate(): static
     {
         // Do not allow performing the same validation more than once.
-        if ($this->alreadyValidated) {
+        if ($this->validated) {
             throw new Exception("[Developer][Exception]: The validation for this instance has been already performed once.");
         }
 
@@ -234,12 +232,12 @@ class Validator
                 }
 
                 // Make necessary transformations to the error message.
-                $validationError = $this->messages[$field] ?? $evaluation['rule']->message();
-                $validationError = \str_replace(':{field}', $field, $validationError);
+                $error = $this->messages[$field] ?? $evaluation['rule']->message();
+                $error = \str_replace(':{field}', $field, $error);
 
-                $this->errors->add($field, $validationError);
+                $this->errors->add($field, $error);
 
-                if ($this->shouldStopOnFailure) {
+                if ($this->stopOnFail) {
                     break 2;
                 }
             }
@@ -249,7 +247,7 @@ class Validator
     }
 
     /**
-     * Obtain the instance for the rules provided in the string/callback format.
+     * Evaluate the rule when it is provided in a string format.
      *
      * @param   string|callable(string $field, mixed $value, \AdityaZanjad\Validator\Fluents\Input $input): bool    $rule
      * @param   string                                                                                              $field
@@ -280,12 +278,10 @@ class Validator
             ];
         }
 
-        // Prepare the arguments that may be required by the rule's constructor.
+        // Prepare the rule constructor arguments. Then, create its instance to to perform the validation.
         $arguments  =   isset($rule[1]) ? \preg_split('/(?<!\\\\),/', $rule[1]) : [];
         $arguments  =   \array_map(fn($arg) => \str_replace('\\,', ',', $arg), $arguments);
-
-        // Prepare the rule instance to perform the validation.
-        $instance = new $ruleClassName(...$arguments);
+        $instance   =   new $ruleClassName(...$arguments);
 
         // Perform the actual validation & return its result.
         return [
@@ -295,7 +291,7 @@ class Validator
     }
 
     /**
-     * Evaluate the validation rule from the given object.
+     * Evaluate the validation rule when it is provided as an object.
      *
      * @param   object      $rule
      * @param   string      $field
@@ -337,7 +333,7 @@ class Validator
      */
     public function failed(): bool
     {
-        return !$this->errors->isEmpty();
+        return !$this->errors->empty();
     }
 
     /**

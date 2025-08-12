@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace AdityaZanjad\Validator\Fluents;
 
-use Exception;
-
 use function AdityaZanjad\Validator\Utils\arr_first;
 
 /**
@@ -33,7 +31,7 @@ class Error
      *
      * @return bool
      */
-    public function isEmpty(): bool
+    public function empty(): bool
     {
         return empty($this->errors);
     }

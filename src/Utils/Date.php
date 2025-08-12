@@ -52,7 +52,7 @@ function parseDateTime($value, string $format = '')
  *
  * @return array<int, string>
  */
-function makeDateTimeFormats()
+function makeDateTimeFormats(): array
 {
     return [
         // --- ISO 8601 & Database Formats (Most Recommended & Unambiguous) ---
