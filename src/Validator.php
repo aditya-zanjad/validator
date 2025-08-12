@@ -68,9 +68,9 @@ class Validator
      */
     public function __construct(array $input, array $rules, array $messages = [])
     {
-        // Initialize & Transform certain values before performing the actual validation.
+        // Initialize & Transform the necessary data required to perform the actual validation.
         $this->input            =   new Input($input);
-        $this->rules            =   $this->prepareRules($rules);
+        $this->rules            =   $this->transformRules($rules);
         $this->messages         =   $messages;
         $this->errors           =   new Error();
         $this->abortWhenFails   =   false;
@@ -81,13 +81,13 @@ class Validator
      * Reorganize/Preprocess the given validation rules before they are actually evaluated.
      *
      * @param array<string, string|array<int|string, string|AbstractRule|callable(string $field, mixed $value): bool>>
-     * 
+     *
      * @return array<string, string|array<int|string, string|AbstractRule|callable(string $field, mixed $value): bool>>
      */
-    protected function prepareRules(array $givenRules): array
+    protected function transformRules(array $givenRules): array
     {
         foreach ($givenRules as $field => $rules) {
-            // If the rules are given in the form of a string, convert them into 
+            // If the rules are given in the form of a string, convert them into
             if (\is_string($rules)) {
                 $rules = \explode('|', $rules);
             }
@@ -98,11 +98,13 @@ class Validator
 
             $givenRules[$field] = $rules;
 
-            // If the current field contains wildcard paths, we need to find out the actual 
-            // paths corresponding to the wildcard parameters path and then add those 
-            // paths to the rules array.
+            /**
+             * If the current field contains wildcard paths, we need to find out 
+             * the actual paths corresponding to this and then add those paths 
+             * to the rules array.
+             */
             if (\preg_match('/(\*|\.\*)/', (string) $field) > 0) {
-                $givenRules = \array_merge($givenRules, $this->resolveWildCardsPath($field, $givenRules));
+                $givenRules += $this->resolveWildCardsPath($field, $givenRules);
                 unset($givenRules[$field]);
             }
         }
@@ -232,7 +234,8 @@ class Validator
                 }
 
                 // Make necessary transformations to the error message.
-                $error = \str_replace(':{field}', $field, $this->messages[$field] ?? $evaluation['rule']->message());
+                $error  = $this->messages[$field] ?? $evaluation['rule']->message();
+                $error  = \str_replace(':{field}', $field, $error);
 
                 $this->errors->add($field, $error);
 
@@ -248,9 +251,9 @@ class Validator
     /**
      * Evaluate the rule when it is provided in a string format.
      *
-     * @param   string|callable(string $field, mixed $value, \AdityaZanjad\Validator\Fluents\Input $input): bool    $rule
-     * @param   string                                                                                              $field
-     * @param   int|string                                                                                          $index
+     * @param   string      $rule
+     * @param   string      $field
+     * @param   int|string  $index
      *
      * @throws  \Exception
      *
@@ -292,7 +295,7 @@ class Validator
      * @param   object      $rule
      * @param   string      $field
      * @param   int|string  $index
-     * 
+     *
      * @throws  \Exception
      *
      * @return  array<string, null|bool|\AdityaZanjad\Validator\Base\AbstractRule>
@@ -301,14 +304,26 @@ class Validator
     {
         $instance = null;
 
+        /**
+         * After much thought or not so much thought I guess, unlike Laravel, I've decided
+         * to keep the callback validation rule as 'implicit/requisite'. It means that
+         * the callback validation will always be run regardless of whether the
+         * input field is present (NOT NULL) or not (NULL).
+         */
         if (\is_callable($rule)) {
             $instance = new Callback($rule);
         }
 
+        // The validation rule object should always end as an object of the 'AbstractRule' class no matter what.
         if (!$rule instanceof AbstractRule) {
             throw new Exception("[Developer][Exception]: The field [{$field}] has an invalid validation rule specified the index [{$index}].");
         }
 
+        /**
+         * The validation will be performed only when either of these are 'true':
+         *  [1] The input is NOT NULL.
+         *  [2] The rule implements the 'RequisiteRule' interface.
+         */
         if ($this->input->isNull($field) && !$instance instanceof RequisiteRule) {
             return ['result' => true];
         }

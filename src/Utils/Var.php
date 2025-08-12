@@ -30,6 +30,10 @@ function varSize($var)
             return ((bool) $var) ? 1 : 0;
 
         case 'string':
+            if (\function_exists('\\mb_strlen')) {
+                return \mb_strlen($var);
+            }
+
             return \strlen($var);
 
         case 'array':

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace AdityaZanjad\Validator\Traits;
 
 use AdityaZanjad\Validator\Validator;
-use function AdityaZanjad\Validator\Utils\validate;
-use function AdityaZanjad\Validator\Utils\validator;
+use function AdityaZanjad\Validator\validate;
+use function AdityaZanjad\Validator\validator;
 
 /**
  * @version 2.0
