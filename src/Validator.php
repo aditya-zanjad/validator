@@ -48,9 +48,9 @@ class Validator
     /**
      * Useful in deciding whether or not to stop the validator on first failure.
      *
-     * @var bool $stopOnFail
+     * @var bool $abortWhenFails
      */
-    protected bool $stopOnFail;
+    protected bool $abortWhenFails;
 
     /**
      * To check whether the validation has been already performed or not.
@@ -69,12 +69,12 @@ class Validator
     public function __construct(array $input, array $rules, array $messages = [])
     {
         // Initialize & Transform certain values before performing the actual validation.
-        $this->input        =   new Input($input);
-        $this->rules        =   $this->prepareRules($rules);
-        $this->messages     =   $messages;
-        $this->errors       =   new Error();
-        $this->stopOnFail   =   false;
-        $this->validated    =   false;
+        $this->input            =   new Input($input);
+        $this->rules            =   $this->prepareRules($rules);
+        $this->messages         =   $messages;
+        $this->errors           =   new Error();
+        $this->abortWhenFails   =   false;
+        $this->validated        =   false;
     }
 
     /**
@@ -190,13 +190,13 @@ class Validator
     /**
      * Stop the validation process immediately on the first validation failure.
      *
-     * @param bool $shouldStop
+     * @param bool $abortWhenFails
      *
      * @return \AdityaZanjad\Validator\Validator
      */
-    public function abortOnFail(bool $shouldStop = true): static
+    public function abortWhenFails(bool $abortWhenFails = true): static
     {
-        $this->stopOnFail = $shouldStop;
+        $this->abortWhenFails = $abortWhenFails;
         return $this;
     }
 
@@ -232,12 +232,11 @@ class Validator
                 }
 
                 // Make necessary transformations to the error message.
-                $error = $this->messages[$field] ?? $evaluation['rule']->message();
-                $error = \str_replace(':{field}', $field, $error);
+                $error = \str_replace(':{field}', $field, $this->messages[$field] ?? $evaluation['rule']->message());
 
                 $this->errors->add($field, $error);
 
-                if ($this->stopOnFail) {
+                if ($this->abortWhenFails) {
                     break 2;
                 }
             }
@@ -272,10 +271,7 @@ class Validator
         }
 
         if ($this->input->isNull($field) && !\in_array(RequisiteRule::class, class_implements($ruleClassName))) {
-            return [
-                'result'    =>  true,
-                'rule'      =>  null
-            ];
+            return ['result' => true];
         }
 
         // Prepare the rule constructor arguments. Then, create its instance to to perform the validation.
@@ -314,10 +310,7 @@ class Validator
         }
 
         if ($this->input->isNull($field) && !$instance instanceof RequisiteRule) {
-            return [
-                'result'    =>  true,
-                'rule'      =>  null
-            ];
+            return ['result' => true];
         }
 
         return [
