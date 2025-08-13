@@ -40,7 +40,8 @@ class Digits extends AbstractRule
      */
     public function check(string $field, $value): bool
     {
-        return \filter_var($value, FILTER_VALIDATE_INT) !== false && varDigits($value) === $this->validDigitsCount;
+        $digits = varDigits($value);
+        return !\is_null($digits) && $digits === $this->validDigitsCount;
     }
 
     /**

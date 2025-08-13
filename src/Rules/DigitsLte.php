@@ -15,24 +15,24 @@ use function AdityaZanjad\Validator\Utils\varDigits;
 class DigitsLte extends AbstractRule
 {
     /**
-     * @var int $maxAllowedDigits
+     * @var int $maxDigits
      */
-    protected int $maxAllowedDigits;
+    protected int $maxDigits;
 
     /**
      * Inject the data required to perform validation.
      *
-     * @param int|string $maxAllowedDigits
+     * @param int|string $maxDigits
      *
      * @throws \Exception
      */
-    public function __construct($maxAllowedDigits)
+    public function __construct($maxDigits)
     {
-        if (filter_var($maxAllowedDigits, FILTER_VALIDATE_INT) === false) {
+        if (filter_var($maxDigits, FILTER_VALIDATE_INT) === false) {
             throw new Exception("[Developer][Exception]: The parameter passed to the validation rule [digits_lte] must be the valid integer.");
         }
 
-        $this->maxAllowedDigits = (int) $maxAllowedDigits;
+        $this->maxDigits = (int) $maxDigits;
     }
 
     /**
@@ -40,7 +40,8 @@ class DigitsLte extends AbstractRule
      */
     public function check(string $field, $value): bool
     {
-        return filter_var($value, FILTER_VALIDATE_FLOAT) !== false && varDigits($value) <= $this->maxAllowedDigits;
+        $digits = varDigits($value);
+        return !\is_null($digits) && $digits <= $this->maxDigits;
     }
 
     /**
@@ -48,6 +49,6 @@ class DigitsLte extends AbstractRule
      */
     public function message(): string
     {
-        return "The field :{field} cannot contain more than {$this->maxAllowedDigits} digits.";
+        return "The field :{field} cannot contain more than {$this->maxDigits} digits.";
     }
 }

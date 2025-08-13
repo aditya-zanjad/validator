@@ -234,8 +234,8 @@ class Validator
                 }
 
                 // Make necessary transformations to the error message.
-                $error  = $this->messages[$field] ?? $evaluation['rule']->message();
-                $error  = \str_replace(':{field}', $field, $error);
+                $error = $this->messages[$field] ?? $evaluation['rule']->message();
+                $error = \str_replace(':{field}', $field, $error);
 
                 $this->errors->add($field, $error);
 

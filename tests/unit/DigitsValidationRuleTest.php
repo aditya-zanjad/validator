@@ -27,10 +27,14 @@ final class DigitsValidationRuleTest extends TestCase
     {
         $validator = validate([
             'pin' => 12345,
-            'id'  => '98765'
+            'id'  => '98765',
+            'abc' => '12345.5789',
+            'def' => 43581.234235235
         ], [
             'pin' => 'digits:5',
-            'id'  => 'digits:5'
+            'id'  => 'digits:5',
+            'abc' => 'digits:5',
+            'def' => 'digits:5'
         ]);
 
         $this->assertFalse($validator->failed());
@@ -38,6 +42,8 @@ final class DigitsValidationRuleTest extends TestCase
         $this->assertNull($validator->errors()->first());
         $this->assertNull($validator->errors()->firstOf('pin'));
         $this->assertNull($validator->errors()->firstOf('id'));
+        $this->assertNull($validator->errors()->firstOf('abc'));
+        $this->assertNull($validator->errors()->firstOf('def'));
     }
 
     /**
@@ -51,7 +57,7 @@ final class DigitsValidationRuleTest extends TestCase
             'pin'       =>  1234,      // Fails: too short
             'id'        =>  '987654',  // Fails: too long
             'code'      =>  'abcde',  // Fails: not all digits
-            'long_pin'  =>  '123456789123456789'
+            'long_pin'  =>  '1234567891.23456789'
         ], [
             'pin'       =>  'digits:5',
             'id'        =>  'digits:5',

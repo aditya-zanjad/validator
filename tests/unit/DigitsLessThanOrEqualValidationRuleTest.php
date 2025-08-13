@@ -26,11 +26,13 @@ final class DigitsLessThanOrEqualValidationRuleTest extends TestCase
     public function testAssertionsPass(): void
     {
         $validator = validate([
-            'code' => '12345',  // Exact length
-            'pin'  => 1234,     // Shorter length
+            'code'  =>  '12345',  // Exact length
+            'pin'   =>  1234,     // Shorter length,
+            'abc'   =>  1236.1235,
         ], [
-            'code' => 'digits_lte:5',
-            'pin'  => 'digits_lte:5'
+            'code'  =>  'digits_lte:5',
+            'pin'   =>  'digits_lte:5',
+            'abc'   =>  'digits_lte:5'
         ]);
 
         $this->assertFalse($validator->failed());
@@ -38,6 +40,7 @@ final class DigitsLessThanOrEqualValidationRuleTest extends TestCase
         $this->assertNull($validator->errors()->first());
         $this->assertNull($validator->errors()->firstOf('code'));
         $this->assertNull($validator->errors()->firstOf('pin'));
+        $this->assertNull($validator->errors()->firstOf('abc'));
     }
 
     /**
@@ -48,13 +51,15 @@ final class DigitsLessThanOrEqualValidationRuleTest extends TestCase
     public function testAssertionsFail(): void
     {
         $validator = validate([
-            'code' => '123456', // Fails: too long
-            'pin'  => 'abc',    // Fails: not all digits
-            'num'  => 12345678910
+            'code'  =>  '123456', // Fails: too long
+            'pin'   =>  'abc',    // Fails: not all digits
+            'num'   =>  12345678910,
+            'abc'   =>  '1234135.3141341341343'
         ], [
-            'code' => 'digits_lte:5',
-            'pin'  => 'digits_lte:5',
-            'num'  => 'digits_lte:5'
+            'code'  =>  'digits_lte:5',
+            'pin'   =>  'digits_lte:5',
+            'num'   =>  'digits_lte:5',
+            'abc'   =>  'digits_lte:5'
         ]);
 
         $this->assertTrue($validator->failed());
@@ -63,5 +68,6 @@ final class DigitsLessThanOrEqualValidationRuleTest extends TestCase
         $this->assertNotNull($validator->errors()->firstOf('code'));
         $this->assertNotNull($validator->errors()->firstOf('pin'));
         $this->assertNotNull($validator->errors()->firstOf('num'));
+        $this->assertNotNull($validator->errors()->firstOf('abc'));
     }
 }

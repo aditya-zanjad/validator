@@ -64,15 +64,15 @@ function varSize($var)
  *
  * @throws  \Exception
  *
- * @return  int
+ * @return  null|int
  */
-function varDigits(int|float|string $var): int
+function varDigits(int|float|string $var): ?int
 {
-    if (filter_var($var, FILTER_VALIDATE_INT) === false || filter_var($var, FILTER_VALIDATE_FLOAT) === false) {
-        throw new Exception("[Developer][Exception]: The parameter must be either an Integer OR a Float value.");
+    if (\filter_var($var, FILTER_VALIDATE_FLOAT) === false) {
+        return null;
     }
 
-    if ($var === 0) {
+    if (((int) $var) === 0) {
         return 1;
     }
 
