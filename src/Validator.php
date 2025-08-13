@@ -213,7 +213,7 @@ class Validator
     {
         // Do not allow performing the same validation more than once.
         if ($this->validated) {
-            throw new Exception("[Developer][Exception]: The validation for this instance has been already performed once.");
+            throw new Exception("[Developer][Exception]: The validation for this instance has already been done. Create a new validator instance to perform a new validation.");
         }
 
         foreach ($this->rules as $field => $rules) {

@@ -26,29 +26,18 @@ function varSize($var)
         case 'double':
             return $var;
 
+        case 'bool':
         case 'boolean':
             return ((bool) $var) ? 1 : 0;
 
         case 'string':
-            if (\function_exists('\\mb_strlen')) {
-                return \mb_strlen($var);
-            }
-
-            return \strlen($var);
+            return varStringSize($var);
 
         case 'array':
             return \count($var);
 
         case 'resource':
-            $metadata = \stream_get_meta_data($var);
-
-            switch ($metadata['wrapper_type']) {
-                case 'plainfile':
-                    return \filesize($var);
-
-                default:
-                    return \strlen($var);
-            }
+            return varFileSize($var);
 
             // no break
         default:
@@ -58,15 +47,53 @@ function varSize($var)
 }
 
 /**
+ * Get the size of a file from the given file path/resource
+ *
+ * @param mixed $var
+ * 
+ * @return null|int
+ */
+function varFileSize(mixed $var): ?int
+{
+    $metadata = \stream_get_meta_data($var);
+
+    if ($metadata['wrapper_type'] !== 'plainfile') {
+        return null;
+    }
+
+    $stats = \fstat($var);
+    return $stats['size'];
+}
+
+/**
+ * Get the size of the given string.
+ *
+ * @param string $var
+ * @return void
+ */
+function varStringSize(string $var)
+{
+    if (is_file($var)) {
+        return filesize($var);
+    }
+
+    if (\function_exists('\\mb_strlen')) {
+        return \mb_strlen($var);
+    }
+
+    return \strlen($var);
+}
+
+/**
  * Find out the number of digits in a number.
  *
- * @param   int|float|string $var
+ * @param mixed $var
  *
- * @throws  \Exception
+ * @throws \Exception
  *
- * @return  null|int
+ * @return null|int
  */
-function varDigits(int|float|string $var): ?int
+function varDigits(mixed $var): ?int
 {
     if (\filter_var($var, FILTER_VALIDATE_FLOAT) === false) {
         return null;
