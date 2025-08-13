@@ -9,13 +9,13 @@ use AdityaZanjad\Validator\Fluents\Input;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversFunction;
 
-use function AdityaZanjad\Validator\validate;
+use function AdityaZanjad\Validator\Presets\validate;
 
 #[CoversClass(Validator::class)]
 #[CoversClass(Error::class)]
 #[CoversClass(Input::class)]
 #[CoversClass(Date::class)]
-#[CoversFunction('\AdityaZanjad\Validator\validate')]
+#[CoversFunction('\AdityaZanjad\Validator\Presets\validate')]
 final class DateValidationRuleTest extends TestCase
 {
     /**

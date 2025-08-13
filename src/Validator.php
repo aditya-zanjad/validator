@@ -48,9 +48,9 @@ class Validator
     /**
      * Useful in deciding whether or not to stop the validator on first failure.
      *
-     * @var bool $abortWhenFails
+     * @var bool $abortOnFail
      */
-    protected bool $abortWhenFails;
+    protected bool $abortOnFail;
 
     /**
      * To check whether the validation has been already performed or not.
@@ -69,12 +69,12 @@ class Validator
     public function __construct(array $input, array $rules, array $messages = [])
     {
         // Initialize & Transform the necessary data required to perform the actual validation.
-        $this->input            =   new Input($input);
-        $this->rules            =   $this->transformRules($rules);
-        $this->messages         =   $messages;
-        $this->errors           =   new Error();
-        $this->abortWhenFails   =   false;
-        $this->validated        =   false;
+        $this->input        =   new Input($input);
+        $this->rules        =   $this->transformRules($rules);
+        $this->messages     =   $messages;
+        $this->errors       =   new Error();
+        $this->abortOnFail  =   false;
+        $this->validated    =   false;
     }
 
     /**
@@ -192,13 +192,13 @@ class Validator
     /**
      * Stop the validation process immediately on the first validation failure.
      *
-     * @param bool $abortWhenFails
+     * @param bool $abortOnFail
      *
      * @return \AdityaZanjad\Validator\Validator
      */
-    public function abortWhenFails(bool $abortWhenFails = true): static
+    public function abortOnFail(bool $abortOnFail = true): static
     {
-        $this->abortWhenFails = $abortWhenFails;
+        $this->abortOnFail = $abortOnFail;
         return $this;
     }
 
@@ -239,7 +239,7 @@ class Validator
 
                 $this->errors->add($field, $error);
 
-                if ($this->abortWhenFails) {
+                if ($this->abortOnFail) {
                     break 2;
                 }
             }
@@ -273,6 +273,11 @@ class Validator
             throw new Exception("[Developer][Exception]: The field [{$field}] has an invalid validation rule [{$ruleClassName}] at the index [{$index}].");
         }
 
+        /**
+         * The validation should be performed only when either of these conditions is true:
+         *  [1] The input is NOT NULL
+         *  [2] The rule is set to be run mandatorily regardless of whether the input is present (NOT NULL) or not (NULL).
+         */
         if ($this->input->isNull($field) && !\in_array(RequisiteRule::class, class_implements($ruleClassName))) {
             return ['result' => true];
         }

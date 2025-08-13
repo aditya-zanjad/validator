@@ -76,7 +76,7 @@ function varDigits(int|float|string $var): int
         return 1;
     }
 
-    return (int) (\log($var, 10) + 1);
+    return (int) (\log((float) $var, 10) + 1);
 }
 
 /**
