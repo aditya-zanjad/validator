@@ -7,6 +7,7 @@ namespace AdityaZanjad\Validator\Rules;
 use Exception;
 use AdityaZanjad\Validator\Base\AbstractRule;
 
+use function AdityaZanjad\Validator\Utils\varMakeSize;
 use function AdityaZanjad\Validator\Utils\varSize;
 
 /**
@@ -15,22 +16,30 @@ use function AdityaZanjad\Validator\Utils\varSize;
 class LessThanOrEqual extends AbstractRule
 {
     /**
-     * @var int|string $comparingSize
+     * @var int|float|string $givenSize
      */
-    protected $comparingSize;
+    protected $givenSize;
+
+    /**
+     * @var int|float $givenSize
+     */
+    protected int|float $minSize;
 
     /**
      * Inject the dependencies required to execute the validation logic in this rule.
      *
-     * @param mixed ...$comparingSize
+     * @param mixed $givenSize
      */
-    public function __construct($comparingSize)
+    public function __construct(mixed $givenSize)
     {
-        if (filter_var($comparingSize, FILTER_VALIDATE_INT) === false && filter_var($comparingSize, FILTER_VALIDATE_FLOAT) === false) {
-            throw new Exception("[Developer][Exception]: The validation rule [lte] requires its parameter to be either an Integer or a Float.");
+        $this->givenSize    =   $givenSize;
+        $givenSize          =   varMakeSize($givenSize);
+
+        if (\is_null($givenSize)) {
+            throw new Exception("[Developer][Exception]: The validation rule [size] accepts only one parameter which should be either an [INTEGER], [FLOAT] or a [STRING].");
         }
 
-        $this->comparingSize = $comparingSize;
+        $this->minSize = $givenSize;
     }
 
     /**
@@ -38,7 +47,7 @@ class LessThanOrEqual extends AbstractRule
      */
     public function check(string $field, $value): bool
     {
-        return varSize($value) <= $this->comparingSize;
+        return varSize($value) <= $this->minSize;
     }
 
     /**
@@ -46,6 +55,6 @@ class LessThanOrEqual extends AbstractRule
      */
     public function message(): string
     {
-        return "The field :{field} must be less than or equal to {$this->comparingSize}";
+        return "The field :{field} must be less than or equal to {$this->givenSize}";
     }
 }

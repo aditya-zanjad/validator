@@ -94,16 +94,20 @@ final class FileValidationRuleTest extends TestCase
             'file_002'  =>  '/invalid_directory/invalid_file.json',
             'file_003'  =>  'This is a test string',
             'file_004'  =>  @fopen('/path/to/invalid/file.txt', 'r'),
-            'file_005'  =>  file_get_contents('/path/to/invalid/file.txt')
+            'file_005'  =>  @file_get_contents('/path/to/invalid/file.txt')
         ], [
             'file_002'  =>  'file',
             'file_003'  =>  'file',
+            'file_004'  =>  'file',
+            'file_005'  =>  'file',
         ]);
 
         $this->assertTrue($validator->failed());
         $this->assertNotEmpty($validator->errors()->all());
         $this->assertNotEmpty($validator->errors()->firstOf('file_002'));
         $this->assertNotEmpty($validator->errors()->firstOf('file_003'));
+        $this->assertNotEmpty($validator->errors()->firstOf('file_004'));
+        $this->assertNotEmpty($validator->errors()->firstOf('file_005'));
     }
 
     /**

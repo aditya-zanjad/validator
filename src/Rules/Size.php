@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace AdityaZanjad\Validator\Rules;
 
+use Exception;
 use AdityaZanjad\Validator\Base\AbstractRule;
 
 use function AdityaZanjad\Validator\Utils\varSize;
+use function AdityaZanjad\Validator\Utils\varMakeSize;
 use function AdityaZanjad\Validator\Utils\varEvaluateType;
 
 /**
@@ -17,19 +19,36 @@ class Size extends AbstractRule
     /**
      * @var string $message
      */
-    protected string $message;  
+    protected string $message;
 
     /**
-     * @var $validSize
+     * The user-supplied size for validating the size of the input value.
+     *
+     * @var int|float|string
      */
-    protected $validSize;
+    protected int|float|string $givenSize;
 
     /**
-     * @param mixed $size
+     * The actual processed value from the user-supplied value that'll be utilized for the validation of the given value.
+     *
+     * @var int|float $validSize
      */
-    public function __construct($size)
+    protected int|float $validSize;
+
+    /**
+     * @param mixed $givenSize
+     */
+    public function __construct(mixed $givenSize)
     {
-        $this->validSize = varEvaluateType($size);
+        $evaluatedSize = varEvaluateType($givenSize);
+        $evaluatedSize = varMakeSize($givenSize);
+
+        if (\is_null($evaluatedSize)) {
+            throw new Exception("[Developer][Exception]: The validation rule [size] accepts only one parameter & it should be either an [INTEGER], [FLOAT] or a [STRING]. Make sure that you've provided the correct parameter to this validation rule.");
+        }
+
+        $this->givenSize = $givenSize;
+        $this->validSize = $evaluatedSize;
     }
 
     /**
@@ -37,36 +56,14 @@ class Size extends AbstractRule
      */
     public function check(string $field, $value): bool
     {
-        $size               =   varSize($value);
-        $valueSizeIsValid   =   $size === $this->validSize || $size == $this->validSize;
+        $size = varSize($value);
 
-        if ($valueSizeIsValid) {
-            return true;
+        if ($size !== $this->validSize && $size != $this->validSize) {
+            $this->message = $this->makeErrorMessage($field, $value);
+            return false;
         }
 
-        // Depending on the data type of the current value, we'll dynamically prepare the error message.
-        switch (gettype($value)) {
-            case 'array':
-                $this->message = "The array {$field} must contain exactly {$this->validSize} elements.";
-
-            case 'string':
-                $this->message = "The string {$field} must contain exactly {$this->validSize} elements.";
-
-            case 'resource':
-                $this->message = "The resource {$field} must be of the length {$this->validSize} bytes.";
-
-            case 'float':
-            case 'double':
-                $this->message = "The field {$field} must be equal to the float value {$this->validSize}.";
-
-            case 'integer':
-                $this->message = "The field {$field} must be equal to the integer value {$this->validSize}.";
-
-            default:
-                $this->message = "The size of the field {$field} must be equal to {$this->validSize}.";
-        }
-
-        return false;
+        return true;
     }
 
     /**
@@ -75,5 +72,23 @@ class Size extends AbstractRule
     public function message(): string
     {
         return $this->message;
+    }
+
+    /**
+     * Make the error message based on the data type of the given value.
+     *
+     * @param   string  $field
+     * @param   mixed   $value
+     *
+     * @return  string
+     */
+    protected function makeErrorMessage(string $field, mixed $value): string
+    {
+        return match (gettype($value)) {
+            'array'                         =>  "The array {$field} must contain exactly {$this->givenSize} elements.",
+            'string'                        =>  \is_file($value) ? "The file {$field} must have the exact size: {$this->givenSize}." : "The string {$field} must have the exact size: {$this->givenSize}.",
+            'integer', 'float', 'double'    =>  "The numeric {$field} must be exactly equal to the size: {$this->givenSize}.",
+            default                         =>  "The field {$field} must have the exact size: {$this->givenSize}"
+        };
     }
 }

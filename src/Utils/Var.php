@@ -69,6 +69,7 @@ function varFileSize(mixed $var): ?int
  * Get the size of the given string.
  *
  * @param string $var
+ * 
  * @return void
  */
 function varStringSize(string $var)
@@ -139,4 +140,45 @@ function varEvaluateType($var)
     }
 
     return $var;
+}
+
+/**
+ * Prepare the size value depending on the provided parameter(s).
+ * 
+ * If the size value is either an integer
+ *
+ * @param mixed $size
+ * 
+ * @return mixed
+ */
+function varMakeSize(mixed $size): mixed
+{
+    if (filter_var($size, FILTER_VALIDATE_FLOAT) !== false) {
+        return (float) $size;
+    }
+
+    if (filter_var($size, FILTER_VALIDATE_INT) !== false) {
+        return (int) $size;
+    }
+
+    if (!\is_string($size)) {
+        return null;
+    }
+
+    $size           =   \str_replace(' ', '', $size);
+    $sizeUnit       =   \substr($size, -2);
+    $sizeUnit       =   \strtoupper($sizeUnit);
+    $sizeInNumeric  =   \substr($size, 0, \strlen($size) - 2);
+
+    if (filter_var($sizeInNumeric, FILTER_VALIDATE_FLOAT) === false && filter_var($sizeInNumeric, FILTER_VALIDATE_INT) === false) {
+        return null;
+    }
+
+    return (int) match ($sizeUnit) {
+        'B'     =>  $sizeInNumeric,
+        'KB'    =>  $sizeInNumeric * 1024,
+        'MB'    =>  $sizeInNumeric * 1024 * 1024,
+        'GB'    =>  $sizeInNumeric * 1024 * 1024 * 1024,
+        default =>  throw new Exception("[Developer][Exception]: The given file size unit [{$sizeUnit}] is invalid/unsupported.")
+    };
 }
