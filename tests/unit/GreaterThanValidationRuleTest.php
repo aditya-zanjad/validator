@@ -135,11 +135,11 @@ class GreaterThanValidationRuleTest extends TestCase
             'mno'   =>  '1234.123',
             ...$this->files
         ], [
-            'abc'   =>  'gt:1',
-            'def'   =>  'gt:100',
-            'ghi'   =>  'gt:0',
-            'jkl'   =>  'gt:-1',
-            'mno'   =>  'gt:1234.213',
+            'abc'       =>  'gt:1',
+            'def'       =>  'gt:100',
+            'ghi'       =>  'gt:0',
+            'jkl'       =>  'gt:-1',
+            'mno'       =>  'gt:1234.213',
             'file_001'  =>  'gt: 4.5MB',
             'file_002'  =>  'gt: 1236123124.123 KB',
             'file_003'  =>  'gt: 12312411231241'

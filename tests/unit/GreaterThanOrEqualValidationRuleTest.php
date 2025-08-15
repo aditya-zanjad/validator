@@ -94,15 +94,19 @@ class GreaterThanOrEqualValidationRuleTest extends TestCase
               'def' =>  '101',
               'ghi' =>  1,
               'jkl' =>  0,
+              'mno' =>  '1234! Get on the dance floor!',
+              'pqr' =>  100.200,
             ...$this->files
         ], [
-            'abc'       =>  'gte:1',
-            'def'       =>  'gte:100',
-            'ghi'       =>  'gte:-100',
-            'jkl'       =>  'gte:-1',
-            'file_001'  =>  'gte: 2MB',
-            'file_002'  =>  'gte: 2048 KB',
-            'file_003'  =>  'gte: 2097152'
+            'abc'       =>  'gte:    1 ',
+            'def'       =>  'gte: 100',
+            'ghi'       =>  'gte:-100 ',
+            'jkl'       =>  'gte: -1 ',
+            'mno'       =>  'gte: 15 ',
+            'pqr'       =>  'gte:100',
+            'file_001'  =>  'gte: 2 MB',
+            'file_002'  =>  'gte: 2048     KB',
+            'file_003'  =>  'gte:2097152   '
         ]);
 
         $this->assertFalse($validator->failed());
@@ -112,6 +116,7 @@ class GreaterThanOrEqualValidationRuleTest extends TestCase
         $this->assertNull($validator->errors()->firstOf('def'));
         $this->assertNull($validator->errors()->firstOf('ghi'));
         $this->assertNull($validator->errors()->firstOf('jkl'));
+        $this->assertNull($validator->errors()->firstOf('mno'));
         $this->assertNull($validator->errors()->firstOf('file_001'));
         $this->assertNull($validator->errors()->firstOf('file_002'));
         $this->assertNull($validator->errors()->firstOf('file_003'));
@@ -129,12 +134,14 @@ class GreaterThanOrEqualValidationRuleTest extends TestCase
               'def' =>  '100',
               'ghi' =>  '-1',
               'jkl' =>  -100,
+              'mno' =>  '1234.32525',
             ...$this->files
         ], [
             'abc'       =>  'gte:3',
             'def'       =>  'gt:101',
             'ghi'       =>  'gte:0',
             'jkl'       =>  'gte:-1',
+            'mno'       =>  'gte: 1235',
             'file_001'  =>  'gte: 4MB',
             'file_002'  =>  'gte: 2049 KB',
             'file_003'  =>  'gte: 2097153'

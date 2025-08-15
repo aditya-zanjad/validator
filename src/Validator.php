@@ -270,7 +270,7 @@ class Validator
         $ruleClassName  =   Rule::valueOf($rule[0]);
 
         if (\is_null($ruleClassName)) {
-            throw new Exception("[Developer][Exception]: The field [{$field}] has an invalid validation rule [{$ruleClassName}] at the index [{$index}].");
+            throw new Exception("[Developer][Exception]: The field [{$field}] has an invalid validation rule [{$rule[0]}] at the index [{$index}].");
         }
 
         /**
@@ -278,7 +278,7 @@ class Validator
          *  [1] The input is NOT NULL
          *  [2] The rule is set to be run mandatorily regardless of whether the input is present (NOT NULL) or not (NULL).
          */
-        if ($this->input->isNull($field) && !\in_array(RequisiteRule::class, class_implements($ruleClassName))) {
+        if ($this->input->isNull($field) && !\in_array(RequisiteRule::class, \class_implements($ruleClassName))) {
             return ['result' => true];
         }
 
