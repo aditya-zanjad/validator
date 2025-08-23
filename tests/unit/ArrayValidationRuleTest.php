@@ -9,13 +9,13 @@ use AdityaZanjad\Validator\Rules\TypeArray;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversFunction;
 
-use function AdityaZanjad\Validator\validate;
+use function AdityaZanjad\Validator\Presets\validate;
 
 #[CoversClass(Validator::class)]
 #[CoversClass(Error::class)]
 #[CoversClass(Input::class)]
 #[CoversClass(TypeArray::class)]
-#[CoversFunction('\AdityaZanjad\Validator\validate')]
+#[CoversFunction('\AdityaZanjad\Validator\Presets\validate')]
 final class ArrayValidationRuleTest extends TestCase
 {
     /**

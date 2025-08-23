@@ -12,14 +12,22 @@ use AdityaZanjad\Validator\Base\AbstractRule;
 class TypeString extends AbstractRule
 {
     /**
-     * @var string $message
-     */
-    protected string $message;
-
-    /**
+     * The Regular Expression to apply on the string.
+     * 
+     * It can be either a valid regular expression or it can be an empty string. As a valid
+     * regular expression, it'll be applied to validate the string. If it's an empty
+     * string, its validation will be skipped.
+     * 
      * @var string $regex
      */
     protected string $regex;
+
+    /**
+     * The validation error message.
+     * 
+     * @var string $message
+     */
+    protected string $message;
 
     /**
      * @param string $regex
@@ -39,8 +47,17 @@ class TypeString extends AbstractRule
             return false;
         }
 
-        if (!empty($this->regex) && \preg_match($this->regex, $value) === false) {
-            $this->message = "The field :{field} must be string matching with the regex {$this->regex}.";
+        if (empty($this->regex)) {
+            return true;
+        }
+
+        if (\function_exists('\\mb_ereg_match') && \mb_ereg_match($this->regex, $value) === false) {
+            $this->message = "The field :{field} must be a string & match the regex pattern: {$this->regex}.";
+            return false;
+        }
+
+        if (\preg_match($this->regex, $value) === false) {
+            $this->message = "The field :{field} must be a string & match the regex pattern: {$this->regex}.";
             return false;
         }
 

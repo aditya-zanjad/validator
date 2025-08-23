@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AdityaZanjad\Validator\Rules;
 
 use Exception;
+use InvalidArgumentException;
 use AdityaZanjad\Validator\Base\AbstractRule;
 
 /**
@@ -22,12 +23,12 @@ class Callback extends AbstractRule
     /**
      * To contain & execute the callback function.
      *
-     * @var callable $fn
+     * @var callable(string $field, mixed $value, \AdityaZanjad\Validator\Fluents\Input $input): bool $fn
      */
     protected $fn;
 
     /**
-     * @param callable(string $field, mixed $value, \AdityaZanjad\Validator\Fluents\Input $input): bool|string $fn
+     * @param callable(string $field, mixed $value, \AdityaZanjad\Validator\Fluents\Input $input): bool $fn
      */
     public function __construct(callable $fn)
     {
@@ -41,18 +42,23 @@ class Callback extends AbstractRule
      */
     public function check(string $field, $value): bool
     {
-        $result = ($this->fn)($field, $value, $this->input);
-
-        if (\is_string($result)) {
-            $this->message = $result;   
-            return false;
+        try {
+            $result = ($this->fn)($field, $value, $this->input);
+        } catch (InvalidArgumentException $e) {
+            // var_dump($e); exit;
+            throw new Exception("[Developer][Exception]: The field [{$field}] has callback validation rule(s) passed with invalid argument(s).");
         }
 
         if (\is_bool($result)) {
             return $result;
         }
 
-        throw new Exception("[Developer][Exception]: The callback validation rule for the field [{$field}] must return either a [BOOLEAN] or a [STRING] value.");
+        if (\is_string($result)) {
+            throw new Exception("[Developer][Exception]: The field [{$field}] has callback validation that must return either a [BOOLEAN] or a [STRING] value.");
+        }
+        
+        $this->message = $result;
+        return false;
     }
 
     /**

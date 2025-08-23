@@ -26,25 +26,18 @@ function varSize($var)
         case 'double':
             return $var;
 
+        case 'bool':
         case 'boolean':
             return ((bool) $var) ? 1 : 0;
 
         case 'string':
-            return \strlen($var);
+            return varStringSize($var);
 
         case 'array':
             return \count($var);
 
         case 'resource':
-            $metadata = \stream_get_meta_data($var);
-
-            switch ($metadata['wrapper_type']) {
-                case 'plainfile':
-                    return \filesize($var);
-
-                default:
-                    return \strlen($var);
-            }
+            return varFileSize($var);
 
         default:
             throw new Exception("[Developer][Exception]: The given parameter has an invalid data type.");
@@ -52,25 +45,63 @@ function varSize($var)
 }
 
 /**
- * Find out the number of digits in a number.
+ * Get the size of a file from the given file path/resource
  *
- * @param   int|float|string $var
- *
- * @throws  \Exception
- *
- * @return  int
+ * @param mixed $var
+ * 
+ * @return null|int
  */
-function varDigits(int|float|string $var): int
+function varFileSize(mixed $var): ?int
 {
-    if (filter_var($var, FILTER_VALIDATE_INT) === false || filter_var($var, FILTER_VALIDATE_FLOAT) === false) {
-        throw new Exception("[Developer][Exception]: The parameter must be either an [INTEGER] OR [FLOAT] value.");
+    $metadata = \stream_get_meta_data($var);
+
+    if ($metadata['wrapper_type'] !== 'plainfile') {
+        return null;
     }
 
-    if ($var === 0) {
+    $stats = \fstat($var);
+    return $stats['size'];
+}
+
+/**
+ * Get the size of the given string.
+ *
+ * @param string $var
+ * @return void
+ */
+function varStringSize(string $var)
+{
+    if (is_file($var)) {
+        return filesize($var);
+    }
+
+    if (\function_exists('\\mb_strlen')) {
+        return \mb_strlen($var);
+    }
+
+    return \strlen($var);
+}
+
+/**
+ * Find out the number of digits in a number.
+ *
+ * @param mixed $var
+ *
+ * @throws \Exception
+ *
+ * @return null|int
+ */
+function varDigits(mixed $var): ?int
+{
+    if (\filter_var($var, FILTER_VALIDATE_FLOAT) === false) {
+        return null;
+    }
+
+    if (((int) $var) === 0) {
         return 1;
     }
 
-    return (int) (\log($var, 10) + 1);
+    return (int) (\log((float) $var, 10) + 1);
 }
 
 /**

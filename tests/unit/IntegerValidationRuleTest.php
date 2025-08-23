@@ -11,14 +11,14 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use AdityaZanjad\Validator\Rules\TypeInteger;
 use PHPUnit\Framework\Attributes\CoversFunction;
 
-use function AdityaZanjad\Validator\validate;
+use function AdityaZanjad\Validator\Presets\validate;
 
 #[UsesClass(Validator::class)]
 #[CoversClass(Error::class)]
 #[CoversClass(Input::class)]
 #[CoversClass(Required::class)]
 #[CoversClass(TypeInteger::class)]
-#[CoversFunction('\AdityaZanjad\Validator\validate')]
+#[CoversFunction('\AdityaZanjad\Validator\Presets\validate')]
 class IntegerValidationRuleTest extends TestCase
 {
     /**

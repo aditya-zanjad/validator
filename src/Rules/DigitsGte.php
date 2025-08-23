@@ -15,24 +15,24 @@ use function AdityaZanjad\Validator\Utils\varDigits;
 class DigitsGte extends AbstractRule
 {
     /**
-     * @var int $minimumDigitsRequired
+     * @var int $minDigits
      */
-    protected int $minimumDigitsRequired;
+    protected int $minDigits;
 
     /**
      * Inject the data required to perform validation.
      *
-     * @param int|string $minimumDigitsRequired
+     * @param int|string $minDigits
      *
      * @throws \Exception
      */
-    public function __construct($minimumDigitsRequired)
+    public function __construct($minDigits)
     {
-        if (filter_var($minimumDigitsRequired, FILTER_VALIDATE_INT) === false) {
+        if (filter_var($minDigits, FILTER_VALIDATE_INT) === false) {
             throw new Exception("[Developer][Exception]: The parameter passed to the validation rule [digits_gte] must be the valid integer.");
         }
 
-        $this->minimumDigitsRequired = (int) $minimumDigitsRequired;
+        $this->minDigits = (int) $minDigits;
     }
 
     /**
@@ -40,15 +40,8 @@ class DigitsGte extends AbstractRule
      */
     public function check(string $field, $value): bool
     {
-        if (filter_var($value, FILTER_VALIDATE_INT) === false || filter_var($value, FILTER_VALIDATE_FLOAT) === false) {
-            return false;
-        }
-
-        if (varDigits($value) < $this->minimumDigitsRequired) {
-            return false;
-        }
-
-        return true;
+        $digits = varDigits($value);
+        return !\is_null($digits) && varDigits($value) >= $this->minDigits;
     }
 
     /**
@@ -56,6 +49,6 @@ class DigitsGte extends AbstractRule
      */
     public function message(): string
     {
-        return "The field :{field} must contain minimum {$this->minimumDigitsRequired} digits.";
+        return "The field :{field} must contain minimum {$this->minDigits} digits.";
     }
 }
