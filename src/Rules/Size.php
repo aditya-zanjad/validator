@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace AdityaZanjad\Validator\Rules;
 
-use AdityaZanjad\Validator\Base\AbstractRule;
 use Exception;
+use AdityaZanjad\Validator\Base\AbstractRule;
 
 use function AdityaZanjad\Validator\Utils\varSize;
-use function AdityaZanjad\Validator\Utils\varEvaluateType;
 
 /**
  * @version 1.0
@@ -18,19 +17,29 @@ class Size extends AbstractRule
     /**
      * @var string $message
      */
-    protected string $message;  
+    protected string $message;
 
     /**
-     * @var $validSize
+     * The user-supplied size for validating the size of the input value.
+     *
+     * @var int|float|string
      */
-    protected $validSize;
+    protected int|float|string $givenSize;
 
     /**
-     * @param mixed $size
+     * @var int|float $validSize
      */
-    public function __construct(string $size)
+    protected int|float $validSize;
+
+    /**
+     * The actual processed value from the user-supplied value that'll be utilized for the validation of the given value.
+     *
+     * @var int|float $validSize
+     */
+    public function __construct(int|float|string $givenSize)
     {
-        $this->validSize = $this->transformGivenSize($size);
+        $this->givenSize    =   $givenSize;
+        $this->validSize    =   $this->transformGivenSize($givenSize);
     }
 
     /**
@@ -39,13 +48,12 @@ class Size extends AbstractRule
     public function check(string $field, $value): bool
     {
         $size = varSize($value);
-        $valueSizeIsValid   =   $size === $this->validSize || $size == $this->validSize;
 
-        if ($valueSizeIsValid) {
+        if ($size === $this->validSize || $size == $this->validSize) {
+            // Depending on the data type of the current value, we'll dynamically prepare the error message.
             return true;
         }
 
-        // Depending on the data type of the current value, we'll dynamically prepare the error message.
         $this->message = match (gettype($value)) {
             'array'             =>  "The array {$field} must contain exactly {$this->validSize} elements.",
             'string'            =>  "The string {$field} must contain exactly {$this->validSize} elements.",
@@ -66,16 +74,29 @@ class Size extends AbstractRule
         return $this->message;
     }
 
-    protected function transformFileSize(string $size)
+    protected function transformGivenSize(mixed $value): int|float
+    {
+        if (filter_var($value, FILTER_VALIDATE_FLOAT) !== false) {
+            return (float) $value;
+        }
+
+        if (filter_var($value, FILTER_VALIDATE_INT) !== false) {
+            return (int) $value;
+        }
+
+        return $this->transformFileSize($value);
+    }
+
+    protected function transformFileSize(string $size): int|float
     {
         $size           =   \str_replace(' ', '', $size);
         $lastTwoChars   =   \substr($size, -1, 2);
 
         return match ($lastTwoChars) {
-            'B', 'bytes'    =>  $size,
-            'KB'            =>  $size * 1024,
-            'MB'            =>  $size * 1024 * 1024,
-            'GB'            =>  $size * 1024 * 1024 * 1024,
+            'B', 'bytes'    =>  (float) $size,
+            'KB'            =>  (float) $size * 1024,
+            'MB'            =>  (float) $size * 1024 * 1024,
+            'GB'            =>  (float) $size * 1024 * 1024 * 1024,
             default         =>  throw new Exception("[Developer][Exception]: The given file size unit [{$lastTwoChars}] is invalid.")
         };
     }

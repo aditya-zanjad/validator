@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
 use AdityaZanjad\Validator\Validator;
-use AdityaZanjad\Validator\Fluents\Input;
+use AdityaZanjad\Validator\Managers\Input;
 use AdityaZanjad\Validator\Rules\Required;
 use AdityaZanjad\Validator\Rules\TypeJson;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -110,8 +110,8 @@ class JsonValidationRuleTest extends TestCase
         $data = [
            'json_one'   =>  '{"name": {"first": "Aditya", "last": "Zanjad"}, "age": 31, "gender": "male", "married": false',
            'json_two'   =>  __DIR__ . '/invalid_directory/invalid_001.json',
-           'json_three' =>  fopen(__DIR__ . '/invalid_directory/sample.txt', 'r'),
-           'json_four'  =>  file_get_contents(__DIR__ . '/invalid_directory/sample.txt')
+           'json_three' =>  @fopen(__DIR__ . '/invalid_directory/sample.txt', 'r'),
+           'json_four'  =>  @file_get_contents(__DIR__ . '/invalid_directory/sample.txt')
         ];
 
         $rules = [

@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace AdityaZanjad\Validator\Traits;
 
 use AdityaZanjad\Validator\Validator;
-use function AdityaZanjad\Validator\validate;
-use function AdityaZanjad\Validator\validator;
+use AdityaZanjad\Validator\Managers\Input;
+use AdityaZanjad\Validator\Managers\Error;
+use AdityaZanjad\Validator\Exceptions\ValidationFailed;
 
 /**
  * @version 2.0
@@ -27,7 +28,14 @@ trait ValidatorTrait
      */
     final public function validate(array $data, array $rules, array $messages = [], bool $shouldThrowException = true): Validator
     {
-        return validate($data, $rules, $messages);
+        $validator = new Validator(new Input($data), $rules, new Error(), $messages);
+        $validator->validate();
+
+        if ($validator->failed() && $shouldThrowException) {
+            throw new ValidationFailed($validator->errors()->first(), $validator->errors()->all());
+        }
+
+        return $validator;
     }
 
     /**
@@ -41,6 +49,6 @@ trait ValidatorTrait
      */
     final public function validator(array $data, array $rules, array $messages = []): Validator
     {
-        return validator($data, $rules, $messages);
+        return new Validator(new Input($data), $rules, new Error(), $messages);
     }
 }

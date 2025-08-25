@@ -2,14 +2,15 @@
 
 declare(strict_types=1);
 
-namespace AdityaZanjad\Validator\Fluents;
+namespace AdityaZanjad\Validator\Managers;
 
 use function AdityaZanjad\Validator\Utils\arr_first;
+use AdityaZanjad\Validator\Interfaces\ErrorManagerInterface;
 
 /**
  * @version 1.0
  */
-class Error
+class Error implements ErrorManagerInterface
 {
     /**
      * To hold the validation errors.

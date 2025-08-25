@@ -11,22 +11,19 @@ use AdityaZanjad\Validator\Base\AbstractRule;
  */
 class ULID extends AbstractRule
 {
-    public function __construct()
-    {
-        
-    }
-
+    /**
+     * @inheritDoc
+     */
     public function check(string $field, $value): bool
     {
-        // TODO => Implement logic for ULID validation.
-
-        if (!\is_string($value)) {
-            return false;
-        }
-
-        return true;
+        return \is_string($value)
+            && \strlen($value) === 26
+            && (bool) preg_match('/^[0-9A-HJKMNP-TV-Z]{26}$/', $value);
     }
 
+    /**
+     * @inheritDoc
+     */
     public function message(): string
     {
         return 'The field :{field} must be a valid ULID string.';

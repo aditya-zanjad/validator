@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
 use AdityaZanjad\Validator\Validator;
-use AdityaZanjad\Validator\Fluents\Input;
+use AdityaZanjad\Validator\Managers\Input;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\Attributes\CoversClass;
 use AdityaZanjad\Validator\Rules\RequiredWith;
@@ -43,12 +43,12 @@ final class RequiredWithValidationRuleTest extends TestCase
 
         $this->assertFalse($validator->failed());
         $this->assertEmpty($validator->errors()->all());
-        $this->assertNull($validator->errors()->first('abc'));
-        $this->assertNull($validator->errors()->first('def'));
-        $this->assertNull($validator->errors()->first('ghi'));
-        $this->assertNull($validator->errors()->first('ijk'));
-        $this->assertNull($validator->errors()->first('pqr'));
-        $this->assertNull($validator->errors()->first('xyz'));
+        $this->assertNull($validator->errors()->firstOf('abc'));
+        $this->assertNull($validator->errors()->firstOf('def'));
+        $this->assertNull($validator->errors()->firstOf('ghi'));
+        $this->assertNull($validator->errors()->firstOf('ijk'));
+        $this->assertNull($validator->errors()->firstOf('pqr'));
+        $this->assertNull($validator->errors()->firstOf('xyz'));
     }
 
     /**
@@ -61,23 +61,22 @@ final class RequiredWithValidationRuleTest extends TestCase
         $validator = validate([
             'abc'   => null,
             'ijk'   => '123',
-            'pqr'   =>  'NULL'
+            'pqr'   =>  'NULL',
         ], [
             'abc'   =>  'required_with:ijk|numeric|integer|size:3',
             'def'   =>  'required_with:pqr|numeric|integer|size:123456',
+            'ghi'   =>  'required_with:ijk,pqr|array|min:3',
             'ijk'   =>  'required_with:abc,def,ghi|string|size:1',
         ]);
 
         $this->assertTrue($validator->failed());
         $this->assertNotEmpty($validator->errors()->all());
         $this->assertIsArray($validator->errors()->all());
-        $this->assertNotNull($validator->errors()->first('abc'));
-        $this->assertIsString($validator->errors()->first('abc'));
-        $this->assertNotNull($validator->errors()->first('def'));
-        $this->assertIsString($validator->errors()->first('def'));
-        $this->assertNotNull($validator->errors()->first('ghi'));
-        $this->assertIsString($validator->errors()->first('ghi'));
-        $this->assertNotNull($validator->errors()->first('ijk'));
-        $this->assertIsString($validator->errors()->first('ijk'));
+        $this->assertNotNull($validator->errors()->firstOf('abc'));
+        $this->assertIsString($validator->errors()->firstOf('abc'));
+        $this->assertNotNull($validator->errors()->firstOf('def'));
+        $this->assertIsString($validator->errors()->firstOf('def'));
+        $this->assertNotNull($validator->errors()->firstOf('ghi'));
+        $this->assertIsString($validator->errors()->firstOf('ghi'));
     }
 }

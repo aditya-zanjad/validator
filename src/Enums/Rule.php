@@ -12,6 +12,8 @@ use AdityaZanjad\Validator\Rules\URL;
 use AdityaZanjad\Validator\Rules\Date;
 use AdityaZanjad\Validator\Rules\Mime;
 use AdityaZanjad\Validator\Rules\Size;
+use AdityaZanjad\Validator\Rules\ULID;
+use AdityaZanjad\Validator\Rules\UUID;
 use AdityaZanjad\Validator\Rules\Email;
 use AdityaZanjad\Validator\Rules\Equal;
 use AdityaZanjad\Validator\Rules\NotIn;
@@ -66,6 +68,8 @@ class Rule extends Enum
     public const FILE                   =   TypeFile::class;
     public const JSON                   =   TypeJson::class;
     public const SIZE                   =   Size::class;
+    public const ULID                   =   ULID::class;
+    public const UUID                   =   UUID::class;
     public const ARRAY                  =   TypeArray::class;
     public const EMAIL                  =   Email::class;
     public const MIMES                  =   Mime::class;
