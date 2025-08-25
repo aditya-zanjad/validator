@@ -15,6 +15,10 @@
         <testsuite name="default">
             <directory>tests</directory>
         </testsuite>
+        <testsuite name="without_wildcards">
+            <directory>tests/*</directory>
+            <exclude>tests/unit/WildCardsParametersTest</exclude>
+        </testsuite>
     </testsuites>
 
     <source restrictDeprecations="true" restrictNotices="true" restrictWarnings="true">

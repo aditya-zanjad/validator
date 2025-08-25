@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
 use AdityaZanjad\Validator\Validator;
-use AdityaZanjad\Validator\Fluents\Input;
+use AdityaZanjad\Validator\Managers\Input;
 use PHPUnit\Framework\Attributes\UsesClass;
 use AdityaZanjad\Validator\Rules\RequiredIf;
 use PHPUnit\Framework\Attributes\CoversClass;

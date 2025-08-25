@@ -6,11 +6,11 @@ namespace AdityaZanjad\Validator;
 
 use Exception;
 use AdityaZanjad\Validator\Enums\Rule;
-use AdityaZanjad\Validator\Fluents\Input;
-use AdityaZanjad\Validator\Fluents\Error;
 use AdityaZanjad\Validator\Rules\Callback;
 use AdityaZanjad\Validator\Base\AbstractRule;
-use AdityaZanjad\Validator\Interfaces\RequisiteRule;
+use AdityaZanjad\Validator\Interfaces\ErrorManagerInterface;
+use AdityaZanjad\Validator\Interfaces\InputManagerInterface;
+use AdityaZanjad\Validator\Interfaces\MandatoryRuleInterface;
 
 /**
  * @version 1.0
@@ -18,32 +18,11 @@ use AdityaZanjad\Validator\Interfaces\RequisiteRule;
 class Validator
 {
     /**
-     * To hold & manage all of the input data that we want to validate.
-     *
-     * @var \AdityaZanjad\Validator\Fluents\Input $input
-     */
-    protected Input $input;
-
-    /**
-     * To hold the validation rules that we want to apply against the given input data.
-     *
-     * @var array<string, string|array<int, string|\AdityaZanjad\Validator\Base\AbstractRule|callable(int|string $field, mixed $value): bool>>
-     */
-    protected array $rules;
-
-    /**
-     * To hold & manage the validation errors.
-     *
-     * @var \AdityaZanjad\Validator\Fluents\Error $errors
-     */
-    protected Error $errors;
-
-    /**
      * Useful in deciding whether or not to stop the validator on first failure.
      *
-     * @var bool $abortOnFail
+     * @var bool $stopOnFail
      */
-    protected bool $abortOnFail = false;
+    protected bool $stopOnFail = false;
 
     /**
      * To check whether the validation has been already performed or not.
@@ -53,135 +32,14 @@ class Validator
     protected bool $validated = false;
 
     /**
-     * Inject all the necessary parameters to perform the validation.
-     *
-     * @param   array<int|string, mixed>
-     * @param   array<string, string|array<int, string|\AdityaZanjad\Validator\Base\AbstractRule|callable(int|string $field, mixed $value): bool>>
+     * @param   \AdityaZanjad\Validator\Interfaces\InputManagerInterface                                                                                                                                                $input
+     * @param   array<string, mixed>  $rules
+     * @param   \AdityaZanjad\Validator\Interfaces\ErrorManagerInterface                                                                                                                                                $errors
+     * @param   array<string, string>                                                                                                                                                                                   $messages
      */
-    public function __construct(array $input, array $rules)
+    public function __construct(protected InputManagerInterface $input, protected array $rules, protected ErrorManagerInterface $errors, protected array $messages = [])
     {
-        $this->input    =   new Input($input);
-        $this->errors   =   new Error();
-
-        // Transform the rules to appropriate format before actually evaluating them.
-        $this->rules = $rules;
         $this->rules = $this->transformRules($this->rules);
-        $this->rules = $this->resolveWildCardsPath($this->rules);
-    }
-
-    /**
-     * Reorganize/Preprocess the given validation rules before they are actually evaluated.
-     *
-     * @param array<string, string|array<int|string, string|AbstractRule|callable(string $field, mixed $value): bool>>
-     *
-     * @return array<string, string|array<int|string, string|AbstractRule|callable(string $field, mixed $value): bool>>
-     */
-    protected function transformRules(array $givenRules): array
-    {
-        foreach ($givenRules as $field => $rules) {
-            // If the rules are given in the form of a string, convert them into
-            if (\is_string($rules)) {
-                $rules = \explode('|', $rules);
-            }
-
-            if (!\is_array($rules)) {
-                throw new Exception("[Developer][Exception]: The field [{$field}] must have validation rules specified either as a [STRING] or [INDEXED ARRAY].");
-            }
-
-            $givenRules[$field] = $rules;
-        }
-
-        return $givenRules;
-    }
-
-    /**
-     * Expand the given wildcard parameters path to its actual input data paths.
-     *
-     * @param   string              $path
-     * @param   array<int, mixed>   $rules
-     *
-     * @return  array<int, string>  $actualPaths
-     */
-    protected function resolveWildCardsPath(array $givenRules): array
-    {
-        foreach ($givenRules as $field => $rules) {
-            if (\in_array(\preg_match('/(\*|\.\*)/', (string) $field), [0, false])) {
-                continue;
-            }
-
-            if ($field === '*') {
-                $matchingFields     =   \array_keys($givenRules);
-                $matchingFields     =   \array_map(fn ($field) => strstr($field, '.', true) ?: $field, $matchingFields);
-                $matchingFields     =   \array_unique($matchingFields);
-                $matchingFields     =   \array_fill_keys($matchingFields, $rules);
-                $givenRules         =   \array_merge_recursive($givenRules, $matchingFields);
-
-                unset($givenRules[$field]);
-                continue;
-            }
-
-            // Get all the paths that match with the wildcard path either completely or partially from left-to-right.
-            $actualPaths = \preg_grep("#^{$field}$#", $this->input->keys());
-
-            // If no matches found, we want to create at least one dummy path to perform validation if necessary.
-            if (empty($actualPaths)) {
-                $search         =   ['.*.', '.*', '*.'];
-                $replace        =   ['.0.', '.0', '0.'];
-                $modifiedPath   =   \str_replace($search, $replace, $field);
-
-                return [$modifiedPath => $rules];
-            }
-
-            $wildCardParams         =   \explode('.', $field);
-            $wildCardParamsLength   =   \count($wildCardParams);
-
-            // Loop through the array of found paths & complete any path which is
-            // incomplete when compared to the wildcard path.
-            foreach ($actualPaths as $index => $actualPath) {
-                $actualParams       =   \explode('.', $actualPath);
-                $actualParamsLength =   \count($actualParams);
-
-                // If the number of parameters in the wildcard path exceed the number of
-                // parameters in the current actual path, we need to add the missing
-                // parameters to the current path.
-                if ($actualParamsLength < $wildCardParamsLength) {
-                    $actualParams           =   \array_replace($wildCardParams, $actualParams);
-                    $actualParams           =   \array_map(fn ($param) => $param === '*' ? '0' : $param, $actualParams);
-                    $actualParams           =   \implode('.', $actualParams);
-                    $actualPaths[$index]    =   $actualParams;
-
-                    continue;
-                }
-
-                // If number of parameters in the current path exceed the number of parameters
-                // in the wildcard parameter path, we need to trim down current path
-                // containing actual parameters.
-                if ($actualParamsLength > $wildCardParamsLength) {
-                    $actualParams           =   \array_slice($actualParams, 0, $wildCardParamsLength);
-                    $actualParams           =   \implode('.', $actualParams);
-                    $actualPaths[$index]    =   $actualParams;
-
-                    continue;
-                }
-            }
-
-            $givenRules = \array_merge($givenRules, \array_fill_keys($actualPaths, $rules));
-        }
-
-        return $givenRules;
-    }
-
-    /**
-     * Stop the validation process immediately on the first validation failure.
-     *
-     * @param bool $abortOnFail
-     *
-     * @return \AdityaZanjad\Validator\Validator
-     */
-    public function abortOnFail(bool $abortOnFail = true): static
-    {
-        $this->abortOnFail = $abortOnFail;
-        return $this;
     }
 
     /**
@@ -198,12 +56,26 @@ class Validator
             throw new Exception("[Developer][Exception]: The validation for this instance has already been done. Create a new validator instance to perform a new validation.");
         }
 
-        foreach ($this->rules as $field => $rules) {
-            // Make sure to type cast the array field path to string explicitly as required for the further operations.
+        $field = null;
+        \reset($this->rules);
+
+        while (!\is_null($field = key($this->rules))) {
             $field = (string) $field;
 
+            // Check for the presence of wildcard parameters in the input path.
+            if (\preg_match('/(\*|\.\*)/', $field)) {
+                $this->rules = \array_merge($this->rules, $this->resolveWildCards($field, $this->rules[$field]));
+
+                \next($this->rules);
+                unset($this->rules[$field]);
+                continue;
+            }
+
+            // Make sure to type cast the array field path to string explicitly as required for the further operations.
+            $this->rules[$field] = \array_unique($this->rules[$field]);
+
             // Start evaluating rules for the current field.
-            foreach ($rules as $index => $rule) {
+            foreach ($this->rules[$field] as $index => $rule) {
                 $evaluation = match (\gettype($rule)) {
                     'string'    =>  $this->evaluateRuleFromString($rule, $field, $index),
                     'object'    =>  $this->evaluateRuleFromObject($rule, $field, $index),
@@ -220,12 +92,108 @@ class Validator
 
                 $this->errors->add($field, $error);
 
-                if ($this->abortOnFail) {
+                if ($this->stopOnFail) {
                     break 2;
                 }
             }
+
+            next($this->rules);
         }
 
+        return $this;
+    }
+
+    /**
+     * Reorganize/Preprocess the given validation rules before they are actually evaluated.
+     *
+     * @param array<int|string, mixed> $givenRules
+     *
+     * @return array<string, mixed>
+     */
+    protected function transformRules(array $givenRules): array
+    {
+        foreach ($givenRules as $field => $rules) {
+            if (\is_string($rules)) {
+                $rules = \explode('|', $rules);
+            }
+
+            if (!\is_array($rules)) {
+                throw new Exception("[Developer][Exception]: The field [{$field}] must have validation rules specified either as a [STRING] or [INDEXED ARRAY].");
+            }
+
+            $givenRules[$field] = $rules;
+        }
+
+        return $givenRules;
+    }
+
+    /**
+     * Filter the array input paths matching with the given wildcard parameters path.
+     *
+     * @param   string  $field
+     * @param   array   $rules
+     * 
+     * @return  array
+     */
+    protected function resolveWildCards(string $field, array $rules): array
+    {
+        $paths          =   $this->input->paths();
+        $fieldParams    =   explode('.', $field);
+        $matches        =   [];
+
+        foreach ($paths as $path) {
+            $pathParams =   explode('.', $path);
+            $pathToAdd  =   '';
+
+            foreach ($fieldParams as $fieldIndex => $fieldParam) {
+                if ($fieldParam === '*') {
+                    $pathParams[$fieldIndex]    ??= 0;
+                    $pathToAdd                  .=  "{$pathParams[$fieldIndex]}.";
+
+                    continue;
+                }
+
+                if (in_array($fieldParam, ['\*', '\.'])) {
+                    $fieldParam = str_replace('\\', '', $fieldParam);
+                }
+
+                if (!isset($pathParams[$fieldIndex]) || $fieldParam !== $pathParams[$fieldIndex]) {
+                    $remainingItems = array_map(function ($item) {
+                        if ($item === '*') {
+                            return 0;
+                        }
+
+                        if (in_array($item, ['\*', '\.'])) {
+                            return str_replace('\\', '', $item);
+                        }
+
+                        return $item;
+                    }, array_slice($fieldParams, $fieldIndex));
+
+                    $pathToAdd .= array_reduce($remainingItems, fn ($carry, $item) => "{$carry}{$item}.");
+                    break;
+                }
+
+                $pathToAdd .= "{$pathParams[$fieldIndex]}.";
+            }
+
+            $matches[] = rtrim($pathToAdd, '.'); 
+        }
+
+        $matches = array_unique($matches);
+        return array_fill_keys($matches, $rules);
+    }
+
+    /**
+     * Stop the validation process immediately on the first validation failure.
+     *
+     * @param bool $stopOnFail
+     *
+     * @return static
+     */
+    public function abortOnFail(bool $stopOnFail = true): static
+    {
+        $this->stopOnFail = $stopOnFail;
         return $this;
     }
 
@@ -260,7 +228,7 @@ class Validator
          *                  and
          *  [2] The rule to be evaluated is not set to be run mandatorily.
          */
-        if ($this->input->isNull($field) && !\in_array(RequisiteRule::class, \class_implements($ruleClassName))) {
+        if ($this->input->isNull($field) && !\in_array(MandatoryRuleInterface::class, \class_implements($ruleClassName))) {
             return ['result' => true];
         }
 
@@ -312,9 +280,9 @@ class Validator
         /**
          * The validation will be performed only when either of these are 'true':
          *  [1] The input is NOT NULL.
-         *  [2] The rule implements the 'RequisiteRule' interface.
+         *  [2] The rule implements the 'MandatoryRuleInterface' interface.
          */
-        if ($this->input->notNull($field) || $rule instanceof RequisiteRule) {
+        if ($this->input->notNull($field) || $rule instanceof MandatoryRuleInterface) {
             return [
                 'result'    =>  $rule->setInput($this->input)->check($field, $this->input->get($field)),
                 'rule'      =>  $rule
@@ -337,9 +305,9 @@ class Validator
     /**
      * Get an instance of the class that holds & manages the error messages.
      *
-     * @return \AdityaZanjad\Validator\Fluents\Error
+     * @return \AdityaZanjad\Validator\Interfaces\ErrorManagerInterface
      */
-    public function errors(): Error
+    public function errors(): ErrorManagerInterface
     {
         return $this->errors;
     }

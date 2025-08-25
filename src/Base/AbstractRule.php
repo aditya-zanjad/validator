@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace AdityaZanjad\Validator\Base;
 
-use AdityaZanjad\Validator\Fluents\Input;
+use AdityaZanjad\Validator\Interfaces\InputManagerInterface;
 
 /**
  * @version 1.0
@@ -16,16 +16,16 @@ abstract class AbstractRule
      *
      * @var \AdityaZanjad\Validator\Fluents\Input $input
      */
-    protected Input $input;
+    protected InputManagerInterface $input;
 
     /**
      * Set an instance that'll make all of the input data accessible in the current class.
      *
-     * @param \AdityaZanjad\Validator\Fluents\Input $input
+     * @param \AdityaZanjad\Validator\Interfaces\InputManagerInterface $input
      *
      * @return static
      */
-    public function setInput(Input $input): static
+    public function setInput(InputManagerInterface $input): static
     {
         $this->input = $input;
         return $this;

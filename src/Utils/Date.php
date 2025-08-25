@@ -30,7 +30,7 @@ function parseDateTime($value, string $format = '')
     } catch (Throwable $e) {
         // var_dump($e); exit;
 
-        // If date parsing fails in the 'try block' above, attempt to parse it from some pre-defined formats.
+        // If parsing the date fails, attempt to parse it with some pre-defined date formats.
         $formats = makeDateTimeFormats();
 
         foreach ($formats as $format) {
@@ -47,8 +47,6 @@ function parseDateTime($value, string $format = '')
 
 /**
  * Get a list of formats based on which we should parse the date if parsing fails.
- *
- * @param string $date
  *
  * @return array<int, string>
  */

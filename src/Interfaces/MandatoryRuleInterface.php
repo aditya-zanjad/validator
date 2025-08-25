@@ -13,7 +13,7 @@ namespace AdityaZanjad\Validator\Interfaces;
  *
  * @version 1.0
  */
-interface RequisiteRule
+interface MandatoryRuleInterface
 {
     //
 }

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace AdityaZanjad\Validator\Presets;
 
 use AdityaZanjad\Validator\Validator;
+use AdityaZanjad\Validator\Managers\Error;
+use AdityaZanjad\Validator\Managers\Input;
 
 /**
  * Obtain the instance of the validator to customize and perform the validation.
@@ -17,5 +19,5 @@ use AdityaZanjad\Validator\Validator;
  */
 function validator(array $data, array $rules, array $messages = []): Validator
 {
-    return new Validator($data, $rules, $rules, $messages);
+    return new Validator(new Input($data), $rules, new Error(), $messages);
 }

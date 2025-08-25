@@ -2,18 +2,20 @@
 
 declare(strict_types=1);
 
-namespace AdityaZanjad\Validator\Fluents;
+namespace AdityaZanjad\Validator\Managers;
+
 
 use function AdityaZanjad\Validator\Utils\arr_get;
 use function AdityaZanjad\Validator\Utils\arr_exists;
 use function AdityaZanjad\Validator\Utils\arr_filled;
 use function AdityaZanjad\Validator\Utils\arr_nulled;
 use function AdityaZanjad\Validator\Utils\arr_dot_paths;
+use AdityaZanjad\Validator\Interfaces\InputManagerInterface;
 
 /**
  * @version 1.0
  */
-class Input
+class Input implements InputManagerInterface
 {
     /**
      * The provided input data.
@@ -23,7 +25,7 @@ class Input
     protected array $data;
 
     /**
-     * The array dot notation paths to each input value.
+     * To hold the dot-notation input field paths for repeated usage.
      *
      * @var array<int, string> $paths
      */
@@ -37,6 +39,16 @@ class Input
     public function __construct(array $data)
     {
         $this->data = $data;
+    }
+
+    /**
+     * Check if the input array is empty or not.
+     *
+     * @return bool
+     */
+    public function isEmpty(): bool
+    {
+        return empty($this->data);
     }
 
     /**
@@ -54,13 +66,19 @@ class Input
      *
      * @return array<int, int|string>
      */
+    public function paths(): array
+    {
+        return $this->paths ??= arr_dot_paths($this->data);
+    }
+
+    /**
+     * Get only the top-level keys of the array.
+     *
+     * @return array<int, int|string>
+     */
     public function keys(): array
     {
-        if (!isset($this->paths)) {
-            $this->paths = array_keys(arr_dot_paths($this->data));
-        }
-
-        return $this->paths;
+        return \array_keys($this->data);
     }
 
     /**

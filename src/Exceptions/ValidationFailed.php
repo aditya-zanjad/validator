@@ -23,7 +23,7 @@ class ValidationFailed extends Exception
      * @param   int                         $code
      * @param   array<int|string, mixed>    $errors
      */
-    public function __construct(string $message = 'Validation Errors', int $code = 422, array $errors = [])
+    public function __construct(string $message = 'Validation Errors', array $errors = [], int $code = 422)
     {
         parent::__construct($message, $code);
         $this->errors = $errors;

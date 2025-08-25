@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace AdityaZanjad\Validator\Rules;
 
 use AdityaZanjad\Validator\Base\AbstractRule;
-use AdityaZanjad\Validator\Interfaces\RequisiteRule;
+use AdityaZanjad\Validator\Interfaces\MandatoryRuleInterface;
 
 /**
  * @version 1.0
  */
-class RequiredWithAll extends AbstractRule implements RequisiteRule
+class RequiredWithAll extends AbstractRule implements MandatoryRuleInterface
 {
     /**
      * @var string $message
