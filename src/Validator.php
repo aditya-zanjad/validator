@@ -153,24 +153,26 @@ class Validator
                     continue;
                 }
 
-                if (in_array($fieldParam, ['\*', '\.'])) {
+                if (\in_array($fieldParam, ['\*', '\.'])) {
                     $fieldParam = str_replace('\\', '', $fieldParam);
                 }
 
                 if (!isset($pathParams[$fieldIndex]) || $fieldParam !== $pathParams[$fieldIndex]) {
-                    $remainingItems = array_map(function ($item) {
-                        if ($item === '*') {
-                            return 0;
+                    $remainingParams = \array_slice($fieldParams, $fieldIndex);
+
+                    foreach ($remainingParams as $remainingParam) {
+                        if ($remainingParam === '*') {
+                            $pathToAdd .= "0.";
+                            continue;
                         }
 
-                        if (in_array($item, ['\*', '\.'])) {
-                            return str_replace('\\', '', $item);
+                        if (in_array($remainingParam, ['\*', '\.'])) {
+                            $remainingParam = \str_replace('\\', '', $remainingParam);
                         }
 
-                        return $item;
-                    }, array_slice($fieldParams, $fieldIndex));
+                        $pathToAdd .= "{$remainingParam}.";
+                    }
 
-                    $pathToAdd .= array_reduce($remainingItems, fn ($carry, $item) => "{$carry}{$item}.");
                     break;
                 }
 
@@ -180,8 +182,8 @@ class Validator
             $matches[] = rtrim($pathToAdd, '.'); 
         }
 
-        $matches = array_unique($matches);
-        return array_fill_keys($matches, $rules);
+        $matches = \array_unique($matches);
+        return \array_fill_keys($matches, $rules);
     }
 
     /**

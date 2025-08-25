@@ -18,17 +18,23 @@ class IpAddress extends AbstractRule
      * @var array<string, int> $validOptions
      */
     protected array $validOptions = [
-        'ipv4'          =>  FILTER_FLAG_IPV4,
-        'ipv6'          =>  FILTER_FLAG_IPV6,
-        'no_private'    =>  FILTER_FLAG_NO_PRIV_RANGE,
-        'no_reserved'   =>  FILTER_FLAG_NO_RES_RANGE
+        'v4'            =>  FILTER_FLAG_IPV4,
+        'v6'            =>  FILTER_FLAG_IPV6,
+        'public'        =>  FILTER_FLAG_NO_PRIV_RANGE,
+        'unreserved'    =>  FILTER_FLAG_NO_RES_RANGE
     ];
 
-    protected array $options;
+    /**
+     * @var array<int, string> $givenOptions
+     */
+    protected array $givenOptions;
 
-    public function __construct(string ...$options)
+    /**
+     * @param string ...$givenOptions
+     */
+    public function __construct(string ...$givenOptions)
     {
-        $this->options = $options;
+        $this->givenOptions = $givenOptions;
     }
 
     /**
@@ -36,34 +42,44 @@ class IpAddress extends AbstractRule
      */
     public function check(string $field, $value): bool
     {
-        if (!is_string($value)) {
-            return false;
-        }
+        return \filter_var($value, FILTER_VALIDATE_IP, $this->prepareOptions()) !== false;
+    }
 
-        if (empty($this->options) && \filter_var($value, FILTER_VALIDATE_IP) === false) {
-            false;
+    /**
+     * @inheritDoc
+     */
+    public function message(): string
+    {
+        return 'The field :{field} must be a valid IP address.';
+    }
+
+    /**
+     * Prepare the user-supplied validation configuration options.
+     *
+     * @return int
+     */
+    protected function prepareOptions(): int
+    {
+        if (empty($this->givenOptions)) {
+            return 0;
         }
 
         // If any of the options are provided, ensure that the provided options are valid.
-        $options        =   \array_values(array_unique($this->options));
-        $invalidOptions =   \array_diff($this->validOptions, $options);
+        $options        =   \array_values($this->givenOptions);
+        $invalidOptions =   \array_diff($options, \array_keys($this->validOptions));
 
         if (!empty($invalidOptions)) {
             $implodedInvalidOptions = \implode(', ', $invalidOptions);
             throw new Exception("[Developer][Exception]: The validation rule [ip_address] is supplied with the invalid options: {$implodedInvalidOptions}");
         }
 
-        $appliedOptions = \array_reduce($options, fn ($carryOver, $option) => $carryOver | $option);
+        $options        =   \array_unique($options);
+        $appliedOptions =   0;
 
-        if (\filter_var($value, FILTER_VALIDATE_IP, $appliedOptions) === false) {
-            return false;
+        foreach ($options as $option) {
+            $appliedOptions |= $this->validOptions[$option];
         }
 
-        return true;
-    }
-
-    public function message(): string
-    {
-        return 'The field :{field} must be a valid IP address.';
+        return $appliedOptions;
     }
 }

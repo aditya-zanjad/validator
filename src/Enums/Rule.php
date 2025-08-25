@@ -48,6 +48,7 @@ use AdityaZanjad\Validator\Rules\LessThanOrEqual;
 use AdityaZanjad\Validator\Rules\RequiredWithAll;
 use AdityaZanjad\Validator\Rules\RequiredWithout;
 use AdityaZanjad\Validator\Rules\GreaterThanOrEqual;
+use AdityaZanjad\Validator\Rules\IpAddress;
 use AdityaZanjad\Validator\Rules\RequiredWithoutAll;
 
 /**
@@ -58,6 +59,7 @@ class Rule extends Enum
     public const EQ                     =   Equal::class;
     public const GT                     =   GreaterThan::class;
     public const IN                     =   In::class;
+    public const IP                     =   IpAddress::class;
     public const LT                     =   LessThan::class;
     public const GTE                    =   GreaterThanOrEqual::class;
     public const LTE                    =   LessThanOrEqual::class;
