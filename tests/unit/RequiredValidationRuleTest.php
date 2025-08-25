@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
 use AdityaZanjad\Validator\Validator;
-use AdityaZanjad\Validator\Fluents\Input;
+use AdityaZanjad\Validator\Managers\Input;
 use AdityaZanjad\Validator\Rules\Required;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversFunction;
 
-use function AdityaZanjad\Validator\validate;
+use function AdityaZanjad\Validator\Presets\validate;
 
 #[UsesClass(Validator::class)]
 #[CoversClass(Error::class)]
 #[CoversClass(Input::class)]
 #[CoversClass(Required::class)]
-#[CoversFunction('\AdityaZanjad\Validator\validate')]
+#[CoversFunction('\AdityaZanjad\Validator\Presets\validate')]
 final class RequiredValidationRuleTest extends TestCase
 {
     /**
@@ -70,12 +70,12 @@ final class RequiredValidationRuleTest extends TestCase
 
         $this->assertFalse($validator->failed());
         $this->assertEmpty($validator->errors()->all());
-        $this->assertNull($validator->errors()->first('abc'));
-        $this->assertNull($validator->errors()->first('xyz'));
-        $this->assertNull($validator->errors()->first('123'));
-        $this->assertNull($validator->errors()->first('456'));
-        $this->assertNull($validator->errors()->first('abc'));
-        $this->assertNull($validator->errors()->first('abc'));
+        $this->assertNull($validator->errors()->firstOf('abc'));
+        $this->assertNull($validator->errors()->firstOf('xyz'));
+        $this->assertNull($validator->errors()->firstOf('123'));
+        $this->assertNull($validator->errors()->firstOf('456'));
+        $this->assertNull($validator->errors()->firstOf('abc'));
+        $this->assertNull($validator->errors()->firstOf('abc'));
     }
 
     /**

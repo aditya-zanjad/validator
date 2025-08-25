@@ -5,19 +5,19 @@ declare(strict_types=1);
 namespace AdityaZanjad\Validator\Rules;
 
 use AdityaZanjad\Validator\Base\AbstractRule;
-use AdityaZanjad\Validator\Interfaces\RequisiteRule;
+use AdityaZanjad\Validator\Interfaces\MandatoryRuleInterface;
 
 /**
  * @version 1.0
  */
-class Required extends AbstractRule implements RequisiteRule
+class Required extends AbstractRule implements MandatoryRuleInterface
 {
     /**
      * @inheritDoc
      */
     public function check(string $field, $value): bool
     {
-        return $this->input->notNull($field);
+        return !\is_null($value);
     }
 
     /**

@@ -40,15 +40,8 @@ class DigitsGt extends AbstractRule
      */
     public function check(string $field, $value): bool
     {
-        if (filter_var($value, FILTER_VALIDATE_INT) === false || filter_var($value, FILTER_VALIDATE_FLOAT) === false) {
-            return false;
-        }
-
-        if (varDigits($value) <= $this->minThreshold) {
-            return false;
-        }
-
-        return true;
+        $digits = varDigits($value);
+        return !\is_null($digits) && varDigits($value) > $this->minThreshold;
     }
 
     /**

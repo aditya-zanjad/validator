@@ -9,70 +9,85 @@ use Exception;
 /**
  * Get the size of the given variable's value.
  *
- * @param   string  $type
- * @param   mixed   $var
+ * @param mixed $var
  *
- * @throws  \Exception
+ * @throws \Exception
  *
- * @return  int|float
+ * @return int|float
  */
-function varSize($var)
+function varSize(mixed $var): int|float
 {
-    $evaluatedVar = varEvaluateType($var);
+    $type = varEvaluateType($var);
 
-    switch (\gettype($evaluatedVar)) {
-        case 'integer':
-        case 'float':
-        case 'double':
-            return $var;
+    return match (\gettype($type)) {
+        'integer'           =>  (int) $var,
+        'float', 'double'   =>  (float) $var,
+        'string'            =>  varStringSize($var),
+        'array'             =>  \count($var),
+        'resource'          =>  varFileSize($var),
+        default             =>  throw new Exception("[Developer][Exception]: The given parameter has an invalid data type.") 
+    };
+}
 
-        case 'boolean':
-            return ((bool) $var) ? 1 : 0;
+/**
+ * Get the size of a file from the given file path/resource
+ *
+ * @param mixed $var
+ * 
+ * @return null|int
+ */
+function varFileSize(mixed $var): ?int
+{
+    $metadata = \stream_get_meta_data($var);
 
-        case 'string':
-            return \strlen($var);
-
-        case 'array':
-            return \count($var);
-
-        case 'resource':
-            $metadata = \stream_get_meta_data($var);
-
-            switch ($metadata['wrapper_type']) {
-                case 'plainfile':
-                    return \filesize($var);
-
-                default:
-                    return \strlen($var);
-            }
-
-            // no break
-        default:
-            throw new Exception("[Developer][Exception]: The given parameter has an invalid data type.");
-            break;
+    if ($metadata['wrapper_type'] !== 'plainfile') {
+        return null;
     }
+
+    $stats = \fstat($var);
+    return $stats['size'];
+}
+
+/**
+ * Get the size of the given string.
+ *
+ * @param string $var
+ * 
+ * @return int
+ */
+function varStringSize(string $var): int
+{
+    if (\is_file($var)) {
+        return \filesize($var);
+    }
+
+    if (\function_exists('\\mb_strlen')) {
+        return \mb_strlen($var);
+    }
+
+    return \strlen($var);
 }
 
 /**
  * Find out the number of digits in a number.
  *
- * @param   int|float|string $var
+ * @param mixed $var
  *
- * @throws  \Exception
+ * @throws \Exception
  *
- * @return  int
+ * @return null|int
  */
-function varDigits(int|float|string $var): int
+function varDigits(mixed $var): ?int
 {
-    if (filter_var($var, FILTER_VALIDATE_INT) === false || filter_var($var, FILTER_VALIDATE_FLOAT) === false) {
-        throw new Exception("[Developer][Exception]: The parameter must be either an Integer OR a Float value.");
+    if (\filter_var($var, FILTER_VALIDATE_FLOAT) === false) {
+        return null;
     }
 
-    if ($var === 0) {
+    if (((int) $var) === 0) {
         return 1;
     }
 
-    return (int) (\log($var, 10) + 1);
+    return (int) (\log((float) $var, 10) + 1);
 }
 
 /**
@@ -108,4 +123,47 @@ function varEvaluateType($var)
     }
 
     return $var;
+}
+
+/**
+ * Prepare the size value depending on the provided parameter(s).
+ * 
+ * If the size value is either an integer
+ *
+ * @param mixed $size
+ * 
+ * @return mixed
+ */
+function varMakeSize(mixed $size): mixed
+{
+    if (filter_var($size, FILTER_VALIDATE_FLOAT) !== false) {
+        return (float) $size;
+    }
+
+    if (filter_var($size, FILTER_VALIDATE_INT) !== false) {
+        return (int) $size;
+    }
+
+    if (!\is_string($size)) {
+        return null;
+    }
+
+    $size           =   \str_replace(' ', '', $size);
+    $sizeUnit       =   \substr($size, -2);
+    $sizeUnit       =   \strtoupper($sizeUnit);
+    $sizeInNumeric  =   \substr($size, 0, \strlen($size) - 2);
+
+    if (filter_var($sizeInNumeric, FILTER_VALIDATE_FLOAT) === false && filter_var($sizeInNumeric, FILTER_VALIDATE_INT) === false) {
+        return null;
+    }
+
+    $sizeInNumeric = (float) $sizeInNumeric;
+
+    return (int) match ($sizeUnit) {
+        'B'     =>  $sizeInNumeric,
+        'KB'    =>  $sizeInNumeric * 1024,
+        'MB'    =>  $sizeInNumeric * 1024 * 1024,
+        'GB'    =>  $sizeInNumeric * 1024 * 1024 * 1024,
+        default =>  throw new Exception("[Developer][Exception]: The given file size unit [{$sizeUnit}] is invalid/unsupported.")
+    };
 }

@@ -15,14 +15,18 @@
             "AdityaZanjad\\Validator\\": "src/"
         },
         "files": [
-            "src/Presets.php",
             "src/Utils/Arr.php",
             "src/Utils/Str.php",
             "src/Utils/Var.php",
-            "src/Utils/Date.php"
+            "src/Utils/Date.php",
+            "src/Presets/validate.php",
+            "src/Presets/validator.php"
         ]
     },
     "require-dev": {
-        "phpunit/phpunit": "10.5.x-dev"
+        "phpunit/phpunit": "10.5.x-dev",
+        "friendsofphp/php-cs-fixer": "dev-master",
+        "phpstan/phpstan": "2.1.x-dev",
+        "vimeo/psalm": "^6.5"
     }
 }

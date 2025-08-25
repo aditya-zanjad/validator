@@ -2,16 +2,15 @@
 
 declare(strict_types=1);
 
-namespace AdityaZanjad\Validator\Fluents;
-
-use Exception;
+namespace AdityaZanjad\Validator\Managers;
 
 use function AdityaZanjad\Validator\Utils\arr_first;
+use AdityaZanjad\Validator\Interfaces\ErrorManagerInterface;
 
 /**
  * @version 1.0
  */
-class Error
+class Error implements ErrorManagerInterface
 {
     /**
      * To hold the validation errors.
@@ -33,7 +32,7 @@ class Error
      *
      * @return bool
      */
-    public function isEmpty(): bool
+    public function empty(): bool
     {
         return empty($this->errors);
     }
@@ -69,7 +68,7 @@ class Error
      *
      * @return null|string|array
      */
-    public function Of(string $field)
+    public function of(string $field)
     {
         if (!isset($this->errors[$field])) {
             return null;

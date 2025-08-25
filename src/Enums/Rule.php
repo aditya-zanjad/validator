@@ -12,6 +12,8 @@ use AdityaZanjad\Validator\Rules\URL;
 use AdityaZanjad\Validator\Rules\Date;
 use AdityaZanjad\Validator\Rules\Mime;
 use AdityaZanjad\Validator\Rules\Size;
+use AdityaZanjad\Validator\Rules\ULID;
+use AdityaZanjad\Validator\Rules\UUID;
 use AdityaZanjad\Validator\Rules\Email;
 use AdityaZanjad\Validator\Rules\Equal;
 use AdityaZanjad\Validator\Rules\NotIn;
@@ -46,6 +48,7 @@ use AdityaZanjad\Validator\Rules\LessThanOrEqual;
 use AdityaZanjad\Validator\Rules\RequiredWithAll;
 use AdityaZanjad\Validator\Rules\RequiredWithout;
 use AdityaZanjad\Validator\Rules\GreaterThanOrEqual;
+use AdityaZanjad\Validator\Rules\IpAddress;
 use AdityaZanjad\Validator\Rules\RequiredWithoutAll;
 
 /**
@@ -56,6 +59,7 @@ class Rule extends Enum
     public const EQ                     =   Equal::class;
     public const GT                     =   GreaterThan::class;
     public const IN                     =   In::class;
+    public const IP                     =   IpAddress::class;
     public const LT                     =   LessThan::class;
     public const GTE                    =   GreaterThanOrEqual::class;
     public const LTE                    =   LessThanOrEqual::class;
@@ -66,6 +70,8 @@ class Rule extends Enum
     public const FILE                   =   TypeFile::class;
     public const JSON                   =   TypeJson::class;
     public const SIZE                   =   Size::class;
+    public const ULID                   =   ULID::class;
+    public const UUID                   =   UUID::class;
     public const ARRAY                  =   TypeArray::class;
     public const EMAIL                  =   Email::class;
     public const MIMES                  =   Mime::class;

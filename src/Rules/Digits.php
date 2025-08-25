@@ -15,24 +15,24 @@ use function AdityaZanjad\Validator\Utils\varDigits;
 class Digits extends AbstractRule
 {
     /**
-     * @var int $validDigitsCount
+     * @var int $validDigits
      */
-    protected int $validDigitsCount;
+    protected int $validDigits;
 
     /**
      * Inject the data required to perform validation.
      *
-     * @param int|string $validDigitsCount
+     * @param int|string $validDigits
      *
      * @throws \Exception
      */
-    public function __construct($validDigitsCount)
+    public function __construct($validDigits)
     {
-        if (!\filter_var($validDigitsCount, FILTER_VALIDATE_INT)) {
+        if (!\filter_var($validDigits, FILTER_VALIDATE_INT)) {
             throw new Exception("[Developer][Exception]: The parameter passed to the validation rule [digits] must be a valid integer.");
         }
 
-        $this->validDigitsCount = (int) $validDigitsCount;
+        $this->validDigits = (int) $validDigits;
     }
 
     /**
@@ -40,7 +40,8 @@ class Digits extends AbstractRule
      */
     public function check(string $field, $value): bool
     {
-        return \filter_var($value, FILTER_VALIDATE_INT) !== false && varDigits($value) === $this->validDigitsCount;
+        $digits = varDigits($value);
+        return !\is_null($digits) && $digits === $this->validDigits;
     }
 
     /**
@@ -48,6 +49,6 @@ class Digits extends AbstractRule
      */
     public function message(): string
     {
-        return "The field :{field} must contain exactly {$this->validDigitsCount} digits.";
+        return "The field :{field} must contain exactly {$this->validDigits} digits.";
     }
 }

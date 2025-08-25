@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
 use AdityaZanjad\Validator\Validator;
-use AdityaZanjad\Validator\Fluents\Input;
+use AdityaZanjad\Validator\Managers\Input;
 use AdityaZanjad\Validator\Rules\TypeBoolean;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversFunction;
 
-use function AdityaZanjad\Validator\validate;
+use function AdityaZanjad\Validator\Presets\validate;
 
 #[CoversClass(Validator::class)]
 #[CoversClass(Error::class)]
 #[CoversClass(Input::class)]
 #[CoversClass(TypeBoolean::class)]
-#[CoversFunction('\AdityaZanjad\Validator\validate')]
+#[CoversFunction('\AdityaZanjad\Validator\Presets\validate')]
 final class BooleanValidationRuleTest extends TestCase
 {
     /**

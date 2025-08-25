@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AdityaZanjad\Validator\Rules;
 
-use finfo;
 use Exception;
 use AdityaZanjad\Validator\Base\AbstractRule;
 
@@ -19,20 +18,20 @@ class Mime extends AbstractRule
     protected string $message;
 
     /**
-     * @var array<int, string> $givenMimeTypes
+     * @var array<int, string> $validMimes
      */
-    protected array $givenMimeTypes;
+    protected array $validMimes;
 
     /**
-     * @param string ...$givenMimeTypes
+     * @param string ...$validMimes
      */
-    public function __construct(string ...$givenMimeTypes)
+    public function __construct(string ...$validMimes)
     {
-        if (empty($givenMimeTypes)) {
-            throw new Exception("[Developer][Exception]: The validation rule [" . static::class . "] must be provided with at least one parameter.");
+        if (empty($validMimes)) {
+            throw new Exception("[Developer][Exception]: The validation rule [mime] must be provided with at least one parameter.");
         }
 
-        $this->givenMimeTypes = \array_map(fn ($mime) => \trim($mime), $givenMimeTypes);
+        $this->validMimes = \array_map(fn($mime) => \trim($mime), $validMimes);
     }
 
     /**
@@ -40,42 +39,36 @@ class Mime extends AbstractRule
      */
     public function check(string $field, $value): bool
     {
-        $valueMimeType = null;
+        $mime = null;
 
         switch (\gettype($value)) {
             case 'string':
-                if (\is_file($value) && \is_readable($value)) {
-                    $valueMimeType = \mime_content_type($value);
-                    break;
+                if (!\is_file($value)) {
+                    return false;
                 }
 
-                $finfo          =   new finfo();
-                $valueMimeType  =   $finfo->buffer($value, FILEINFO_MIME_TYPE);
+                $mime = \extension_loaded('fileinfo')
+                    ? \finfo_file(\finfo_open(FILEINFO_MIME_TYPE), $value)
+                    : \mime_content_type($value);
                 break;
 
             case 'resource':
                 $metadata = \stream_get_meta_data($value);
 
                 if ($metadata['wrapper_type'] !== 'plainfile') {
-                    $this->message = "The field {$field} must be a valid file.";
                     return false;
                 }
 
-                $valueMimeType = \mime_content_type($metadata['uri']);
-
-                if ($valueMimeType === false) {
-                    $finfo          =   new finfo();
-                    $valueMimeType  =   $finfo->file($metadata['uri'], FILEINFO_MIME_TYPE);
-                }
+                $mime = \extension_loaded('fileinfo')
+                    ? \finfo_file(\finfo_open(FILEINFO_MIME_TYPE), $metadata['uri'])
+                    : \mime_content_type($metadata['uri']);
                 break;
 
             default:
-                throw new Exception("[Developer][Exception]: The field :{field} must be a valid file.");
-                break;
+                return false;
         }
 
-        if (!in_array($valueMimeType, $this->givenMimeTypes)) {
-            $this->message = "The field [$field] must have one of these MIME types: " . implode(', ', $this->givenMimeTypes);
+        if (!\in_array($mime, $this->validMimes)) {
             return false;
         }
 
@@ -87,6 +80,6 @@ class Mime extends AbstractRule
      */
     public function message(): string
     {
-        return $this->message;
+        return "The file :{field} must match one of these MIME types: " . implode(', ', $this->validMimes);
     }
 }

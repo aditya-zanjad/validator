@@ -51,12 +51,8 @@ class DigitsBetween extends AbstractRule
      */
     public function check(string $field, $value): bool
     {
-        if (filter_var($value, FILTER_VALIDATE_INT) === false) {
-            return false;
-        }
-
-        $digitsInGivenValue = varDigits($value);
-        return $digitsInGivenValue >= $this->minDigits && $digitsInGivenValue <= $this->maxDigits;
+        $digits = varDigits($value);
+        return !\is_null($digits) && $digits >= $this->minDigits && $digits <= $this->maxDigits;
     }
 
     /**

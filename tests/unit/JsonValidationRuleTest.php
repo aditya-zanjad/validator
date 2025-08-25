@@ -4,21 +4,21 @@ declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
 use AdityaZanjad\Validator\Validator;
-use AdityaZanjad\Validator\Fluents\Input;
+use AdityaZanjad\Validator\Managers\Input;
 use AdityaZanjad\Validator\Rules\Required;
 use AdityaZanjad\Validator\Rules\TypeJson;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversFunction;
 
-use function AdityaZanjad\Validator\validate;
+use function AdityaZanjad\Validator\Presets\validate;
 
 #[UsesClass(Validator::class)]
 #[CoversClass(Error::class)]
 #[CoversClass(Input::class)]
 #[CoversClass(Required::class)]
 #[CoversClass(TypeJson::class)]
-#[CoversFunction('\AdityaZanjad\Validator\validate')]
+#[CoversFunction('\AdityaZanjad\Validator\Presets\validate')]
 class JsonValidationRuleTest extends TestCase
 {
     protected string $tempDirPath;
@@ -110,8 +110,8 @@ class JsonValidationRuleTest extends TestCase
         $data = [
            'json_one'   =>  '{"name": {"first": "Aditya", "last": "Zanjad"}, "age": 31, "gender": "male", "married": false',
            'json_two'   =>  __DIR__ . '/invalid_directory/invalid_001.json',
-           'json_three' =>  fopen(__DIR__ . '/invalid_directory/sample.txt', 'r'),
-           'json_four'  =>  file_get_contents(__DIR__ . '/invalid_directory/sample.txt')
+           'json_three' =>  @fopen(__DIR__ . '/invalid_directory/sample.txt', 'r'),
+           'json_four'  =>  @file_get_contents(__DIR__ . '/invalid_directory/sample.txt')
         ];
 
         $rules = [
