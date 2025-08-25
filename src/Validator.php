@@ -39,68 +39,9 @@ class Validator
      */
     public function __construct(protected InputManagerInterface $input, protected array $rules, protected ErrorManagerInterface $errors, protected array $messages = [])
     {
-        $this->rules = $this->transformRules($this->rules);
-    }
-
-    /**
-     * Perform the validation process.
-     *
-     * @throws \Exception
-     *
-     * @return static
-     */
-    public function validate(): static
-    {
-        // Do not allow performing the same validation more than once.
-        if ($this->validated) {
-            throw new Exception("[Developer][Exception]: The validation for this instance has already been done. Create a new validator instance to perform a new validation.");
-        }
-
-        $field = null;
-        \reset($this->rules);
-
-        while (!\is_null($field = key($this->rules))) {
-            $field = (string) $field;
-
-            // Check for the presence of wildcard parameters in the input path.
-            if (\preg_match('/(\*|\.\*)/', $field)) {
-                $this->rules = \array_merge($this->rules, $this->resolveWildCards($field, $this->rules[$field]));
-
-                \next($this->rules);
-                unset($this->rules[$field]);
-                continue;
-            }
-
-            // Make sure to type cast the array field path to string explicitly as required for the further operations.
-            $this->rules[$field] = \array_unique($this->rules[$field]);
-
-            // Start evaluating rules for the current field.
-            foreach ($this->rules[$field] as $index => $rule) {
-                $evaluation = match (\gettype($rule)) {
-                    'string'    =>  $this->evaluateRuleFromString($rule, $field, $index),
-                    'object'    =>  $this->evaluateRuleFromObject($rule, $field, $index),
-                    default     =>  throw new Exception("[Developer][Exception]: The field [{$field}] has an invalid rule at the index [{$index}].")
-                };
-
-                // If the validation was successful, there is no need to proceed further below.
-                if ($evaluation['result'] === true) {
-                    continue;
-                }
-
-                // Make necessary transformations to the error message.
-                $error = \str_replace(':{field}', $field, $evaluation['rule']->message());
-
-                $this->errors->add($field, $error);
-
-                if ($this->stopOnFail) {
-                    break 2;
-                }
-            }
-
-            next($this->rules);
-        }
-
-        return $this;
+        // Prepare the validation rules before performing the actual validation.
+        $this->rules    =   $this->transformRules($this->rules);
+        $this->rules    =   $this->resolveWildCardParameters($this->rules);
     }
 
     /**
@@ -128,60 +69,130 @@ class Validator
     }
 
     /**
-     * Filter the array input paths matching with the given wildcard parameters path.
+     * Transform the the array path containing any wildcard parameter(s) to its actual representable paths from the input array.
      *
      * @param   string  $field
      * @param   array   $rules
      * 
-     * @return  array
+     * @return  array<string, mixed>
      */
-    protected function resolveWildCards(string $field, array $rules): array
+    protected function resolveWildCardParameters(array $givenRules): array
     {
-        $paths          =   $this->input->paths();
-        $fieldParams    =   explode('.', $field);
-        $matches        =   [];
+        $inputPaths = $this->input->paths();
 
-        foreach ($paths as $path) {
-            $pathParams =   explode('.', $path);
-            $pathToAdd  =   '';
+        foreach ($givenRules as $ruleKey => $rules) {
+            $ruleKey = (string) $ruleKey;
 
-            foreach ($fieldParams as $fieldIndex => $fieldParam) {
-                if ($fieldParam === '*') {
-                    $pathParams[$fieldIndex]    ??= 0;
-                    $pathToAdd                  .=  "{$pathParams[$fieldIndex]}.";
+            // Check if the rule key contains a wildcard before proceeding.
+            // This optimizes the function by skipping keys without wildcards.
+            if (\preg_match('/(\*|\.\*)/', $ruleKey) === 0) {
+                continue;
+            }
 
+            $ruleKeySegments    =   \explode('.', $ruleKey);
+            $matchedPaths       =   [];
+
+            // Iterate through each of the available input paths.
+            foreach ($inputPaths as $inputPath) {
+                $inputPathSegments = \explode('.', $inputPath);
+                $resolvedPath = '';
+
+                // Compare each segment of the rule key against the input path.
+                foreach ($ruleKeySegments as $ruleIndex => $ruleSegment) {
+                    // If the rule segment is a wildcard '*', get the corresponding path segment from the input.
+                    if ($ruleSegment === '*') {
+                        $inputPathSegments[$ruleIndex]  ??= 0;
+                        $resolvedPath                   .=  "{$inputPathSegments[$ruleIndex]}.";
+
+                        continue;
+                    }
+
+                    // If the rule segment is an escaped wildcard or dot, remove the escape character.
+                    if (\in_array($ruleSegment, ['\*', '\.'])) {
+                        $ruleSegment = \str_replace('\\', '', $ruleSegment);
+                    }
+
+                    // If the rule segment does not exist in the input path,
+                    // or if it doesn't match, resolve the rest of the path based on the rule.
+                    if (!isset($inputPathSegments[$ruleIndex]) || $ruleSegment !== $inputPathSegments[$ruleIndex]) {
+                        // Get the remaining segments from the original rule.
+                        $remainingSegments = \array_slice($ruleKeySegments, $ruleIndex);
+
+                        // Build the rest of the path from the remaining rule segments.
+                        foreach ($remainingSegments as $remainingRuleSegment) {
+                            if ($remainingRuleSegment === '*') {
+                                $resolvedPath .= "0.";
+                                continue;
+                            }
+
+                            if (\in_array($remainingRuleSegment, ['\*', '\.'])) {
+                                $remainingRuleSegment = \str_replace('\\', '', $remainingRuleSegment);
+                            }
+
+                            $resolvedPath .= "{$remainingRuleSegment}.";
+                        }
+
+                        // Exit the inner loop since a mismatch was found.
+                        break;
+                    }
+
+                    // If the segments match, add the current path segment to the resolved path.
+                    $resolvedPath .= "{$inputPathSegments[$ruleIndex]}.";
+                }
+
+                // Store the final resolved path after removing any trailing dots.
+                $matchedPaths[] = \rtrim($resolvedPath, '.');
+            }
+
+            // Merge the newly matched paths with the existing rules and remove the original wildcard rule.
+            $givenRules = \array_merge($givenRules, \array_fill_keys(\array_unique($matchedPaths), $rules));
+            unset($givenRules[$ruleKey]);
+        }
+
+        return $givenRules;
+    }
+
+    /**
+     * Perform the validation process.
+     *
+     * @throws \Exception
+     *
+     * @return static
+     */
+    public function validate(): static
+    {
+        // Do not allow performing the same validation more than once.
+        if ($this->validated) {
+            throw new Exception("[Developer][Exception]: The validation for this instance has already been done. Create a new validator instance to perform a new validation.");
+        }
+
+        foreach ($this->rules as $field => $rulesGroup) {
+            $field = (string) $field;
+
+            foreach ($rulesGroup as $index => $rule) {
+                $evaluation = match (\gettype($rule)) {
+                    'string'    =>  $this->evaluateRuleFromString($rule, $field, $index),
+                    'object'    =>  $this->evaluateRuleFromObject($rule, $field, $index),
+                    default     =>  throw new Exception("[Developer][Exception]: The field [{$field}] has an invalid rule at the index [{$index}].")
+                };
+
+                // If the validation was successful, there is no need to proceed further below.
+                if ($evaluation['result'] === true) {
                     continue;
                 }
 
-                if (in_array($fieldParam, ['\*', '\.'])) {
-                    $fieldParam = str_replace('\\', '', $fieldParam);
+                // Make necessary transformations to the error message.
+                $error = \str_replace(':{field}', $field, $evaluation['rule']->message());
+
+                $this->errors->add($field, $error);
+
+                if ($this->stopOnFail) {
+                    break 2;
                 }
-
-                if (!isset($pathParams[$fieldIndex]) || $fieldParam !== $pathParams[$fieldIndex]) {
-                    $remainingItems = array_map(function ($item) {
-                        if ($item === '*') {
-                            return 0;
-                        }
-
-                        if (in_array($item, ['\*', '\.'])) {
-                            return str_replace('\\', '', $item);
-                        }
-
-                        return $item;
-                    }, array_slice($fieldParams, $fieldIndex));
-
-                    $pathToAdd .= array_reduce($remainingItems, fn ($carry, $item) => "{$carry}{$item}.");
-                    break;
-                }
-
-                $pathToAdd .= "{$pathParams[$fieldIndex]}.";
             }
-
-            $matches[] = rtrim($pathToAdd, '.'); 
         }
 
-        $matches = array_unique($matches);
-        return array_fill_keys($matches, $rules);
+        return $this;
     }
 
     /**
@@ -232,10 +243,12 @@ class Validator
             return ['result' => true];
         }
 
-        // Instantiate the rule class along with its arguments.
-        $arguments  =   isset($rule[1]) ? \preg_split('/(?<!\\\\),/', $rule[1]) : [];
-        $arguments  =   \array_map(fn ($arg) => \str_replace('\\,', ',', $arg), $arguments);
-        $instance   =   new $rule[0](...$arguments);
+        // Prepare the arguments that'll be passed to the rule constructor.
+        $arguments = isset($rule[1]) ? \preg_split('/(?<!\\\\),/', $rule[1]) : [];
+        $arguments = \array_map(fn($arg) => \str_replace('\\,', ',', $arg), $arguments);
+
+        // Instantiate the rule class to perform the validation.
+        $instance = new $rule[0](...$arguments);
 
         // Perform the actual validation & return its result.
         return [

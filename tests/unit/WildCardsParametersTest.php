@@ -299,19 +299,20 @@ final class WildCardsParametersTest extends TestCase
 
         $rules = [
             // // General array rules
-            'projects' => 'required|array|min:1',
-            'projects.*.employees' => 'required|array|min:1',
-            'projects.*.tasks' => 'required|array|min:1',
+            'projects'                          =>  'required|array|min:1',
+            'projects.*.employees'              =>  'required|array|min:1',
+            'projects.*.tasks'                  =>  'required|array|min:1',
 
             // // Employee rules
-            'projects.*.employees.*.id' => 'required|integer',
-            'projects.*.employees.*.name' => 'required|string|min:5', // Rule set to fail for 'John Doe'
-            'projects.1.employees.1.name' => 'required|string|max:10', // Rule set to fail for 12345
+            'projects.*.employees.*.id'         =>  'required|integer',
+            'projects.*.employees.*.name'       =>  'required|string|min:5', // Rule set to fail for 'John Doe'
+            'projects.1.employees.1.name'       =>  'required|string|max:10', // Rule set to fail for 12345
 
             // Task rules
-            'projects.*.tasks.*.task_id' => 'required|string|min:2',
-            'projects.*.tasks.*.description' => 'required|string|max:40', // Rule set to fail for the long description
-            'projects.*.tasks.*.assigned_to' => 'required|integer',
+            'projects.*.tasks.*.task_id'        =>  'required|string|min:2',
+            'projects.*.tasks.*.name'           =>  'required|string',
+            'projects.*.tasks.*.description'    =>  'required|string|max:40', // Rule set to fail for the long description
+            'projects.*.tasks.*.assigned_to'    =>  'required|integer',
 
             // Non-existent key
             'projects.*.employees.*.name.first' => 'required|array|string|min:1'
@@ -334,7 +335,7 @@ final class WildCardsParametersTest extends TestCase
         $this->assertArrayHasKey('projects.0.employees.0.name.first', $validator->errors()->all());
 
         // Assertions for the total number of errors
-        $this->assertCount(18, $validator->errors()->all());
+        $this->assertCount(24, $validator->errors()->all());
 
         $this->assertTrue($validator->failed());
         $this->assertNotNull($validator->errors()->of('projects.0.tasks.0.assigned_to'));
@@ -355,18 +356,24 @@ final class WildCardsParametersTest extends TestCase
         // 6. projects.1.tasks.2.description is too long (max:40)
         // 7. projects.2.employees is empty (min:1)
         // 8. projects.2.tasks is empty (min:1)
-        $this->assertCount(18, $validator->errors()->all());
+        $this->assertCount(24, $validator->errors()->all());
 
         // Assertions for individual failures
         // Project 1 Failures
+        $this->assertNotNull($validator->errors()->firstOf('projects.0.tasks.0.name'));
+        $this->assertNotNull($validator->errors()->firstOf('projects.0.tasks.1.name'));
         $this->assertNotNull($validator->errors()->firstOf('projects.0.tasks.1.assigned_to'));
         $this->assertNotNull($validator->errors()->firstOf('projects.0.employees.1.name'));
 
         // Project 2 Failures
+        $this->assertNotNull($validator->errors()->firstOf('projects.1.tasks.1.name'));
+        $this->assertNotNull($validator->errors()->firstOf('projects.1.tasks.2.name'));
         $this->assertNotNull($validator->errors()->firstOf('projects.1.employees.1.name'));
         $this->assertNotNull($validator->errors()->firstOf('projects.1.tasks.2.description'));
 
         // Project 3 Failures
+        $this->assertNotNull($validator->errors()->firstOf('projects.2.tasks.0.name'));
+        $this->assertNotNull($validator->errors()->firstOf('projects.2.tasks.0.assigned_to'));
         $this->assertNotNull($validator->errors()->firstOf('projects.2.employees'));
         $this->assertNotNull($validator->errors()->firstOf('projects.2.tasks'));
     }
