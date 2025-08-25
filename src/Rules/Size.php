@@ -49,8 +49,7 @@ class Size extends AbstractRule
     {
         $size = varSize($value);
 
-        if ($size === $this->validSize || $size == $this->validSize) {
-            // Depending on the data type of the current value, we'll dynamically prepare the error message.
+        if ($size == $this->validSize) {
             return true;
         }
 
@@ -84,20 +83,16 @@ class Size extends AbstractRule
             return (int) $value;
         }
 
-        return $this->transformFileSize($value);
-    }
-
-    protected function transformFileSize(string $size): int|float
-    {
-        $size           =   \str_replace(' ', '', $size);
-        $lastTwoChars   =   \substr($size, -1, 2);
+        $size           =   \str_replace(' ', '', $value);
+        $lastTwoChars   =   \substr($size, -2);
+        $lastTwoChars   =   \strtolower($lastTwoChars);
 
         return match ($lastTwoChars) {
-            'B', 'bytes'    =>  (float) $size,
-            'KB'            =>  (float) $size * 1024,
-            'MB'            =>  (float) $size * 1024 * 1024,
-            'GB'            =>  (float) $size * 1024 * 1024 * 1024,
-            default         =>  throw new Exception("[Developer][Exception]: The given file size unit [{$lastTwoChars}] is invalid.")
+            'b'     =>  (float) $size,
+            'kb'    =>  (float) $size * 1024,
+            'mb'    =>  (float) $size * 1024 * 1024,
+            'gb'    =>  (float) $size * 1024 * 1024 * 1024,
+            default =>  throw new Exception("[Developer][Exception]: The given file size unit [{$lastTwoChars}] is invalid.")
         };
     }
 }
