@@ -40,8 +40,8 @@ class Validator
     public function __construct(protected InputManagerInterface $input, protected array $rules, protected ErrorManagerInterface $errors, protected array $messages = [])
     {
         // Prepare the validation rules before performing the actual validation.
-        $this->rules    =   $this->transformRules($this->rules);
-        $this->rules    =   $this->resolveWildCardParameters($this->rules);
+        $this->rules = $this->transformRules($this->rules);
+        $this->rules = $this->resolveWildCardParameters($this->rules);
     }
 
     /**
@@ -88,9 +88,10 @@ class Validator
                 continue;
             }
 
+            $fieldParams = \explode('.', $field);
+
             // For each given rule, loop through input paths array to determine the matching paths.
             foreach ($actualPaths as $actualPath) {
-                $fieldParams        =   \explode('.', $field);
                 $actualPathParams   =   \explode('.', $actualPath);
                 $resolvedPath       =   '';
 
@@ -103,18 +104,18 @@ class Validator
                 foreach ($fieldParams as $fieldIndex => $fieldParam) {
                     $actualPathParams[$fieldIndex] ??= 0;
 
-                    // Replace the wildcard path parameter with its corresponding actual path parameter.
-                    if (\in_array($fieldParam, [$actualPathParams[$fieldIndex], '*'])) {
-                        $resolvedPath .= "{$actualPathParams[$fieldIndex]}.";
-                        continue;
-                    }
-
                     // If the actual path parameters array is shorter than wildcard parameters path,
                     // fill up the path with the remaining parameters to complete it.
-                    $remainingParts =   \implode('.', \array_slice($fieldParams, $fieldIndex));
-                    $remainingParts =   \str_replace(['*.', '.*.', '.*'], ['0.', '.0.', '.0'], $remainingParts);
-                    $resolvedPath   =   "{$resolvedPath}{$remainingParts}";
-                    break;
+                    if (!\in_array($fieldParam, [$actualPathParams[$fieldIndex], '*'])) {
+                        $remainingParts =   \implode('.', \array_slice($fieldParams, $fieldIndex));
+                        $remainingParts =   \str_replace(['*.', '.*.', '.*'], ['0.', '.0.', '.0'], $remainingParts);
+                        $resolvedPath   =   "{$resolvedPath}{$remainingParts}";
+
+                        break;
+                    }
+
+                    // Replace the wildcard path parameter with its corresponding actual path parameter.
+                    $resolvedPath .= "{$actualPathParams[$fieldIndex]}.";
                 }
 
                 $resolvedPath           =   \rtrim($resolvedPath, '.');
