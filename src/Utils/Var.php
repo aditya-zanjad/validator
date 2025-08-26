@@ -93,11 +93,11 @@ function varDigits(mixed $var): ?int
 /**
  * Evaluate the given string variable to its corresponding data type value.
  *
- * @param string $var
+ * @param mixed $var
  *
  * @return mixed
  */
-function varEvaluateType($var)
+function varEvaluateType(mixed $var)
 {
     if (!\is_string($var)) {
         return $var;

@@ -16,8 +16,9 @@ class Numeric extends AbstractRule
      */
     public function check(string $field, $value): bool
     {
-        return filter_var($value, FILTER_VALIDATE_FLOAT) !== false
-            || filter_var($value, FILTER_VALIDATE_INT) !== false;
+        return \extension_loaded('filter')
+            ? \filter_var($value, FILTER_VALIDATE_FLOAT) !== false || \filter_var($value, FILTER_VALIDATE_INT) !== false
+            : \is_numeric($value);
     }
 
     /**

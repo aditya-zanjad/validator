@@ -32,7 +32,7 @@ class DigitsBetween extends AbstractRule
      *
      * @throws  \Exception
      */
-    public function __construct($minDigits, $maxDigits)
+    public function __construct(int|string $minDigits, int|string $maxDigits)
     {
         if (filter_var($minDigits, FILTER_VALIDATE_INT) === false) {
             throw new Exception("[Developer][Exception]: The parameters passed to the validation rule [digits_between] must be the valid integer.");

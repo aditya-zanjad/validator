@@ -23,11 +23,9 @@ class NotIn extends AbstractRule
      *
      * @param string ...$params
      */
-    public function __construct(...$params)
+    public function __construct(string ...$params)
     {
-        $this->params = \array_map(function ($param) {
-            return \is_string($param) ? \trim($param) : $param;
-        }, $params);
+        $this->params = \array_map(fn ($param) => \trim($param), $params);
     }
 
     /**

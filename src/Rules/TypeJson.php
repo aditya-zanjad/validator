@@ -33,14 +33,14 @@ class TypeJson extends AbstractRule
      */
     public function check(string $field, $value): bool
     {
-        $preprocessedValue = $this->preprocessValue($value);
+        $jsonContents = $this->obtainJsonContents($value);
 
-        if ($preprocessedValue === false) {
+        if ($jsonContents === false) {
             return false;
         }
 
-        return \function_exists('\\json_validate') && \json_validate($preprocessedValue, $this->jsonDepth)
-            || \json_decode($preprocessedValue, true, $this->jsonDepth) && \json_last_error() === JSON_ERROR_NONE;
+        return \function_exists('\\json_validate') && \json_validate($jsonContents, $this->jsonDepth)
+            || \json_decode($jsonContents, true, $this->jsonDepth) && \json_last_error() === JSON_ERROR_NONE;
     }
 
     /**
@@ -58,27 +58,25 @@ class TypeJson extends AbstractRule
      * 
      * @return bool|string
      */
-    protected function preprocessValue($value)
+    protected function obtainJsonContents($value)
     {
         switch (gettype($value)) {
             // If a path towards a JSON file is given.
             case 'string':
-                if (is_string($value) && is_file($value)) {
+                if (is_file($value)) {
                     $value = file_get_contents($value);
                 }
                 break;
 
             // If a JSON resource/stream is given.
             case 'resource':
-                if (is_resource($value)) {
-                    $metadata = stream_get_meta_data($value);
+                $metadata = stream_get_meta_data($value);
 
-                    if ($metadata['wrapper_type'] !== 'plainfile') {
-                        return false;
-                    }
-
-                    $value = stream_get_contents($value, -1, 0);
+                if ($metadata['wrapper_type'] !== 'plainfile') {
+                    return false;
                 }
+
+                $value = stream_get_contents($value, -1, 0);
                 break;
 
             default:

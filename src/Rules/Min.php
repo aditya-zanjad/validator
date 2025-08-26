@@ -14,18 +14,21 @@ use function AdityaZanjad\Validator\Utils\varSize;
 class Min extends AbstractRule
 {
     /**
-     * @var int $minAllowedSize
+     * @var int $minValidSize
      */
-    protected int $minAllowedSize;
+    protected int $minValidSize;
 
     /**
-     * Inject the dependencies required to execute the validation logic in this rule.
-     *
-     * @param int $minAllowedSize
+     * @var string $message
      */
-    public function __construct(int|string $minAllowedSize)
+    protected string $message;
+
+    /**
+     * @param int $minValidSize
+     */
+    public function __construct(int|string $minValidSize)
     {
-        $this->minAllowedSize = (int) $minAllowedSize;
+        $this->minValidSize = (int) $minValidSize;
     }
 
     /**
@@ -33,7 +36,21 @@ class Min extends AbstractRule
      */
     public function check(string $field, $value): bool
     {
-        return varSize($value) >= $this->minAllowedSize;
+        $size = varSize($value);
+
+        if ($size >= $this->minValidSize) {
+            return true;
+        }
+
+        $this->message = match (gettype($value)) {
+            'array'                         =>  "The array {$field} must contain at least {$this->minValidSize} elements.",
+            'string'                        =>  "The string {$field} must contain at least {$this->minValidSize} characters.",
+            'resource'                      =>  "The file {$field} must be at least {$this->minValidSize}.",
+            'integer', 'float', 'double'    =>  "The field {$field} must be at least {$this->minValidSize}.",
+            default                         =>  "The size of the field {$field} must be equal to {$this->minValidSize}.",
+        };
+
+        return false;
     }
 
     /**
@@ -41,6 +58,6 @@ class Min extends AbstractRule
      */
     public function message(): string
     {
-        return "The field :{field} cannot be less than {$this->minAllowedSize}.";
+        return $this->message;
     }
 }

@@ -32,9 +32,7 @@ class Size extends AbstractRule
     protected int|float $validSize;
 
     /**
-     * The actual processed value from the user-supplied value that'll be utilized for the validation of the given value.
-     *
-     * @var int|float $validSize
+     * @param int|float|string $givenSize
      */
     public function __construct(int|float|string $givenSize)
     {

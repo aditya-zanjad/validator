@@ -23,12 +23,12 @@ class Callback extends AbstractRule
     /**
      * To contain & execute the callback function.
      *
-     * @var callable(string $field, mixed $value, \AdityaZanjad\Validator\Fluents\Input $input): bool $fn
+     * @var callable(string $field, mixed $value, \AdityaZanjad\Validator\Interfaces\InputManagerInterface $input): bool $fn
      */
     protected $fn;
 
     /**
-     * @param callable(string $field, mixed $value, \AdityaZanjad\Validator\Fluents\Input $input): bool $fn
+     * @param callable(string $field, mixed $value, \AdityaZanjad\Validator\Interfaces\InputManagerInterface $input): bool $fn
      */
     public function __construct(callable $fn)
     {

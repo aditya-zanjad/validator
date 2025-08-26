@@ -3,9 +3,13 @@
 declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
+use AdityaZanjad\Validator\Rules\Min;
 use AdityaZanjad\Validator\Validator;
 use AdityaZanjad\Validator\Managers\Input;
+use AdityaZanjad\Validator\Rules\Required;
+use AdityaZanjad\Validator\Rules\TypeArray;
 use AdityaZanjad\Validator\Rules\TypeString;
+use AdityaZanjad\Validator\Rules\TypeInteger;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversFunction;
 
@@ -15,6 +19,10 @@ use function AdityaZanjad\Validator\Presets\validate;
 #[CoversClass(Error::class)]
 #[CoversClass(Input::class)]
 #[CoversClass(TypeString::class)]
+#[CoversClass(TypeArray::class)]
+#[CoversClass(TypeInteger::class)]
+#[CoversClass(Required::class)]
+#[CoversClass(Min::class)]
 #[CoversFunction('\AdityaZanjad\Validator\Presets\validate')]
 final class WildCardsParametersTest extends TestCase
 {

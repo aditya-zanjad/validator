@@ -34,9 +34,8 @@ class RequiredIf extends AbstractRule implements MandatoryRuleInterface
     protected array $otherFieldValues;
 
     /**
-     * Inject necessary dependencies into the class.
-     *
-     * @param callable $entity
+     * @param   string  $otherField
+     * @param   string  ...$otherFieldValues
      */
     public function __construct(string $otherField, mixed ...$otherFieldValues)
     {

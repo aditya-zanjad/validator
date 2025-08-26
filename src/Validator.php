@@ -71,52 +71,52 @@ class Validator
     /**
      * Transform the the array path containing any wildcard parameter(s) to its actual representable paths from the input array.
      *
-     * @param   string  $field
-     * @param   array   $rules
+     * @param array<int|string, mixed> $givenRules
      * 
-     * @return  array<string, mixed>
+     * @return array<string, mixed> $givenRules
      */
     protected function resolveWildCardParameters(array $givenRules): array
     {
-        $inputPaths = $this->input->paths();
+        // Obtain all of the array paths in dot notation format from the input array.
+        $paths = $this->input->paths();
 
-        foreach ($givenRules as $ruleKey => $rules) {
-            $ruleKey = (string) $ruleKey;
+        // Iterate through the given rules to find out & process the paths containing the wildcard parameters.
+        foreach ($givenRules as $field => $rules) {
+            $field = (string) $field;
 
-            // Check if the rule key contains a wildcard before proceeding.
-            // This optimizes the function by skipping keys without wildcards.
-            if (\preg_match('/(\*|\.\*)/', $ruleKey) === 0) {
+            // If the path does not contain any wildcard parameter(s), skip the current iteration. 
+            if (\preg_match('/(\*|\.\*)/', $field) === 0) {
                 continue;
             }
 
-            $ruleKeySegments    =   \explode('.', $ruleKey);
-            $matchedPaths       =   [];
+            $fieldParams    =   \explode('.', $field);
+            $matchedPaths   =   [];
 
             // Iterate through each of the available input paths.
-            foreach ($inputPaths as $inputPath) {
-                $inputPathSegments = \explode('.', $inputPath);
-                $resolvedPath = '';
+            foreach ($paths as $path) {
+                $pathsegments   =   \explode('.', $path);
+                $resolvedPath   =   '';
 
                 // Compare each segment of the rule key against the input path.
-                foreach ($ruleKeySegments as $ruleIndex => $ruleSegment) {
-                    // If the rule segment is a wildcard '*', get the corresponding path segment from the input.
-                    if ($ruleSegment === '*') {
-                        $inputPathSegments[$ruleIndex]  ??= 0;
-                        $resolvedPath                   .=  "{$inputPathSegments[$ruleIndex]}.";
+                foreach ($fieldParams as $fieldIndex => $fieldParam) {
+                    $pathsegments[$fieldIndex]  ??= 0;
 
+                    // If the rule segment is a wildcard '*', get the corresponding path segment from the input.
+                    if ($fieldParam === '*') {
+                        $resolvedPath .= "{$pathsegments[$fieldIndex]}.";
                         continue;
                     }
 
                     // If the rule segment is an escaped wildcard or dot, remove the escape character.
-                    if (\in_array($ruleSegment, ['\*', '\.'])) {
-                        $ruleSegment = \str_replace('\\', '', $ruleSegment);
+                    if (\in_array($fieldParam, ['\*', '\.'])) {
+                        $fieldParam = \str_replace('\\', '', $fieldParam);
                     }
 
                     // If the rule segment does not exist in the input path,
                     // or if it doesn't match, resolve the rest of the path based on the rule.
-                    if (!isset($inputPathSegments[$ruleIndex]) || $ruleSegment !== $inputPathSegments[$ruleIndex]) {
+                    if (!isset($pathsegments[$fieldIndex]) || $fieldParam !== $pathsegments[$fieldIndex]) {
                         // Get the remaining segments from the original rule.
-                        $remainingSegments = \array_slice($ruleKeySegments, $ruleIndex);
+                        $remainingSegments = \array_slice($fieldParams, $fieldIndex);
 
                         // Build the rest of the path from the remaining rule segments.
                         foreach ($remainingSegments as $remainingRuleSegment) {
@@ -137,7 +137,7 @@ class Validator
                     }
 
                     // If the segments match, add the current path segment to the resolved path.
-                    $resolvedPath .= "{$inputPathSegments[$ruleIndex]}.";
+                    $resolvedPath .= "{$pathsegments[$fieldIndex]}.";
                 }
 
                 // Store the final resolved path after removing any trailing dots.
@@ -146,7 +146,7 @@ class Validator
 
             // Merge the newly matched paths with the existing rules and remove the original wildcard rule.
             $givenRules = \array_merge($givenRules, \array_fill_keys(\array_unique($matchedPaths), $rules));
-            unset($givenRules[$ruleKey]);
+            unset($givenRules[$field]);
         }
 
         return $givenRules;

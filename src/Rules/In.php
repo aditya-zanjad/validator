@@ -23,10 +23,9 @@ class In extends AbstractRule
      *
      * @param string ...$params
      */
-    public function __construct(...$params)
+    public function __construct(string ...$params)
     {
-        // Make certain transformations to the provided data before actual comparison.
-        $this->params = array_map(fn ($param) => is_string($param) ? trim($param) : $param, $params);
+        $this->params = array_map(fn ($param) => \trim($param), $params);
     }
 
     /**

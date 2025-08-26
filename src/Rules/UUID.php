@@ -54,8 +54,8 @@ class UUID extends AbstractRule
      */
     protected function makeRegex(string $version): string
     {
-        $version = \str_replace(' ', '', $version);
-        $version = \strtolower($version);
+        $version    =   \str_replace(' ', '', $version);
+        $version    =   \strtolower($version);
 
         return match ($version) {
             'v1'    =>  '/^([0-9a-f]{8})-([0-9a-f]{4})-1([0-9a-f]{3})-([89ab][0-9a-f]{3})-([0-9a-f]{12})$/i',
@@ -68,7 +68,5 @@ class UUID extends AbstractRule
             'v8'    =>  '/^([0-9a-f]{8})-([0-9a-f]{4})-8([0-9a-f]{3})-([89ab][0-9a-f]{3})-([0-9a-f]{12})$/i',
             default =>  throw new Exception("[Developer][Exception]: The validation rule [uuid] is supplied with an invalid/unsupported UUID version: [{$version}]")
         };
-
-        return $regex;
     }
 }
