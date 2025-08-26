@@ -21,12 +21,12 @@ class Filled extends AbstractRule
      */
     public function check(string $field, $value): bool
     {
-        if (!empty($value) || filter_var($value, FILTER_VALIDATE_BOOL)) {
+        if (!empty($value) || (extension_loaded('filter') && \filter_var($value, FILTER_VALIDATE_BOOL)) || \is_bool($value)) {
             return true;
         }
 
-        $this->message = match (gettype($value)) {
-            'string'    =>  is_file($value) && in_array(filesize($value), [0, false]) ? "The file :{field} must not be empty." : "The string :{field} must not be empty.",
+        $this->message = match (\gettype($value)) {
+            'string'    =>  \is_file($value) && \in_array(filesize($value), [0, false]) ? "The file :{field} must not be empty." : "The string :{field} must not be empty.",
             'array'     =>  "The array :{field} must not be empty.",
             'NULL'      =>  "the field :{field} must not be an empty or a NULL value.",
             'default'   =>  "The field :{field} must not be empty.",

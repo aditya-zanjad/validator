@@ -3,9 +3,13 @@
 declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
+use AdityaZanjad\Validator\Rules\Min;
 use AdityaZanjad\Validator\Validator;
 use AdityaZanjad\Validator\Managers\Input;
+use AdityaZanjad\Validator\Rules\Required;
+use AdityaZanjad\Validator\Rules\TypeArray;
 use AdityaZanjad\Validator\Rules\TypeString;
+use AdityaZanjad\Validator\Rules\TypeInteger;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversFunction;
 
@@ -15,6 +19,10 @@ use function AdityaZanjad\Validator\Presets\validate;
 #[CoversClass(Error::class)]
 #[CoversClass(Input::class)]
 #[CoversClass(TypeString::class)]
+#[CoversClass(TypeArray::class)]
+#[CoversClass(TypeInteger::class)]
+#[CoversClass(Required::class)]
+#[CoversClass(Min::class)]
 #[CoversFunction('\AdityaZanjad\Validator\Presets\validate')]
 final class WildCardsParametersTest extends TestCase
 {
@@ -298,12 +306,12 @@ final class WildCardsParametersTest extends TestCase
         ];
 
         $rules = [
-            // // General array rules
+            // General array rules
             'projects'                          =>  'required|array|min:1',
             'projects.*.employees'              =>  'required|array|min:1',
             'projects.*.tasks'                  =>  'required|array|min:1',
 
-            // // Employee rules
+            // Employee rules
             'projects.*.employees.*.id'         =>  'required|integer',
             'projects.*.employees.*.name'       =>  'required|string|min:5', // Rule set to fail for 'John Doe'
             'projects.1.employees.1.name'       =>  'required|string|max:10', // Rule set to fail for 12345

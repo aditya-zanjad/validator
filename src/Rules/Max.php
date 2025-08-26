@@ -20,6 +20,11 @@ class Max extends AbstractRule
     protected int $maxAllowedSize;
 
     /**
+     * @var string $message
+     */
+    protected string $message;
+
+    /**
      * Inject the dependencies required to execute the validation logic in this rule.
      *
      * @param   int|string $maxAllowedSize
@@ -42,7 +47,19 @@ class Max extends AbstractRule
      */
     public function check(string $field, $value): bool
     {
-        return varSize($value) <= $this->maxAllowedSize;
+        if (varSize($value) > $this->maxAllowedSize) {
+            $this->message = match (\gettype($value)) {
+                'array'                         =>  "The array {$field} must not contain more than {$this->maxAllowedSize} elements.",
+                'string'                        =>  "The string {$field} must not contain more than {$this->maxAllowedSize} characters.",
+                'resource'                      =>  "The size of the file {$field} must not be more than {$this->maxAllowedSize}.",
+                'integer', 'float', 'double'    =>  "The number {$field} must not be more than {$this->maxAllowedSize}.",
+                default                         =>  "The size of the field {$field} must not be more than {$this->maxAllowedSize}.",
+            };
+
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -50,6 +67,6 @@ class Max extends AbstractRule
      */
     public function message(): string
     {
-        return "The field :{field} cannot be more than {$this->maxAllowedSize}.";
+        return $this->message;
     }
 }

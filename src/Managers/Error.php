@@ -40,8 +40,8 @@ class Error implements ErrorManagerInterface
     /**
      * Add a new error message for the given field
      *
-     * @param   string      $field
-     * @param   bool|string $message
+     * @param   string  $field
+     * @param   string  $message
      *
      * @return  static
      */

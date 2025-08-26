@@ -17,35 +17,13 @@ class TypeFile extends AbstractRule
      */
     public function check(string $field, $value): bool
     {
-        $result = null;
-
-        switch (gettype($value)) {
-            case 'string':
-                $result = $this->validateFromPath($value);
-                break;
-
-            case 'array':
-                $result = $this->validateFromUpload($value);
-                break;
-
-            case 'object':
-                $result = $this->validateFromObject($value);
-                break;
-
-            case 'resource':
-                $result = $this->validateFromResource($value);
-                break;
-
-            default:
-                $result = false;
-                break;
-        }
-
-        if ($result === false) {
-            return false;
-        }
-
-        return true;
+        return match (\gettype($value)) {
+            'string'    =>  $this->validateFromPath($value),
+            'array'     =>  $this->validateFromUpload($value),
+            'object'    =>  $this->validateFromObject($value),
+            'resource'  =>  $this->validateFromResource($value),
+            default     =>  false
+        };
     }
 
     /**
@@ -65,7 +43,7 @@ class TypeFile extends AbstractRule
      */
     protected function validateFromPath(string $value): bool
     {
-        return is_file($value) && is_readable($value);
+        return \is_file($value) && \is_readable($value);
     }
 
     /**
@@ -77,21 +55,20 @@ class TypeFile extends AbstractRule
      */
     protected function validateFromUpload(array $value): bool
     {
-        return (isset($value['error']) && $value['error'] === UPLOAD_ERR_OK) 
-            || (isset($value['tmp_name']) && is_uploaded_file($value['tmp_name']));
+        return (isset($value['error']) && $value['error'] === UPLOAD_ERR_OK) || (isset($value['tmp_name']) && is_uploaded_file($value['tmp_name']));
     }
 
     /**
      * Validate the file from the '\SplFileInfo' object.
      *
-     * @param \SplFileInfo $value
+     * @param object $value
      * 
      * @return bool
      */
-    protected function validateFromObject($value): bool
+    protected function validateFromObject(object $value): bool
     {
-        return extension_loaded('SPL')
-            && class_exists(SplFileInfo::class)
+        return \extension_loaded('SPL')
+            && \class_exists(SplFileInfo::class)
             && $value instanceof SplFileInfo
             && $value->isFile()
             && $value->isReadable();
@@ -111,6 +88,6 @@ class TypeFile extends AbstractRule
         }
 
         $metadata = stream_get_meta_data($value);
-        return isset($metadata['wrapper_type']) && $metadata['wrapper_type'] === 'plainfile';
+        return $metadata['wrapper_type'] === 'plainfile';
     }
 }

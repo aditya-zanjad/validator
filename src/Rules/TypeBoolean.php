@@ -35,20 +35,20 @@ class TypeBoolean extends AbstractRule
     {
         if (empty($expectedBooleans)) {
             $this->expectedBooleans = $this->validBooleans;
-            return $this;
+            return;
         }
 
-        $this->expectedBooleans = array_map(function ($value) {
-            if (is_string($value)) {
-                $value = strtolower($value);
+        foreach ($expectedBooleans as $expectedBoolean) {
+            if (\is_string($expectedBoolean)) {
+                $expectedBoolean = \strtolower($expectedBoolean);
             }
 
-            if (!in_array($value, $this->validBooleans)) {
+            if (!\in_array($expectedBoolean, $this->validBooleans)) {
                 throw new Exception("[Developer][Exception]: The validation rule [boolean] considers only these arguments as valid: [(bool) true], [(bool) false], [(string) true], [(string) false], [(int) 1], [(int) 0], [(string) 1], [(string) 0], [(string) on], [(string) off].");
             }
 
-            return $value;
-        }, $expectedBooleans);
+            $this->expectedBooleans[] = $expectedBoolean;
+        }
     }
 
     /**
@@ -56,9 +56,9 @@ class TypeBoolean extends AbstractRule
      */
     public function check(string $field, $value): bool
     {
-        $transformedValue = is_string($value) ? strtolower($value) : $value;
+        $transformedValue = \is_string($value) ? \strtolower($value) : $value;
 
-        if (!in_array($transformedValue, $this->expectedBooleans, true)) {
+        if (!\in_array($transformedValue, $this->expectedBooleans, true)) {
             return false;
         }
 
@@ -66,7 +66,7 @@ class TypeBoolean extends AbstractRule
     }
 
     /**
-     * @return string
+     * @inheritDoc
      */
     public function message(): string
     {

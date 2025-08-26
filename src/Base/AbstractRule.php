@@ -14,7 +14,7 @@ abstract class AbstractRule
     /**
      * An instance that'll allow access to all of the input data.
      *
-     * @var \AdityaZanjad\Validator\Fluents\Input $input
+     * @var \AdityaZanjad\Validator\Interfaces\InputManagerInterface $input
      */
     protected InputManagerInterface $input;
 

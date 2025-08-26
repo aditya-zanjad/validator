@@ -21,7 +21,7 @@ class Date extends AbstractRule
     /**
      * Inject the data required to perform validation.
      *
-     * @param string $format
+     * @param string ...$formatChars
      */
     public function __construct(string ...$formatChars)
     {
