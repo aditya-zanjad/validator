@@ -38,19 +38,19 @@ class Min extends AbstractRule
     {
         $size = varSize($value);
 
-        if ($size >= $this->minValidSize) {
-            return true;
+        if ($size < $this->minValidSize) {
+            $this->message = match (gettype($value)) {
+                'array'                         =>  "The array {$field} must contain at least {$this->minValidSize} elements.",
+                'string'                        =>  "The string {$field} must contain at least {$this->minValidSize} characters.",
+                'resource'                      =>  "The file {$field} must be at least {$this->minValidSize}.",
+                'integer', 'float', 'double'    =>  "The field {$field} must be at least {$this->minValidSize}.",
+                default                         =>  "The field {$field} must be at least {$this->minValidSize}.",
+            };
+
+            return false;
         }
 
-        $this->message = match (gettype($value)) {
-            'array'                         =>  "The array {$field} must contain at least {$this->minValidSize} elements.",
-            'string'                        =>  "The string {$field} must contain at least {$this->minValidSize} characters.",
-            'resource'                      =>  "The file {$field} must be at least {$this->minValidSize}.",
-            'integer', 'float', 'double'    =>  "The field {$field} must be at least {$this->minValidSize}.",
-            default                         =>  "The size of the field {$field} must be equal to {$this->minValidSize}.",
-        };
-
-        return false;
+        return true;
     }
 
     /**

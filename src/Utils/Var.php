@@ -13,9 +13,9 @@ use Exception;
  *
  * @throws \Exception
  *
- * @return int|float
+ * @return null|int|float
  */
-function varSize(mixed $var): int|float
+function varSize(mixed $var): null|int|float
 {
     $type = varEvaluateType($var);
 
@@ -25,7 +25,7 @@ function varSize(mixed $var): int|float
         'string'            =>  varStringSize($var),
         'array'             =>  \count($var),
         'resource'          =>  varFileSize($var),
-        default             =>  throw new Exception("[Developer][Exception]: The given parameter has an invalid data type.") 
+        default             =>  null
     };
 }
 
@@ -104,9 +104,8 @@ function varEvaluateType(mixed $var)
     }
 
     $varLowered = \strtolower($var);
-    $varTrimmed = \str_replace(' ', '', $var);
 
-    if ($varTrimmed === '' || $varLowered == 'null') {
+    if (\str_replace(' ', '', $var) === '' || $varLowered == 'null') {
         return null;
     }
 
@@ -160,10 +159,10 @@ function varMakeSize(mixed $size): mixed
     $sizeInNumeric = (float) $sizeInNumeric;
 
     return (int) match ($sizeUnit) {
-        'B'     =>  $sizeInNumeric,
         'KB'    =>  $sizeInNumeric * 1024,
         'MB'    =>  $sizeInNumeric * 1024 * 1024,
         'GB'    =>  $sizeInNumeric * 1024 * 1024 * 1024,
+        'TB'    =>  $sizeInNumeric * 1024 * 1024 * 1024 * 1024,
         default =>  throw new Exception("[Developer][Exception]: The given file size unit [{$sizeUnit}] is invalid/unsupported.")
     };
 }

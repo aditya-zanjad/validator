@@ -306,12 +306,12 @@ final class WildCardsParametersTest extends TestCase
         ];
 
         $rules = [
-            // // General array rules
+            // General array rules
             'projects'                          =>  'required|array|min:1',
             'projects.*.employees'              =>  'required|array|min:1',
             'projects.*.tasks'                  =>  'required|array|min:1',
 
-            // // Employee rules
+            // Employee rules
             'projects.*.employees.*.id'         =>  'required|integer',
             'projects.*.employees.*.name'       =>  'required|string|min:5', // Rule set to fail for 'John Doe'
             'projects.1.employees.1.name'       =>  'required|string|max:10', // Rule set to fail for 12345
