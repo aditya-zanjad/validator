@@ -7,6 +7,8 @@ namespace AdityaZanjad\Validator\Rules;
 use AdityaZanjad\Validator\Base\AbstractRule;
 use AdityaZanjad\Validator\Interfaces\MandatoryRuleInterface;
 
+use function AdityaZanjad\Validator\Utils\varIsEmpty;
+
 /**
  * @version 1.0
  */
@@ -39,9 +41,9 @@ class RequiredWithoutAll extends AbstractRule implements MandatoryRuleInterface
      */
     public function check(string $field, $value): bool
     {
-        $currentFieldIsPresent = !\is_null($value);
+        $currentFieldIsPresent = !varIsEmpty($value);
 
-        $allOtherFieldsArePresent = array_reduce($this->otherFields, function ($carry, $field) {
+        $allOtherFieldsArePresent = \array_reduce($this->otherFields, function ($carry, $field) {
             return $carry && $this->input->notNull($field);
         }, true);
 

@@ -7,6 +7,7 @@ namespace AdityaZanjad\Validator\Rules;
 use AdityaZanjad\Validator\Base\AbstractRule;
 use AdityaZanjad\Validator\Interfaces\MandatoryRuleInterface;
 
+use function AdityaZanjad\Validator\Utils\varIsEmpty;
 use function AdityaZanjad\Validator\Utils\varEvaluateType;
 
 /**
@@ -50,7 +51,7 @@ class RequiredIf extends AbstractRule implements MandatoryRuleInterface
     {
         $otherFieldValue = $this->input->get($this->otherField);
 
-        if (\is_null($otherFieldValue)) {
+        if (varIsEmpty($otherFieldValue)) {
             return true;
         }
 
@@ -58,7 +59,7 @@ class RequiredIf extends AbstractRule implements MandatoryRuleInterface
             return true;
         }
 
-        if (\is_null($value)) {
+        if (varIsEmpty($value)) {
             $this->message = "The field {$field} is required when the field {$this->otherField} is equals to: {$otherFieldValue}.";
             return false;
         }

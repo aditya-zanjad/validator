@@ -7,6 +7,8 @@ namespace AdityaZanjad\Validator\Rules;
 use AdityaZanjad\Validator\Base\AbstractRule;
 use AdityaZanjad\Validator\Interfaces\MandatoryRuleInterface;
 
+use function AdityaZanjad\Validator\Utils\varIsEmpty;
+
 /**
  * @version 1.0
  */
@@ -17,7 +19,7 @@ class Required extends AbstractRule implements MandatoryRuleInterface
      */
     public function check(string $field, $value): bool
     {
-        return !\is_null($value);
+        return !varIsEmpty($value);
     }
 
     /**

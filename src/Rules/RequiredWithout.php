@@ -7,6 +7,8 @@ namespace AdityaZanjad\Validator\Rules;
 use AdityaZanjad\Validator\Base\AbstractRule;
 use AdityaZanjad\Validator\Interfaces\MandatoryRuleInterface;
 
+use function AdityaZanjad\Validator\Utils\varIsEmpty;
+
 /**
  * @version 1.0
  */
@@ -39,7 +41,7 @@ class RequiredWithout extends AbstractRule implements MandatoryRuleInterface
      */
     public function check(string $field, $value): bool
     {
-        $currentFieldIsPresent = !\is_null($value);
+        $currentFieldIsPresent = !varIsEmpty($value);
 
         // The current field is required iff any of the dependent fields is not present in the input.
         foreach ($this->otherFields as $otherField) {

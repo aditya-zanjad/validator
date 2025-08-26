@@ -7,6 +7,8 @@ namespace AdityaZanjad\Validator\Rules;
 use AdityaZanjad\Validator\Base\AbstractRule;
 use AdityaZanjad\Validator\Interfaces\MandatoryRuleInterface;
 
+use function AdityaZanjad\Validator\Utils\varIsEmpty;
+
 /**
  * @version 1.0
  */
@@ -46,7 +48,7 @@ class RequiredWithAll extends AbstractRule implements MandatoryRuleInterface
             }
         }
 
-        if ($allOtherFieldsArePresent && \is_null($value)) {
+        if ($allOtherFieldsArePresent && varIsEmpty($value)) {
             $this->message = "The field {$field} is required when these fields are present: " . \implode(', ', $this->otherFields);
 
             return false;
