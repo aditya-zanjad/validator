@@ -146,6 +146,11 @@ class Validator
         foreach ($this->rules as $field => $rulesGroup) {
             $field = (string) $field;
 
+            // If the nullable rule is present & the field is also missing, we can skip the whole validation in its entirety.
+            if (\in_array('nullable', $rulesGroup) && $this->input->isNull($field)) {
+                continue;
+            }
+
             foreach ($rulesGroup as $index => $rule) {
                 $evaluation = match (\gettype($rule)) {
                     'string'    =>  $this->evaluateRuleFromString($rule, $field, $index),
@@ -169,6 +174,7 @@ class Validator
             }
         }
 
+        $this->validated = true;
         return $this;
     }
 

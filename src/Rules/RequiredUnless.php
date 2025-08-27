@@ -7,6 +7,7 @@ namespace AdityaZanjad\Validator\Rules;
 use AdityaZanjad\Validator\Base\AbstractRule;
 use AdityaZanjad\Validator\Interfaces\MandatoryRuleInterface;
 
+use function AdityaZanjad\Validator\Utils\varIsEmpty;
 use function AdityaZanjad\Validator\Utils\varEvaluateType;
 
 /**
@@ -55,26 +56,19 @@ class RequiredUnless extends AbstractRule implements MandatoryRuleInterface
     public function check(string $field, $value): bool
     {
         $otherFieldValue            =   $this->input->get($this->otherField);
-        $currentFieldIsPresent      =   !\is_null($value);
+        $currentFieldIsPresent      =   !varIsEmpty($value);
         $otherFieldHasExpectedValue =   \in_array($otherFieldValue, $this->otherFieldExpectedValues);
 
-        // If the other field does not equal to any of the expected values & the current is present [i.e. not missing or not NULL]
-        if (!$otherFieldHasExpectedValue && $currentFieldIsPresent) {
-            return true;
-        }
-
-        // Other field equals one of the expected values & the current field is missing [i.e. is missing or is NULL]
-        if ($otherFieldHasExpectedValue && !$currentFieldIsPresent) {
-            return true;
-        }
-
         /**
-         * If any of the expected values is/are NULL, we want to convert them to a 
-         * string 'NULL' in order to represent them in the error message.
+         * If the other field does not equal to any of the expected values & the current is present [i.e. not missing or not NULL]
+         * Other field equals one of the expected values & the current field is missing [i.e. is missing or is NULL] 
          */
-        $otherFieldExpectedValues = \array_map(function ($value) {
-            return !\is_null($value) ? $value : '[NULL]';
-        }, $this->otherFieldExpectedValues);
+        if ((!$otherFieldHasExpectedValue && $currentFieldIsPresent) || $otherFieldHasExpectedValue && !$currentFieldIsPresent) {
+            return true;
+        }
+
+        // If any of the expected values is/are NULL, we want to convert them to a string 'NULL' in order to represent them in the error message.
+        $otherFieldExpectedValues = \array_map(fn ($value) => !varIsEmpty($value) ? $value : '[NULL]', $this->otherFieldExpectedValues);
 
         $this->message = "The field {$field} is required if the field {$this->otherField} is not equal to any of these values: " . \implode(', ', $otherFieldExpectedValues);
         return false;

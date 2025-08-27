@@ -1,6 +1,7 @@
 /.phpunit.cache
 /.vscode
 /vendor
-index.php
+/index.php
+/validate.php
 /tests/test-files
 todo.md

@@ -53,8 +53,8 @@ final class RequiredValidationRuleTest extends TestCase
     public function testAssertionsPass(): void
     {
         $validator = validate([
-            'abc'   =>  [],
-            'xyz'   =>  '',
+            'abc'   =>  [null],
+            'xyz'   =>  'abc',
             'pqr'   =>  false,
             123     =>  0,
             456     =>  '0',
@@ -124,7 +124,7 @@ final class RequiredValidationRuleTest extends TestCase
                             'mno' => [
                                 'pqr' => [
                                     'uvw' => [
-                                        'xyz' => []
+                                        'xyz' => [null]
                                     ]
                                 ]
                             ]
