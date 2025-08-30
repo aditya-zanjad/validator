@@ -5,11 +5,8 @@ declare(strict_types=1);
 namespace AdityaZanjad\Validator\Managers;
 
 
-use function AdityaZanjad\Validator\Utils\arr_get;
-use function AdityaZanjad\Validator\Utils\arr_exists;
-use function AdityaZanjad\Validator\Utils\arr_filled;
-use function AdityaZanjad\Validator\Utils\arr_nulled;
-use function AdityaZanjad\Validator\Utils\arr_dot_paths;
+use RecursiveArrayIterator;
+use RecursiveIteratorIterator;
 use AdityaZanjad\Validator\Interfaces\InputManagerInterface;
 
 /**
@@ -68,7 +65,27 @@ class Input implements InputManagerInterface
      */
     public function paths(): array
     {
-        return $this->paths ??= arr_dot_paths($this->data);
+        if (isset($this->paths)) {
+            return $this->paths;
+        }
+
+        $arr        =   new RecursiveArrayIterator($this->data);
+        $arr        =   new RecursiveIteratorIterator($arr, RecursiveIteratorIterator::SELF_FIRST);
+        $result     =   [];
+        $nestedKeys =   [];
+
+        foreach ($arr as $key => $value) {
+            $nestedKeys[$arr->getDepth()] = $key;
+
+            if (\is_array($value) && !empty($value)) {
+                continue;
+            }
+
+            $nestedKeys =   \array_slice($nestedKeys, 0, $arr->getDepth() + 1);
+            $result[]   =   \implode('.', $nestedKeys);
+        }
+
+        return $result;
     }
 
     /**
@@ -88,9 +105,20 @@ class Input implements InputManagerInterface
      *
      * @return mixed
      */
-    public function get(string $path)
+    public function get(string $path): mixed
     {
-        return arr_get($this->data, $path);
+        $ref    =   &$this->data;
+        $keys   =   \explode('.', $path);
+
+        foreach ($keys as $key) {
+            if (!isset($ref[$key])) {
+                return null;
+            }
+
+            $ref = &$ref[$key];
+        }
+
+        return $ref;
     }
 
     /**
@@ -102,7 +130,18 @@ class Input implements InputManagerInterface
      */
     public function exists(string $path): bool
     {
-        return arr_exists($this->data, $path);
+        $ref    =   &$this->data;
+        $keys   =   \explode('.', $path);
+
+        foreach ($keys as $key) {
+            if (!\array_key_exists($key, $ref) || !\is_array($ref[$key])) {
+                return false;
+            }
+
+            $ref = &$ref[$key];
+        }
+
+        return true;
     }
 
     /**
@@ -114,19 +153,18 @@ class Input implements InputManagerInterface
      */
     public function isNull(string $path): bool
     {
-        return arr_nulled($this->data, $path);
-    }
+        $ref    =   &$this->data;
+        $keys   =   \explode('.', $path);
 
-    /**
-     * Check if the given input path exists & is not equal to NULL.
-     * 
-     * @param string $path
-     * 
-     * @return bool
-     */
-    public function notNull(string $path): bool
-    {
-        return !arr_nulled($this->data, $path);
+        foreach ($keys as $key) {
+            if (!isset($ref[$key])) {
+                return true;
+            }
+
+            $ref = &$ref[$key];
+        }
+
+        return false;
     }
 
     /**
@@ -138,6 +176,18 @@ class Input implements InputManagerInterface
      */
     public function filled(string $path): bool
     {
-        return arr_filled($this->data, $path);
+        $ref    =   &$this->data;
+        $keys   =   \explode('.', $path);
+
+        foreach ($keys as $key) {
+            // The field must be set & not empty.
+            if (!isset($ref[$key]) || empty($ref[$key])) {
+                return false;
+            }
+
+            $ref = &$ref[$key];
+        }
+
+        return true;
     }
 }

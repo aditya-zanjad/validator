@@ -39,12 +39,12 @@ class RequiredWithoutAll extends AbstractRule implements MandatoryRuleInterface
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value): bool
+    public function check(string $field, mixed $value): bool
     {
         $currentFieldIsPresent = !varIsEmpty($value);
 
         $allOtherFieldsArePresent = \array_reduce($this->otherFields, function ($carry, $field) {
-            return $carry && $this->input->notNull($field);
+            return $carry && !$this->input->isNull($field);
         }, true);
 
         if ($allOtherFieldsArePresent && $currentFieldIsPresent) {

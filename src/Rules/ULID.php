@@ -14,7 +14,7 @@ class ULID extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value): bool
+    public function check(string $field, mixed $value): bool
     {
         return \is_string($value)
             && \strlen($value) === 26

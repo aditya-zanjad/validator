@@ -31,7 +31,7 @@ class TypeJson extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value): bool
+    public function check(string $field, mixed $value): bool
     {
         $jsonContents = $this->obtainJsonContents($value);
 

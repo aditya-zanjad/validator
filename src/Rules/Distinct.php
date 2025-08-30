@@ -14,7 +14,7 @@ class Distinct extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value): bool
+    public function check(string $field, mixed $value): bool
     {
         // TODO => Add validation for recognizing if the array contains distinct values or not
 

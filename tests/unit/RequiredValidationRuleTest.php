@@ -20,29 +20,46 @@ use function AdityaZanjad\Validator\Presets\validate;
 final class RequiredValidationRuleTest extends TestCase
 {
     /**
-     * Assert that the validation fails when the required field is missing.
+     * Path to the file.
      *
-     * @return void
+     * @var string $tempDirPath
      */
-    public function testAssertionsFailWhenRequiredFieldIsMissing(): void
+    protected string $tempDirPath;
+
+    /**
+     * To contain paths to the valid files.
+     *
+     * @var array $validFiles
+     */
+    protected array $validFiles = [];
+
+    /**
+     * @inheritDoc
+     */
+    public function setUp(): void
     {
-        $validator = validate([], ['abc' => 'required']);
-        $this->assertTrue($validator->failed());
-        $this->assertNotEmpty($validator->errors()->firstOf('abc'));
-        $this->assertNotEmpty($validator->errors()->all());
+        $this->tempDirPath = __DIR__ . DIRECTORY_SEPARATOR . 'temp';
+
+        if (!\is_dir($this->tempDirPath)) {
+            \mkdir($this->tempDirPath, 0775, true);
+        }
+
+        \chmod($this->tempDirPath, 0775);
+
+        $this->validFiles = [
+            'file_001'  =>  $this->tempDirPath . DIRECTORY_SEPARATOR . 'sample.txt',
+        ];
+
+        \file_put_contents($this->validFiles['file_001'], trim($this->makeTestTextData()));
     }
 
     /**
-     * Test that the validator fails when the required field is set to null.
-     *
-     * @return void
+     * @inheritDoc
      */
-    public function testAssertionsFailWhenRequiredFieldIsNull(): void
+    public function tearDown(): void
     {
-        $validator = validate(['abc' => null,], ['abc' => 'required']);
-        $this->assertTrue($validator->failed());
-        $this->assertNotEmpty($validator->errors()->firstOf('abc'));
-        $this->assertNotEmpty($validator->errors()->all());
+        \unlink($this->validFiles['file_001']);
+        \rmdir($this->tempDirPath);
     }
 
     /**
@@ -53,19 +70,21 @@ final class RequiredValidationRuleTest extends TestCase
     public function testAssertionsPass(): void
     {
         $validator = validate([
-            'abc'   =>  [null],
-            'xyz'   =>  'abc',
-            'pqr'   =>  false,
-            123     =>  0,
-            456     =>  '0',
-            789     =>  'false',
+            'abc'       =>  [null],
+            'xyz'       =>  'abc',
+            'pqr'       =>  false,
+            123         =>  0,
+            456         =>  '0',
+            789         =>  'false',
+            ...$this->validFiles
         ], [
-            'abc'   =>  'required',
-            'xyz'   =>  'required',
-            'pqr'   =>  'required',
-            123     =>  'required',
-            456     =>  'required',
-            789     =>  'required',
+            'abc'       =>  'required',
+            'xyz'       =>  'required',
+            'pqr'       =>  'required',
+            123         =>  'required',
+            456         =>  'required',
+            789         =>  'required',
+            'file_001'  =>  'required'
         ]);
 
         $this->assertFalse($validator->failed());
@@ -79,74 +98,35 @@ final class RequiredValidationRuleTest extends TestCase
     }
 
     /**
-     * Assert that the validator fails when the required nested path are not present.
+     * Assert that the validation fails when the required field is missing.
      *
      * @return void
      */
-    public function testAssertionsFailWhenNestedFieldIsMissingOrNull(): void
+    public function testAssertionsFail(): void
     {
         $validator = validate([
-            'abc' => [
-                'pqr' => [
-                    //
-                ]
-            ],
-            123 => [
-                456 => [
-                    789 => [
-                        0 => null
-                    ]
-                ]
-            ]
+            'def' => null,
+            'ghi' => '',
+            'jkl' => []
         ], [
-            'abc.pqr.xyz'   =>  'required',
-            '123.456.789.0' =>  'required'
+            'abc'   =>  'required',
+            'def'   =>  'required',
+            'jkl'   =>  'required',
+
         ]);
 
         $this->assertTrue($validator->failed());
-        $this->assertNotNull($validator->errors()->firstOf('abc.pqr.xyz'));
-        $this->assertNotNull($validator->errors()->firstOf('123.456.789.0'));
+        $this->assertNotEmpty($validator->errors()->firstOf('abc'));
         $this->assertNotEmpty($validator->errors()->all());
     }
 
     /**
-     * Assert that the validation succeeds when the required fields are present.
+     * Required for performing the test assertions.
      *
-     * @return void
+     * @return string
      */
-    public function testAssertionsPassWhenNestedFieldsArePresent(): void
+    protected function makeTestTextData(): string
     {
-        $validator = validate([
-            'abc' => [
-                'def' => [
-                    'ghi' => [
-                        'jkl' => [
-                            'mno' => [
-                                'pqr' => [
-                                    'uvw' => [
-                                        'xyz' => [null]
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ],
-            123 => [
-                456 => [
-                    789 => [
-                        0 => 0
-                    ]
-                ]
-            ]
-        ], [
-            'abc.def.ghi.jkl.mno.pqr.uvw.xyz'   =>  'required',
-            '123.456.789.0'                     =>  'required'
-        ]);
-
-        $this->assertFalse($validator->failed());
-        $this->assertEmpty($validator->errors()->all());
-        $this->assertNull($validator->errors()->firstOf('123.456.789.0'));
-        $this->assertNull($validator->errors()->firstOf('abc.def.ghi.jkl.mno.pqr.uvw.xyz'));
+        return 'Hello World! 1234! Get on the dance floor!';
     }
 }

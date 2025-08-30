@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace AdityaZanjad\Validator\Enums;
 
+use AdityaZanjad\Validator\Rules\Gt;
 use AdityaZanjad\Validator\Rules\In;
+use AdityaZanjad\Validator\Rules\Lt;
 use AdityaZanjad\Validator\Base\Enum;
-use AdityaZanjad\Validator\Rules\Max;
-use AdityaZanjad\Validator\Rules\Min;
+use AdityaZanjad\Validator\Rules\Gte;
+use AdityaZanjad\Validator\Rules\Lte;
 use AdityaZanjad\Validator\Rules\URL;
 use AdityaZanjad\Validator\Rules\Date;
 use AdityaZanjad\Validator\Rules\Mime;
@@ -27,28 +29,25 @@ use AdityaZanjad\Validator\Rules\DateLte;
 use AdityaZanjad\Validator\Rules\Numeric;
 use AdityaZanjad\Validator\Rules\DigitsGt;
 use AdityaZanjad\Validator\Rules\DigitsLt;
-use AdityaZanjad\Validator\Rules\LessThan;
 use AdityaZanjad\Validator\Rules\Required;
 use AdityaZanjad\Validator\Rules\TypeFile;
 use AdityaZanjad\Validator\Rules\TypeJson;
 use AdityaZanjad\Validator\Rules\DateEqual;
 use AdityaZanjad\Validator\Rules\DigitsGte;
 use AdityaZanjad\Validator\Rules\DigitsLte;
+use AdityaZanjad\Validator\Rules\IpAddress;
 use AdityaZanjad\Validator\Rules\TypeArray;
+use AdityaZanjad\Validator\Rules\MacAddress;
 use AdityaZanjad\Validator\Rules\RequiredIf;
 use AdityaZanjad\Validator\Rules\TypeString;
-use AdityaZanjad\Validator\Rules\GreaterThan;
 use AdityaZanjad\Validator\Rules\TypeBoolean;
 use AdityaZanjad\Validator\Rules\TypeInteger;
 use AdityaZanjad\Validator\Rules\DateBetween;
 use AdityaZanjad\Validator\Rules\RequiredWith;
 use AdityaZanjad\Validator\Rules\DigitsBetween;
 use AdityaZanjad\Validator\Rules\RequiredUnless;
-use AdityaZanjad\Validator\Rules\LessThanOrEqual;
 use AdityaZanjad\Validator\Rules\RequiredWithAll;
 use AdityaZanjad\Validator\Rules\RequiredWithout;
-use AdityaZanjad\Validator\Rules\GreaterThanOrEqual;
-use AdityaZanjad\Validator\Rules\IpAddress;
 use AdityaZanjad\Validator\Rules\RequiredWithoutAll;
 
 /**
@@ -57,14 +56,15 @@ use AdityaZanjad\Validator\Rules\RequiredWithoutAll;
 class Rule extends Enum
 {
     public const EQ                     =   Equal::class;
-    public const GT                     =   GreaterThan::class;
+    public const GT                     =   Gt::class;
     public const IN                     =   In::class;
     public const IP                     =   IpAddress::class;
-    public const LT                     =   LessThan::class;
-    public const GTE                    =   GreaterThanOrEqual::class;
-    public const LTE                    =   LessThanOrEqual::class;
-    public const MAX                    =   Max::class;
-    public const MIN                    =   Min::class;
+    public const LT                     =   Lt::class;
+    public const GTE                    =   Gte::class;
+    public const MAC                    =   MacAddress::class;
+    public const MIN                    =   Gte::class;
+    public const LTE                    =   Lte::class;
+    public const MAX                    =   Lte::class;
     public const URL                    =   URL::class;
     public const DATE                   =   Date::class;
     public const FILE                   =   TypeFile::class;

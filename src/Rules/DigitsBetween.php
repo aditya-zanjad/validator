@@ -37,19 +37,26 @@ class DigitsBetween extends AbstractRule
         if (filter_var($minDigits, FILTER_VALIDATE_INT) === false) {
             throw new Exception("[Developer][Exception]: The parameters passed to the validation rule [digits_between] must be the valid integer.");
         }
-
+        
         if (filter_var($minDigits, FILTER_VALIDATE_INT) === false) {
             throw new Exception("[Developer][Exception]: The parameters passed to the validation rule [digits_between] must be the valid integer.");
         }
+        
+        $minDigits = (int) $minDigits;
+        $maxDigits = (int) $maxDigits;
 
-        $this->minDigits    =   (int) $minDigits;
-        $this->maxDigits    =   (int) $maxDigits;
+        if ($maxDigits < $minDigits) {
+            throw new Exception("[Developer][Exception]: The second parameter passed to the validation rule [digits_between] must not be lesser than the first parameter.");
+        }
+
+        $this->minDigits = $minDigits;
+        $this->maxDigits = $maxDigits;
     }
 
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value): bool
+    public function check(string $field, mixed $value): bool
     {
         $digits = varDigits($value);
         return !\is_null($digits) && $digits >= $this->minDigits && $digits <= $this->maxDigits;

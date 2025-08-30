@@ -39,9 +39,7 @@ class Validator
      */
     public function __construct(protected InputManagerInterface $input, protected array $rules, protected ErrorManagerInterface $errors, protected array $messages = [])
     {
-        // Prepare the validation rules before performing the actual validation.
         $this->rules = $this->transformRules($this->rules);
-        $this->rules = $this->resolveWildCardParameters($this->rules);
     }
 
     /**
@@ -53,38 +51,15 @@ class Validator
      */
     protected function transformRules(array $givenRules): array
     {
-        foreach ($givenRules as $field => $rules) {
-            if (\is_string($rules)) {
-                $rules = \explode('|', $rules);
-            }
-
-            if (!\is_array($rules)) {
-                throw new Exception("[Developer][Exception]: The field [{$field}] must have validation rules specified either as a [STRING] or [INDEXED ARRAY].");
-            }
-
-            $givenRules[$field] = $rules;
-        }
-
-        return $givenRules;
-    }
-
-    /**
-     * Transform the the array path containing any wildcard parameter(s) to its actual representable paths from the input array.
-     *
-     * @param array<int|string, mixed> $givenRules
-     * 
-     * @return array<string, mixed> $givenRules
-     */
-    protected function resolveWildCardParameters(array $givenRules): array
-    {
-        $result         =   [];
-        $actualPaths    =   $this->input->paths();  // Obtain input data array paths in dot notation form.
+        $actualPaths = $this->input->paths();
 
         foreach ($givenRules as $field => $rules) {
-            $field = (string) $field;
+            $field  =   (string) $field;
+            $rules  =   $this->parseFieldRules($field, $rules);
 
             // If the field to be validated does not contain any wildcard parameters.
-            if (\preg_match('/(\*|\.\*)/', $field) === 0) {
+            if (!\str_contains($field, '*')) {
+                $givenRules[$field] = $rules;
                 continue;
             }
 
@@ -118,15 +93,46 @@ class Validator
                     $resolvedPath .= "{$actualPathParams[$fieldIndex]}.";
                 }
 
-                $resolvedPath           =   \rtrim($resolvedPath, '.');
-                $result[$resolvedPath]  =   $rules;
+                // Remove any unneeded characters from the resolved path string.
+                $resolvedPath = \rtrim($resolvedPath, '.');
+
+                // If the resolved path does not exist in the rules array, we're fine to skip to the next iteration.
+                if (!isset($givenRules[$resolvedPath])) {
+                    $givenRules[$resolvedPath] = $rules;
+                    continue;
+                }
+
+                // If the resolved path exists in the array, we need to combine the current rules with its existing rules while avoiding the duplicates.
+                $givenRules[$resolvedPath]  =   $this->parseFieldRules($resolvedPath, $givenRules[$resolvedPath]);
+                $givenRules[$resolvedPath]  =   \array_merge($givenRules[$resolvedPath], $rules);
+                $givenRules[$resolvedPath]  =   \array_unique($givenRules[$resolvedPath]);
             }
 
-            $givenRules = \array_merge($givenRules, $result);
             unset($givenRules[$field]);
         }
 
         return $givenRules;
+    }
+
+    /**
+     * Transform the given field rules if necessary.
+     *
+     * @param   string  $field
+     * @param   mixed   $rules
+     * 
+     * @return  array
+     */
+    protected function parseFieldRules(string $field, mixed $rules): array
+    {
+        if (\is_string($rules)) {
+            $rules = \explode('|', $rules);
+        }
+
+        if (!\is_array($rules)) {
+            throw new Exception("[Developer][Exception]: The field [{$field}] must have validation rules specified either as a [STRING] or [INDEXED ARRAY].");
+        }
+
+        return $rules;
     }
 
     /**
@@ -146,11 +152,6 @@ class Validator
         foreach ($this->rules as $field => $rulesGroup) {
             $field = (string) $field;
 
-            // If the nullable rule is present & the field is also missing, we can skip the whole validation in its entirety.
-            if (\in_array('nullable', $rulesGroup) && $this->input->isNull($field)) {
-                continue;
-            }
-
             foreach ($rulesGroup as $index => $rule) {
                 $evaluation = match (\gettype($rule)) {
                     'string'    =>  $this->evaluateRuleFromString($rule, $field, $index),
@@ -158,18 +159,13 @@ class Validator
                     default     =>  throw new Exception("[Developer][Exception]: The field [{$field}] has an invalid rule at the index [{$index}].")
                 };
 
-                // If the validation was successful, there is no need to proceed further below.
-                if ($evaluation['result'] === true) {
-                    continue;
-                }
-
-                // Make necessary transformations to the error message.
-                $error = \str_replace(':{field}', $field, $evaluation['rule']->message());
-
-                $this->errors->add($field, $error);
-
-                if ($this->stopOnFail) {
-                    break 2;
+                // If the validation fails
+                if ($evaluation['result'] === false) {
+                    $this->errors->add($field, \str_replace(':{field}', $field, $evaluation['rule']->message()));
+                    
+                    if ($this->stopOnFail) {
+                        break 2;
+                    }
                 }
             }
         }
@@ -209,10 +205,10 @@ class Validator
         }
 
         // Extract the important data from the given parameters to execute the validation rule.
-        $rule       =   \explode(':', $rule);
-        $rule[0]    =   Rule::valueOf($rule[0]);
+        $rule           =   \explode(':', $rule);
+        $ruleClassName  =   Rule::valueOf($rule[0]);
 
-        if (\is_null($rule[0])) {
+        if (\is_null($ruleClassName)) {
             throw new Exception("[Developer][Exception]: The field [{$field}] has an invalid validation rule [{$rule[0]}] at the index [{$index}].");
         }
 
@@ -222,16 +218,16 @@ class Validator
          *                  and
          *  [2] The rule to be evaluated is not set to be run mandatorily.
          */
-        if ($this->input->isNull($field) && !\in_array(MandatoryRuleInterface::class, \class_implements($rule[0]))) {
+        if ($this->input->isNull($field) && !\in_array(MandatoryRuleInterface::class, \class_implements($ruleClassName))) {
             return ['result' => true];
         }
 
         // Prepare the arguments that'll be passed to the rule constructor.
-        $arguments = isset($rule[1]) ? \preg_split('/(?<!\\\\),/', $rule[1]) : [];
-        $arguments = \array_map(fn($arg) => \str_replace('\\,', ',', $arg), $arguments);
+        $arguments  =   isset($rule[1]) ? \preg_split('/(?<!\\\\),/', $rule[1]) : [];
+        $arguments  =   \array_map(fn($arg) => \str_replace('\\,', ',', $arg), $arguments);
 
         // Instantiate the rule class to perform the validation.
-        $instance = new $rule[0](...$arguments);
+        $instance = new $ruleClassName(...$arguments);
 
         // Perform the actual validation & return its result.
         return [
@@ -278,14 +274,14 @@ class Validator
          *  [1] The input is NOT NULL.
          *  [2] The rule implements the 'MandatoryRuleInterface' interface.
          */
-        if ($this->input->notNull($field) || $rule instanceof MandatoryRuleInterface) {
-            return [
-                'result'    =>  $rule->setInput($this->input)->check($field, $this->input->get($field)),
-                'rule'      =>  $rule
-            ];
+        if ($this->input->isNull($field) && !$rule instanceof MandatoryRuleInterface) {
+            return ['result' => true];
         }
 
-        return ['result' => true];
+        return [
+            'result'    =>  $rule->setInput($this->input)->check($field, $this->input->get($field)),
+            'rule'      =>  $rule
+        ];
     }
 
     /**

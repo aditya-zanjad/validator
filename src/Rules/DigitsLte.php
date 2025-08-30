@@ -38,7 +38,7 @@ class DigitsLte extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value): bool
+    public function check(string $field, mixed $value): bool
     {
         $digits = varDigits($value);
         return !\is_null($digits) && $digits <= $this->maxDigits;

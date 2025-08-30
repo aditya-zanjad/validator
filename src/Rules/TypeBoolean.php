@@ -17,7 +17,7 @@ class TypeBoolean extends AbstractRule
      * 
      * @var array<int, bool|int|string> $validBooleans
      */
-    protected array $validBooleans = [true, false, 0, 1, 'true', 'false', '1', '0', 'on', 'off'];
+    protected array $validBooleans = [true, false, 0, 1, 'true', 'false', '1', '0', 'on', 'off', 'no', 'yes'];
 
     /**
      * It includes only those parameters that are expected for the value.
@@ -54,7 +54,7 @@ class TypeBoolean extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value): bool
+    public function check(string $field, mixed $value): bool
     {
         $transformedValue = \is_string($value) ? \strtolower($value) : $value;
 

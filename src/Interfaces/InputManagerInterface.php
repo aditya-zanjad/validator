@@ -16,7 +16,7 @@ namespace AdityaZanjad\Validator\Interfaces;
 interface InputManagerInterface
 {
     /**
-     * Check if the input array is empty or not.
+     * Check if the input array is empty.
      *
      * @return bool
      */
@@ -32,28 +32,21 @@ interface InputManagerInterface
     /**
      * Get all of the array paths in the dot notation form.
      *
-     * @return array<int, int|string>
+     * @return array<int, string>
      */
     public function paths(): array;
 
     /**
-     * Get only the top-level keys of the array.
-     *
-     * @return array<int, int|string>
-     */
-    public function keys(): array;
-
-    /**
-     * Get a value of the particular dot notation array path.
+     * Get the value of a particular dot notation array path.
      *
      * @param string $path
      *
      * @return mixed
      */
-    public function get(string $path);
+    public function get(string $path): mixed;
 
     /**
-     * Check if a particular dot notation array path exists or not in the given array.
+     * Check if a particular dot notation array path exists in the given array.
      *
      * @param string $path
      *
@@ -62,22 +55,13 @@ interface InputManagerInterface
     public function exists(string $path): bool;
 
     /**
-     * Check if the given input path is equal to NULL.
+     * Check if the value of the given input path is equal to NULL.
      * 
      * @param string $path
      * 
      * @return bool
      */
     public function isNull(string $path): bool;
-
-    /**
-     * Check if the given input path exists & is not equal to NULL.
-     * 
-     * @param string $path
-     * 
-     * @return bool
-     */
-    public function notNull(string $path): bool;
 
     /**
      * Check if a particular dot notation array path exists & its value is not empty.

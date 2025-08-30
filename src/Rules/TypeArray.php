@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace AdityaZanjad\Validator\Rules;
 
+use ArrayAccess;
+use ArrayObject;
 use AdityaZanjad\Validator\Base\AbstractRule;
 
 /**
@@ -14,9 +16,9 @@ class TypeArray extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value): bool
+    public function check(string $field, mixed $value): bool
     {
-        return is_array($value);
+        return \is_array($value) || $value instanceof ArrayObject || $value instanceof ArrayAccess;
     }
 
     /**
