@@ -40,7 +40,7 @@ class IpAddress extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value): bool
+    public function check(string $field, mixed $value): bool
     {
         return \filter_var($value, FILTER_VALIDATE_IP, $this->prepareOptions()) !== false;
     }

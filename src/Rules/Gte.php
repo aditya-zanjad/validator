@@ -8,12 +8,12 @@ use Exception;
 use AdityaZanjad\Validator\Base\AbstractRule;
 
 use function AdityaZanjad\Validator\Utils\varSize;
-use function AdityaZanjad\Validator\Utils\varMakeSize;
+use function AdityaZanjad\Validator\Utils\varFilterSize;
 
 /**
  * @version 1.0
  */
-class GreaterThanOrEqual extends AbstractRule
+class Gte extends AbstractRule
 {
     /**
      * @var int|float|string $givenSize
@@ -26,6 +26,11 @@ class GreaterThanOrEqual extends AbstractRule
     protected int|float|string $minSize;
 
     /**
+     * @var string $message
+     */
+    protected string $message;
+
+    /**
      * Inject the dependencies required to execute the validation logic in this rule.
      *
      * @param mixed $givenSize
@@ -33,7 +38,7 @@ class GreaterThanOrEqual extends AbstractRule
     public function __construct(mixed $givenSize)
     {
         $this->givenSize    =   $givenSize;
-        $givenSize          =   varMakeSize($givenSize);
+        $givenSize          =   varFilterSize($givenSize);
 
         if (\is_null($givenSize)) {
             throw new Exception("[Developer][Exception]: The validation rule [size] accepts only one parameter which should be either an [INTEGER], [FLOAT] or a [STRING].");
@@ -45,9 +50,20 @@ class GreaterThanOrEqual extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value): bool
+    public function check(string $field, mixed $value): bool
     {
-        return varSize($value) >= $this->minSize;
+        if (varSize($value) < $this->minSize) {
+            $this->message = match (\gettype($value)) {
+                'array'                                     =>  "The field {$field} must contain at least {$this->minSize} elements.",
+                'string'                                    =>  "The field {$field} must contain at least {$this->minSize} characters.",
+                'resource', 'float', 'double', 'integer'    =>  "The field {$field} must be at least {$this->minSize}.",
+                default                                     =>  "The field {$field} must be at least {$this->minSize}."
+            };
+
+            return false;
+        };
+
+        return true;
     }
 
     /**
@@ -55,6 +71,6 @@ class GreaterThanOrEqual extends AbstractRule
      */
     public function message(): string
     {
-        return "The field :{field} must be greater than or equal to {$this->givenSize}";
+        return $this->message;
     }
 }

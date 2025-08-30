@@ -31,7 +31,7 @@ class Date extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value): bool
+    public function check(string $field, mixed $value): bool
     {
         $givenDateTime = parseDateTime($value, $this->format);
         return $givenDateTime !== false ? true : false;
@@ -42,10 +42,8 @@ class Date extends AbstractRule
      */
     public function message(): string
     {
-        if (empty($this->format)) {
-            return 'The field :{field} must be a valid date.';
-        }
-
-        return "The field :{field} must be a valid date with the format: {$this->format}";
+        return empty($this->format)
+            ? 'The field :{field} must be a valid date.' 
+            : "The field :{field} must be a valid date with the format: {$this->format}";
     }
 }

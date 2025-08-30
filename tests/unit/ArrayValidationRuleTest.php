@@ -31,14 +31,16 @@ final class ArrayValidationRuleTest extends TestCase
             'ghi'   =>  [1, 2, 3, 4, 5, 6],
             'jkl'   =>  [12345682385],
             'mno'   =>  [[[[57832572.23478235]]]],
-            'pqr'   =>  ['abc' => 1234]
+            'pqr'   =>  ['abc' => 1234],
+            'xyz'   =>  new \ArrayObject()
         ], [
             'abc'   =>  'array',
             'def'   =>  'array',
             'ghi'   =>  'array',
             'jkl'   =>  'array',
             'mno'   =>  'array',
-            'pqr'   =>  'array'
+            'pqr'   =>  'array',
+            'xyz'   =>  'array'
         ]);
 
         $this->assertFalse($validator->failed());
@@ -49,6 +51,7 @@ final class ArrayValidationRuleTest extends TestCase
         $this->assertEmpty($validator->errors()->firstOf('jkl'));
         $this->assertEmpty($validator->errors()->firstOf('mno'));
         $this->assertEmpty($validator->errors()->firstOf('pqr'));
+        $this->assertEmpty($validator->errors()->firstOf('xyz'));
     }
 
     /**

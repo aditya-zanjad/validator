@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace AdityaZanjad\Validator\Utils;
 
+use Countable;
 use Exception;
+use ArrayAccess;
+use ArrayObject;
+use SplFileInfo;
 
 /**
- * Check if the variable is an empty string/file/array/null.
+ * Check if the variable is null or empty string or empty array or an invalid file.
  * 
  * @param mixed $var
  * 
@@ -19,28 +23,24 @@ function varIsEmpty(mixed $var): bool
         return true;
     }
 
-    if (\in_array($var, [true, false, 'true', 'false'], true)) {
-        return false;
+    if (\is_array($var)) {
+        if (\count($var) === 0) {
+            return true;
+        }
+
+        if (isset($var['error']) && $var['error'] === UPLOAD_ERR_OK && isset($var['tmp_name']) && \is_uploaded_file($var['tmp_name'])) {
+            return false;
+        }
     }
 
-    if (\filter_var($var, FILTER_VALIDATE_INT) !== false) {
-        return false;
-    }
+    if (\is_string($var)) {
+        if (\is_file($var) && \is_readable($var)) {
+            return false;
+        }
 
-    if (\filter_var($var, FILTER_VALIDATE_FLOAT) !== false) {
-        return false;
-    }
-
-    if (\is_array($var) && \count($var) === 0) {
-        return true;
-    }
-
-    if (\is_resource($var) && varFileSize($var) === 0) {
-        return true;
-    }
-
-    if (\is_string($var) && varStrSize($var) === 0) {
-        return true;
+        return \extension_loaded('mbstring')
+            ? \mb_strlen($var) === 0
+            : \strlen($var) === 0;
     }
 
     return false;
@@ -51,12 +51,12 @@ function varIsEmpty(mixed $var): bool
  *
  * @param mixed $var
  *
- * @return int|float
+ * @return bool|int|float
  */
-function varSize(mixed $var): int|float
+function varSize(mixed $var): bool|int|float
 {
     if (\in_array($var, [true, false, 'true', 'false'], true)) {
-        return (int) $var;
+        return $var;
     }
 
     if (\filter_var($var, FILTER_VALIDATE_INT) !== false) {
@@ -67,15 +67,35 @@ function varSize(mixed $var): int|float
         return (float) $var;
     }
 
-    if (\is_array($var)) {
-        return \count($var);
+    if (\is_array($var) || $var instanceof ArrayObject || $var instanceof ArrayAccess || $var instanceof Countable) {
+        return varArrSize($var);
     }
 
     if (\is_resource($var)) {
         return varFileSize($var);
     }
 
+    if (\is_object($var) && $var instanceof SplFileInfo && $var->isFile() && $var->isReadable()) {
+        return $var->getSize();
+    }
+
     return varStrSize((string) $var);
+}
+
+/**
+ * Get the size of the given array.
+ * 
+ * @param array $var
+ * 
+ * @return int
+ */
+function varArrSize(array $var): int
+{
+    if (isset($var['error']) && $var['error'] === UPLOAD_ERR_OK && isset($var['tmp_name']) && \is_uploaded_file($var['tmp_name'])) {
+        return \filesize($var['tmp_name']);
+    }
+
+    return \count($var);
 }
 
 /**
@@ -104,7 +124,7 @@ function varFileSize(mixed $var): ?int
  * 
  * @return int
  */
-function varStrSize(string $var): int
+function varStrSize(string $var): bool|int
 {
     if (\is_file($var)) {
         return \filesize($var);
@@ -186,7 +206,7 @@ function varEvaluateType(mixed $var)
  * 
  * @return mixed
  */
-function varMakeSize(mixed $size): mixed
+function varFilterSize(mixed $size): mixed
 {
     if (\filter_var($size, FILTER_VALIDATE_FLOAT) !== false) {
         return (float) $size;

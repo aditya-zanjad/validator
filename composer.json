@@ -15,8 +15,6 @@
             "AdityaZanjad\\Validator\\": "src/"
         },
         "files": [
-            "src/Utils/Arr.php",
-            "src/Utils/Str.php",
             "src/Utils/Var.php",
             "src/Utils/Date.php",
             "src/Presets/validate.php",

@@ -33,7 +33,11 @@ final class BooleanValidationRuleTest extends TestCase
             'mno'   =>  'false',
             'pqr'   =>  'true',
             'uvw'   =>  '1',
-            'xyz'   =>  '0'
+            'xyz'   =>  '0',
+            'zyx'   =>  'on',
+            'wvu'   =>  'off',
+            'rqp'   =>  'yes',
+            'onm'   =>  'no'
         ], [
             'abc'   =>  'boolean',
             'def'   =>  'boolean',
@@ -43,6 +47,10 @@ final class BooleanValidationRuleTest extends TestCase
             'pqr'   =>  'boolean',
             'uvw'   =>  'boolean',
             'xyz'   =>  'boolean',
+            'zyx'   =>  'boolean',
+            'wvu'   =>  'boolean',
+            'rqp'   =>  'boolean',
+            'onm'   =>  'boolean'
         ]);
 
         $this->assertFalse($validator->failed());
@@ -55,6 +63,10 @@ final class BooleanValidationRuleTest extends TestCase
         $this->assertEmpty($validator->errors()->firstOf('pqr'));
         $this->assertEmpty($validator->errors()->firstOf('uvw'));
         $this->assertEmpty($validator->errors()->firstOf('xyz'));
+        $this->assertEmpty($validator->errors()->firstOf('zyx'));
+        $this->assertEmpty($validator->errors()->firstOf('wvu'));
+        $this->assertEmpty($validator->errors()->firstOf('rqp'));
+        $this->assertEmpty($validator->errors()->firstOf('onm'));
     }
 
     /**
@@ -70,14 +82,16 @@ final class BooleanValidationRuleTest extends TestCase
             'ghi'   =>  'truth',
             'jkl'   =>  new \stdClass(),
             'mno'   =>  57832572.23478235,
-            'pqr'   =>  1234
+            'pqr'   =>  1234,
+            'xyz'   =>  'null'
         ], [
             'abc'   =>  'boolean',
             'def'   =>  'boolean',
             'ghi'   =>  'boolean',
             'jkl'   =>  'boolean',
             'mno'   =>  'boolean',
-            'pqr'   =>  'boolean'
+            'pqr'   =>  'boolean',
+            'xyz'   =>  'boolean'
         ]);
 
         $this->assertTrue($validator->failed());
@@ -88,5 +102,6 @@ final class BooleanValidationRuleTest extends TestCase
         $this->assertNotEmpty($validator->errors()->firstOf('jkl'));
         $this->assertNotEmpty($validator->errors()->firstOf('mno'));
         $this->assertNotEmpty($validator->errors()->firstOf('pqr'));
+        $this->assertNotEmpty($validator->errors()->firstOf('xyz'));
     }
 }

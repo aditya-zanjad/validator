@@ -15,14 +15,11 @@ use Throwable;
  *
  * @return  bool|\DateTime
  */
-function parseDateTime($value, string $format = '')
+function parseDateTime($value, string $format = ''): bool|DateTime
 {
-    if (!is_string($value)) {
+    if (!\is_string($value)) {
         return false;
     }
-
-    // *** NOTE => Commented temporarily. Might be needed in the future ***
-    // $timezone = new DateTimeZone(ini_get('date.timezone') ?: date_default_timezone_get());
 
     try {
         if (!empty($format)) {
@@ -33,7 +30,7 @@ function parseDateTime($value, string $format = '')
     } catch (Throwable $e) {
         // var_dump($e); exit;
 
-        // If parsing the date fails, attempt to parse it with some pre-defined date formats.
+        // If parsing the date fails, attempt to parse it with pre-defined date formats.
         $formats = makeDateTimeFormats();
 
         foreach ($formats as $format) {

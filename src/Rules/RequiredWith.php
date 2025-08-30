@@ -35,7 +35,7 @@ class RequiredWith extends AbstractRule implements MandatoryRuleInterface
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value): bool
+    public function check(string $field, mixed $value): bool
     {
         $currentFieldIsMissing = varIsEmpty($value);
 
@@ -43,7 +43,7 @@ class RequiredWith extends AbstractRule implements MandatoryRuleInterface
         // will return true. However, if the all the dependent fields are present & if the
         // current field is missing, a validation error message will be returned.
         foreach ($this->otherFields as $otherField) {
-            if ($this->input->notNull($otherField) && $currentFieldIsMissing) {
+            if (!$this->input->isNull($otherField) && $currentFieldIsMissing) {
                 $this->message = "The field {$field} is required when the field {$otherField} is present.";
                 return false;
             }

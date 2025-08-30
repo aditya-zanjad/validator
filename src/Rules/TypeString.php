@@ -40,7 +40,7 @@ class TypeString extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value): bool
+    public function check(string $field, mixed $value): bool
     {
         if (!\is_string($value)) {
             $this->message = "The field {$field} must be a string.";
@@ -51,13 +51,14 @@ class TypeString extends AbstractRule
             return true;
         }
 
+        
         if (\function_exists('\\mb_ereg_match') && \mb_ereg_match($this->regex, $value) === false) {
-            $this->message = "The field :{field} must be a string & match the regex pattern: {$this->regex}.";
+            $this->message = "The field :{field} must be valid string that matches the regular expression: {$this->regex}.";
             return false;
         }
 
         if (\preg_match($this->regex, $value) === false) {
-            $this->message = "The field :{field} must be a string & match the regex pattern: {$this->regex}.";
+            $this->message = "The field :{field} must be valid string that matches the regular expression: {$this->regex}.";
             return false;
         }
 

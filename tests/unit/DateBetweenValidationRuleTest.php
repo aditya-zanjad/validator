@@ -34,7 +34,7 @@ final class DateBetweenValidationRuleTest extends TestCase
             'pqr'   =>  '05/11/1994',
             'uvw'   =>  'May 11, 1994',
             'xyz'   =>  '1994/05/11',
-            // 'zyx'   =>  '783993600'
+            'zyx'   =>  '783993600'
         ], [
             'abc'   =>  'date_between:1994-05-10,1994-05-12',
             'def'   =>  'date_between:10-05-1994, 12-05-1994',
@@ -44,7 +44,7 @@ final class DateBetweenValidationRuleTest extends TestCase
             'pqr'   =>  'date_between:05/10/1994,05/12/1994',
             'uvw'   =>  'date_between:May 10\, 1994, 12 May\, 1994',
             'xyz'   =>  'date_between:1994-05-10,1994-05-12',
-            // 'zyx'   =>  'date_between:781315200,786585600'
+            'zyx'   =>  'date_between:781315200,786585600'
         ]);
 
         $this->assertFalse($validator->failed());
@@ -76,7 +76,7 @@ final class DateBetweenValidationRuleTest extends TestCase
             'pqr'   =>  '05/08/1994',
             'uvw'   =>  'May 14, 1994',
             'xyz'   =>  '1994/05/16',
-            // 'zyx'   =>  '768614400'
+            'zyx'   =>  '768614400'
         ], [
             'abc'   =>  'date_between:1994-05-10,1994-05-12',
             'def'   =>  'date_between:10-05-1994, 12-05-1994',
@@ -86,7 +86,7 @@ final class DateBetweenValidationRuleTest extends TestCase
             'pqr'   =>  'date_between:05/10/1994,05/12/1994',
             'uvw'   =>  'date_between:May 10\, 1994, 12 May\, 1994',
             'xyz'   =>  'date_between:1994-05-10,1994-05-12',
-            // 'zyx'   =>  'date_between:781315200,786585600'
+            'zyx'   =>  'date_between:781315200,786585600'
         ]);
 
         $this->assertTrue($validator->failed());
@@ -99,6 +99,6 @@ final class DateBetweenValidationRuleTest extends TestCase
         $this->assertNotEmpty($validator->errors()->firstOf('pqr'));
         $this->assertNotEmpty($validator->errors()->firstOf('uvw'));
         $this->assertNotEmpty($validator->errors()->firstOf('xyz'));
-        // $this->assertNotEmpty($validator->errors()->firstOf('zyx'));
+        $this->assertNotEmpty($validator->errors()->firstOf('zyx'));
     }
 }

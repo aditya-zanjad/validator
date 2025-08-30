@@ -3,9 +3,10 @@
 declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
-use AdityaZanjad\Validator\Rules\Min;
+use AdityaZanjad\Validator\Rules\Gte;
 use AdityaZanjad\Validator\Validator;
 use AdityaZanjad\Validator\Managers\Input;
+use AdityaZanjad\Validator\Rules\Required;
 use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversFunction;
@@ -15,10 +16,72 @@ use function AdityaZanjad\Validator\Presets\validate;
 #[UsesClass(Validator::class)]
 #[CoversClass(Error::class)]
 #[CoversClass(Input::class)]
-#[CoversClass(Min::class)]
+#[CoversClass(Required::class)]
+#[CoversClass(Gte::class)]
 #[CoversFunction('\AdityaZanjad\Validator\Presets\validate')]
 class MinValidationRuleTest extends TestCase
 {
+    protected string $tempDirPath;
+
+    /**
+     * To contain paths to the valid files.
+     *
+     * @var array $files
+     */
+    protected array $files = [];
+
+    /**
+     * @inheritDoc
+     */
+    public function setUp(): void
+    {
+        $this->tempDirPath = __DIR__ . DIRECTORY_SEPARATOR . 'temp';
+
+        if (!is_dir($this->tempDirPath)) {
+            mkdir($this->tempDirPath, 0775, true);
+        }
+
+        chmod($this->tempDirPath, 0775);
+
+        $this->files = [
+            'file_001'  =>  $this->tempDirPath . DIRECTORY_SEPARATOR . 'valid_001.json',
+            'file_002'  =>  $this->tempDirPath . DIRECTORY_SEPARATOR . 'sample.txt',
+            'file_003'  =>  $this->tempDirPath . DIRECTORY_SEPARATOR . 'sample_doc.doc',
+        ];
+
+        $fileOne = fopen($this->files['file_001'], 'w');
+
+        // To create a file of size 2 MB.
+        fseek($fileOne, (2 * 1024 * 1024) - 1);
+        fwrite($fileOne, ' ');
+        fclose($fileOne);
+
+        // To create a file of size 2048 KB.
+        $this->files['file_002'] = fopen($this->files['file_002'], 'w');
+        fseek($this->files['file_002'], (2 * 1024 * 1024) - 1);
+        fwrite($this->files['file_002'], ' ');
+
+        // To create a file of size 2097152 bytes
+        $fileThree = fopen($this->files['file_003'], 'w');
+        fseek($fileThree, (2 * 1024 * 1024) - 1);
+        fwrite($fileThree, ' ');
+    }
+
+    /**
+     * Delete all the files/directories that were created before the execution of test cases.
+     *
+     * @return void
+     */
+    public function tearDown(): void
+    {
+        unlink($this->files['file_001']);
+        $streamMetadata = stream_get_meta_data($this->files['file_002']);
+        fclose($this->files['file_002']);
+        unlink($streamMetadata['uri']);
+        unlink($this->files['file_003']);
+        rmdir($this->tempDirPath);
+    }
+
     /**
      * Assert that the validation rule 'min:' succeeds.
      *
@@ -27,17 +90,23 @@ class MinValidationRuleTest extends TestCase
     public function testAssertionsPass(): void
     {
         $validator = validate([
-            'abc' => 123456,
-            'def' => 0,
-            'ghi' => 'abc',
-            'jkl' => 'x',
-            'xyz' => -20,
+              'abc' =>  'b',
+              'def' =>  '101',
+              'ghi' =>  1,
+              'jkl' =>  0,
+              'mno' =>  '1234! Get on the dance floor!',
+              'pqr' =>  100.200,
+            ...$this->files
         ], [
-            'abc' => 'min:3',
-            'def' => 'min:-1',
-            'ghi' => 'min:3',
-            'jkl' => 'min:1',
-            'xyz' => 'min:-30',
+            'abc'       =>  'gte:    1 ',
+            'def'       =>  'gte: 100',
+            'ghi'       =>  'gte:-100 ',
+            'jkl'       =>  'gte: -1 ',
+            'mno'       =>  'gte: 15 ',
+            'pqr'       =>  'gte:100',
+            'file_001'  =>  'gte: 2 MB',
+            'file_002'  =>  'gte: 2048     KB',
+            'file_003'  =>  'gte:2097152   '
         ]);
 
         $this->assertFalse($validator->failed());
@@ -47,6 +116,10 @@ class MinValidationRuleTest extends TestCase
         $this->assertNull($validator->errors()->firstOf('def'));
         $this->assertNull($validator->errors()->firstOf('ghi'));
         $this->assertNull($validator->errors()->firstOf('jkl'));
+        $this->assertNull($validator->errors()->firstOf('mno'));
+        $this->assertNull($validator->errors()->firstOf('file_001'));
+        $this->assertNull($validator->errors()->firstOf('file_002'));
+        $this->assertNull($validator->errors()->firstOf('file_003'));
     }
 
     /**
@@ -57,17 +130,21 @@ class MinValidationRuleTest extends TestCase
     public function testAssertionsFail(): void
     {
         $validator = validate([
-            'abc' => 123456,
-            'def' => 0,
-            'ghi' => 'abc',
-            'jkl' => 'x',
-            'xyz' => -20,
+              'abc' =>  'hi',
+              'def' =>  '100',
+              'ghi' =>  '-1',
+              'jkl' =>  -100,
+              'mno' =>  '1234.32525',
+            ...$this->files
         ], [
-            'abc' => 'min:1000000',
-            'def' => 'min:10',
-            'ghi' => 'min:15',
-            'jkl' => 'min:25',
-            'xyz' => 'min:0,1,2,3'
+            'abc'       =>  'gte:3',
+            'def'       =>  'gt:101',
+            'ghi'       =>  'gte:0',
+            'jkl'       =>  'gte:-1',
+            'mno'       =>  'gte: 1235',
+            'file_001'  =>  'gte: 4MB',
+            'file_002'  =>  'gte: 2049 KB',
+            'file_003'  =>  'gte: 2097153'
         ]);
 
         $this->assertTrue($validator->failed());
@@ -77,10 +154,8 @@ class MinValidationRuleTest extends TestCase
         $this->assertNotNull($validator->errors()->firstOf('def'));
         $this->assertNotNull($validator->errors()->firstOf('ghi'));
         $this->assertNotNull($validator->errors()->firstOf('jkl'));
-        $this->assertIsString($validator->errors()->first());
-        $this->assertIsString($validator->errors()->firstOf('abc'));
-        $this->assertIsString($validator->errors()->firstOf('def'));
-        $this->assertIsString($validator->errors()->firstOf('ghi'));
-        $this->assertIsString($validator->errors()->firstOf('jkl'));
+        $this->assertNotNull($validator->errors()->firstOf('file_001'));
+        $this->assertNotNull($validator->errors()->firstOf('file_002'));
+        $this->assertNotNull($validator->errors()->firstOf('file_003'));
     }
 }

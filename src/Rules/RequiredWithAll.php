@@ -35,7 +35,7 @@ class RequiredWithAll extends AbstractRule implements MandatoryRuleInterface
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value): bool
+    public function check(string $field, mixed $value): bool
     {
         $allOtherFieldsArePresent = true;
 

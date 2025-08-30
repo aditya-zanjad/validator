@@ -44,7 +44,7 @@ final class DateGreaterThanOrEqualValidationRuleTest extends TestCase
             'mno'   =>  'date_gte: 11/05/1994    ',
             'pqr'   =>  'date_gte:01/11/1994',
             'uvw'   =>  'date_gte:May 11\, 1994',
-            // 'xyz'   =>  'date_gte:768613300',
+            'xyz'   =>  'date_gte:768594600',
             // 'zyx'   =>  'date_gte:1800-05-11',
             // 'wvu'   =>  'date_gte:768614400'
         ]);

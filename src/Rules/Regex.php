@@ -29,7 +29,7 @@ class Regex extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value): bool
+    public function check(string $field, mixed $value): bool
     {
         return !in_array(preg_match($this->regex, $value, $matches), [0, false]);
     }

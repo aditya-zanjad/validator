@@ -66,15 +66,11 @@ class Error implements ErrorManagerInterface
      *
      * @param string $field
      *
-     * @return null|string|array
+     * @return null|array
      */
-    public function of(string $field)
+    public function of(string $field): null|array
     {
-        if (!isset($this->errors[$field])) {
-            return null;
-        }
-
-        return $this->errors[$field];
+        return $this->errors[$field] ?? null;
     }
 
     /**
@@ -84,13 +80,12 @@ class Error implements ErrorManagerInterface
      */
     public function first()
     {
-        $firstFieldErrors = arr_first($this->errors);
-
-        if (is_null($firstFieldErrors)) {
+        if (empty($this->errors)) {
             return null;
         }
 
-        return arr_first($firstFieldErrors);
+        $firstField = \array_key_first($this->errors);
+        return $this->errors[$firstField][\array_key_first($this->errors[$firstField])];
     }
 
     /**
@@ -104,6 +99,6 @@ class Error implements ErrorManagerInterface
             return null;
         }
 
-        return arr_first($this->errors[$field]);
+        return $this->errors[$field][\array_key_first($this->errors[$field])];
     }
 }

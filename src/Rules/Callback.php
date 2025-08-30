@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AdityaZanjad\Validator\Rules;
 
+use Closure;
 use Exception;
 use InvalidArgumentException;
 use AdityaZanjad\Validator\Base\AbstractRule;
@@ -23,14 +24,14 @@ class Callback extends AbstractRule
     /**
      * To contain & execute the callback function.
      *
-     * @var callable(string $field, mixed $value, \AdityaZanjad\Validator\Interfaces\InputManagerInterface $input): bool $fn
+     * @var \Closure $fn
      */
-    protected $fn;
+    protected Closure $fn;
 
     /**
-     * @param callable(string $field, mixed $value, \AdityaZanjad\Validator\Interfaces\InputManagerInterface $input): bool $fn
+     * @param \Closure $fn
      */
-    public function __construct(callable $fn)
+    public function __construct(Closure $fn)
     {
         $this->fn = $fn;
     }
@@ -40,7 +41,7 @@ class Callback extends AbstractRule
      * 
      * @throws \Exception => Whenever the callback function returns an invalid value.
      */
-    public function check(string $field, $value): bool
+    public function check(string $field, mixed $value): bool
     {
         try {
             $result = ($this->fn)($field, $value, $this->input);
@@ -53,7 +54,7 @@ class Callback extends AbstractRule
             return $result;
         }
 
-        if (\is_string($result)) {
+        if (!\is_string($result)) {
             throw new Exception("[Developer][Exception]: The field [{$field}] has callback validation that must return either a [BOOLEAN] or a [STRING] value.");
         }
         

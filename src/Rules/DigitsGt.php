@@ -28,7 +28,7 @@ class DigitsGt extends AbstractRule
      */
     public function __construct($minThreshold)
     {
-        if (!filter_var($minThreshold, FILTER_VALIDATE_INT)) {
+        if (\filter_var($minThreshold, FILTER_VALIDATE_INT) === false) {
             throw new Exception("[Developer][Exception]: The parameter passed to the validation rule [digits_gt] must be a valid integer.");
         }
 
@@ -38,7 +38,7 @@ class DigitsGt extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, $value): bool
+    public function check(string $field, mixed $value): bool
     {
         $digits = varDigits($value);
         return !\is_null($digits) && varDigits($value) > $this->minThreshold;
