@@ -90,11 +90,12 @@ class GreaterThanValidationRuleTest extends TestCase
     public function testAssertionsPass(): void
     {
         $validator = validate([
-            'abc'   =>  'hello',
-            'def'   =>  '120',
-            'ghi'   =>  '1',
-            'jkl'   =>  0,
-            'mno'   =>  1234.12345,
+            'abc'       =>  'hello',
+            'def'       =>  '120',
+            'ghi'       =>  '1',
+            'jkl'       =>  0,
+            'mno'       =>  1234.12345,
+
             ...$this->files
         ], [
             'abc'       =>  'gt:4',
@@ -128,11 +129,12 @@ class GreaterThanValidationRuleTest extends TestCase
     public function testAssertionsFail(): void
     {
         $validator = validate([
-            'abc'   =>  'a',
-            'def'   =>  '100',
-            'ghi'   =>  '-1',
-            'jkl'   =>  -100,
-            'mno'   =>  '1234.123',
+            'abc'       =>  'a',
+            'def'       =>  '100',
+            'ghi'       =>  '-1',
+            'jkl'       =>  -100,
+            'mno'       =>  '1234.123',
+
             ...$this->files
         ], [
             'abc'       =>  'gt:1',

@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
-use AdityaZanjad\Validator\Rules\Lt;
 use AdityaZanjad\Validator\Validator;
 use AdityaZanjad\Validator\Managers\Input;
 use AdityaZanjad\Validator\Rules\Required;
@@ -51,25 +50,25 @@ class MacAddressValidationRuleTest extends TestCase
     public function testAssertionsFail(): void
     {
         $validator = validate([
-            'mac_no_separator_lowercase' => '000a959d6816',
-            'mac_no_separator_uppercase' => '000A959D6816',
-            'mac_invalid_length' => '00:0a:95:9d:68:16:11',
-            'mac_invalid_separator' => '00_0A_95_9D_68_16',
-            'mac_invalid_char' => '00:0A:95:9D:68:1G',
-            'mac_incomplete' => '00:0A:95:9D:68',
-            'mac_empty' => '',
-            'mac_not_a_string' => 123456,
-            'mac_wrong_format' => 'ab:cd:ef:gh:ij:kl'
+            'mac_no_separator_lowercase'    =>  '000a959d6816',
+            'mac_no_separator_uppercase'    =>  '000A959D6816',
+            'mac_invalid_length'            =>  '00:0a:95:9d:68:16:11',
+            'mac_invalid_separator'         =>  '00_0A_95_9D_68_16',
+            'mac_invalid_char'              =>  '00:0A:95:9D:68:1G',
+            'mac_incomplete'                =>  '00:0A:95:9D:68',
+            'mac_empty'                     =>  '',
+            'mac_not_a_string'              =>  123456,
+            'mac_wrong_format'              =>  'ab:cd:ef:gh:ij:kl'
         ], [
-            'mac_no_separator_lowercase' => 'mac',
-            'mac_no_separator_uppercase' => 'mac',
-            'mac_invalid_length' => 'mac',
-            'mac_invalid_separator' => 'mac',
-            'mac_invalid_char' => 'mac',
-            'mac_incomplete' => 'mac',
-            'mac_empty' => 'mac',
-            'mac_not_a_string' => 'mac',
-            'mac_wrong_format' => 'mac'
+            'mac_no_separator_lowercase'    =>  'mac',
+            'mac_no_separator_uppercase'    =>  'mac',
+            'mac_invalid_length'            =>  'mac',
+            'mac_invalid_separator'         =>  'mac',
+            'mac_invalid_char'              =>  'mac',
+            'mac_incomplete'                =>  'mac',
+            'mac_empty'                     =>  'mac',
+            'mac_not_a_string'              =>  'mac',
+            'mac_wrong_format'              =>  'mac'
         ]);
 
         $this->assertTrue($validator->failed());

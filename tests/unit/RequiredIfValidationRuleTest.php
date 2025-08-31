@@ -20,32 +20,11 @@ use function AdityaZanjad\Validator\Presets\validate;
 class RequiredIfValidationRuleTest extends TestCase
 {
     /**
-     * Validate that the 'required_if' validation rule returns a validation error.
-     *
-     * @return void
-     */
-    public function testAssertionsPass(): void
-    {
-        $validator = validate([
-            'abc' => 123,
-            'xyz' => null
-        ], [
-            'abc'   =>  'required',
-            'xyz'   =>  'required_if:abc,123'
-        ]);
-
-        $this->assertTrue($validator->failed());
-        $this->assertNotEmpty($validator->errors()->all());
-        $this->assertNotEmpty($validator->errors()->first());
-        $this->assertNotEmpty($validator->errors()->firstOf('xyz'));
-    }
-
-    /**
      * Test that the 'required_if' validation succeeds.
      *
      * @return void
      */
-    public function testAssertionsFail(): void
+    public function testAssertionsPass(): void
     {
         $validator = validate([
             'abc'   =>  123,
@@ -63,5 +42,26 @@ class RequiredIfValidationRuleTest extends TestCase
         $this->assertEmpty($validator->errors()->all());
         $this->assertEmpty($validator->errors()->first());
         $this->assertEmpty($validator->errors()->firstOf('xyz'));
+    }
+
+    /**
+     * Validate that the 'required_if' validation rule returns a validation error.
+     *
+     * @return void
+     */
+    public function testAssertionsFail(): void
+    {
+        $validator = validate([
+            'abc'   =>  123,
+            'xyz'   =>  null
+        ], [
+            'abc'   =>  'required',
+            'xyz'   =>  'required_if:abc,123'
+        ]);
+
+        $this->assertTrue($validator->failed());
+        $this->assertNotEmpty($validator->errors()->all());
+        $this->assertNotEmpty($validator->errors()->first());
+        $this->assertNotEmpty($validator->errors()->firstOf('xyz'));
     }
 }

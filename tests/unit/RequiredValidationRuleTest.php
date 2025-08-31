@@ -105,9 +105,9 @@ final class RequiredValidationRuleTest extends TestCase
     public function testAssertionsFail(): void
     {
         $validator = validate([
-            'def' => null,
-            'ghi' => '',
-            'jkl' => []
+            'def'   =>  null,
+            'ghi'   =>  '',
+            'jkl'   =>  []
         ], [
             'abc'   =>  'required',
             'def'   =>  'required',

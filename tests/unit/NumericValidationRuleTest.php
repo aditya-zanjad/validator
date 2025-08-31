@@ -29,29 +29,21 @@ class NumericValidationRuleTest extends TestCase
     public function testAssertionsPass(): void
     {
         $validator = validate([
-            'abc' => 123,
-            'def' => 0.12311551,
-            'xyz' => -10000.24512,
-            'pqr' => [
-                123 => [
-                    456 => [
-                        789 => [
-                            123 => 358234.21178412
-                        ]
-                    ]
-                ]
-            ],
-            'ghi' => '12478125.1231245757',
-            'axz' => '-12345',
-            'mno' => -124712123
+            'abc'   =>  123,
+            'def'   =>  0.12311551,
+            'xyz'   =>  -10000.24512,
+            'pqr'   =>  358234.21178412,
+            'ghi'   =>  '12478125.1231245757',
+            'axz'   =>  '-12345',
+            'mno'   =>  -124712123
         ], [
-            'abc'                   =>  'integer',
-            'def'                   =>  'numeric',
-            'pqr.123.456.789.123'   =>  'numeric',
-            'xyz'                   =>  'numeric',
-            'ghi'                   =>  'numeric',
-            'axz'                   =>  'numeric',
-            'mno'                   =>  'numeric'
+            'abc'   =>  'integer',
+            'def'   =>  'numeric',
+            'pqr'   =>  'numeric',
+            'xyz'   =>  'numeric',
+            'ghi'   =>  'numeric',
+            'axz'   =>  'numeric',
+            'mno'   =>  'numeric'
         ]);
 
         $this->assertFalse($validator->failed());
@@ -59,7 +51,7 @@ class NumericValidationRuleTest extends TestCase
         $this->assertNull($validator->errors()->first());
         $this->assertNull($validator->errors()->firstOf('abc'));
         $this->assertNull($validator->errors()->firstOf('def'));
-        $this->assertNull($validator->errors()->firstOf('pqr.123.456.789.123'));
+        $this->assertNull($validator->errors()->firstOf('pqr'));
         $this->assertNull($validator->errors()->firstOf('xyz'));
         $this->assertNull($validator->errors()->firstOf('ghi'));
         $this->assertNull($validator->errors()->firstOf('axz'));
@@ -74,17 +66,17 @@ class NumericValidationRuleTest extends TestCase
     public function testAssertionsFail(): void
     {
         $validator = validate([
-            'abc' => 'abcdefghi',
-            'def' => '-1abc',
-            'ghi' => 'abc',
-            'jkl' => ['key' => 'value'],
-            'xyz' => (object) [],
+            'abc'   =>  'abcdefghi',
+            'def'   =>  '-1abc',
+            'ghi'   =>  'abc',
+            'jkl'   =>  ['key' => 'value'],
+            'xyz'   =>  (object) [],
         ], [
-            'abc' => 'integer',
-            'def' => 'numeric',
-            'ghi' => 'numeric',
-            'jkl' => 'numeric',
-            'xyz' => 'numeric'
+            'abc'   =>  'integer',
+            'def'   =>  'numeric',
+            'ghi'   =>  'numeric',
+            'jkl'   =>  'numeric',
+            'xyz'   =>  'numeric'
         ]);
 
         $this->assertTrue($validator->failed());

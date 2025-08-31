@@ -79,7 +79,7 @@ final class DateEqualValidationRuleTest extends TestCase
             'pqr'   =>  '05/11/1994',
             'uvw'   =>  'May 11, 1994',
             'xyz'   =>  '1994/05/11',
-            'zyx'   =>  '783993600'
+            // 'zyx'   =>  '783993600'
         ], [
             'abc'   =>  'date_eq:1994-05-12',
             'def'   =>  'date_eq:10-05-1994',

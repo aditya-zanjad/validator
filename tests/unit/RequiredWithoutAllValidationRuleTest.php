@@ -47,8 +47,8 @@ final class RequiredWithoutAllValidationRuleTest extends TestCase
     public function testAssertionsFail(): void
     {
         $validator = validate([
-            'abc'   => '123',
-            'ghi'   => 'abc_def_ghi',
+            'abc'   =>  '123',
+            'ghi'   =>  'abc_def_ghi',
             'jkl'   =>  ['an indexed array'],
             'xyz'   =>  1234567890
         ], [

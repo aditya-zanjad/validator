@@ -27,10 +27,10 @@ final class RequiredWithValidationRuleTest extends TestCase
     public function testAssertionsPass(): void
     {
         $validator = validate([
-            'abc'   => '123',
-            'def'   => 123456,
-            'ghi'   => 'abc_def_ghi',
-            'ijk'   => ['this is a test array!'],
+            'abc'   =>  '123',
+            'def'   =>  123456,
+            'ghi'   =>  'abc_def_ghi',
+            'ijk'   =>  ['this is a test array!'],
             'xyz'   =>  null,
         ], [
             'abc'   =>  'required_with:ijk|numeric|integer|size:123',
@@ -59,8 +59,8 @@ final class RequiredWithValidationRuleTest extends TestCase
     public function testAssertionsFail(): void
     {
         $validator = validate([
-            'abc'   => null,
-            'ijk'   => '123',
+            'abc'   =>  null,
+            'ijk'   =>  '123',
             'pqr'   =>  'NULL',
         ], [
             'abc'   =>  'required_with:ijk|numeric|integer|size:3',

@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
-use AdityaZanjad\Validator\Rules\Lt;
 use AdityaZanjad\Validator\Validator;
+use AdityaZanjad\Validator\Rules\Between;
 use AdityaZanjad\Validator\Managers\Input;
 use AdityaZanjad\Validator\Rules\Required;
 use PHPUnit\Framework\Attributes\UsesClass;
@@ -17,9 +17,9 @@ use function AdityaZanjad\Validator\Presets\validate;
 #[CoversClass(Error::class)]
 #[CoversClass(Input::class)]
 #[CoversClass(Required::class)]
-#[CoversClass(Lt::class)]
+#[CoversClass(Between::class)]
 #[CoversFunction('\AdityaZanjad\Validator\Presets\validate')]
-class LessThanValidationRuleTest extends TestCase
+class BetweenValidationRuleTest extends TestCase
 {
     protected string $tempDirPath;
 
@@ -90,29 +90,37 @@ class LessThanValidationRuleTest extends TestCase
     public function testAssertionsPass(): void
     {
         $validator = validate([
-           'b'          =>  'b',
-           123          =>  123,
-           0            =>  0,
-           -12345       =>  -12345,
-           
-           ...$this->files
+              'abc'     =>  'b',
+              'def'     =>  '101',
+              'ghi'     =>  1,
+              'jkl'     =>  0,
+              'mno'     =>  '1234! Get on the dance floor!',
+              'pqr'     =>  100.200,
+              'xyz'     =>  [123, 456, 789],
+
+            ...$this->files
         ], [
-            'b'         =>  'lt:2',
-           '123'        =>  'lt:124',
-           0            =>  'lt:1',
-           -12345       =>  'lt:0',
-           'file_001'   =>  'lt: 3 MB',
-           'file_002'   =>  'lt: 2048.1 KB',
-           'file_003'   =>  'lt: 2097153'
+            'abc'       =>  'between:    1,    3   ',
+            'def'       =>  'between: 100,102',
+            'ghi'       =>  'between:-100, 1',
+            'jkl'       =>  'between: 0,1',
+            'mno'       =>  'between: 15,100',
+            'pqr'       =>  'between:100,100.201',
+            'xyz'       =>  'between:1,4',
+            'file_001'  =>  'between: 2 MB,4MB',
+            'file_002'  =>  'between: 2048     KB,4096KB',
+            'file_003'  =>  'between:2097152,2097152   '
         ]);
 
         $this->assertFalse($validator->failed());
         $this->assertEmpty($validator->errors()->all());
         $this->assertNull($validator->errors()->first());
-        $this->assertNull($validator->errors()->firstOf('b'));
-        $this->assertNull($validator->errors()->firstOf('123'));
-        $this->assertNull($validator->errors()->firstOf('0'));
-        $this->assertNull($validator->errors()->firstOf('-12345'));
+        $this->assertNull($validator->errors()->firstOf('abc'));
+        $this->assertNull($validator->errors()->firstOf('def'));
+        $this->assertNull($validator->errors()->firstOf('ghi'));
+        $this->assertNull($validator->errors()->firstOf('jkl'));
+        $this->assertNull($validator->errors()->firstOf('mno'));
+        $this->assertNull($validator->errors()->firstOf('xyz'));
         $this->assertNull($validator->errors()->firstOf('file_001'));
         $this->assertNull($validator->errors()->firstOf('file_002'));
         $this->assertNull($validator->errors()->firstOf('file_003'));
@@ -126,32 +134,37 @@ class LessThanValidationRuleTest extends TestCase
     public function testAssertionsFail(): void
     {
         $validator = validate([
-           'b'          =>  'Hello World!',
-           123          =>  123,
-           0            =>  0,
-           -12345       =>  -12345,
+              'abc'     =>  'hi',
+              'def'     =>  '99',
+              'ghi'     =>  '-1111111',
+              'jkl'     =>  -100,
+              'mno'     =>  '1234.32525',
+              'xyz'     =>  [456, 123, 789, 0],
 
-           ...$this->files
+            ...$this->files
         ], [
-            'b'         =>  'lt:2',
-           '123'        =>  'lt:120',
-           0            =>  'lt:0',
-           -12345       =>  'lt:-12345',
-           'file_001'   =>  'lt: 1.9MB',
-           'file_002'   =>  'lt: 1024 KB',
-           'file_003'   =>  'lt:2097151.9',
+            'abc'       =>  'between:    1,    1   ',
+            'def'       =>  'between: 100,102',
+            'ghi'       =>  'between:-100, 1',
+            'jkl'       =>  'between: 0,1',
+            'mno'       =>  'between: 15,100',
+            'pqr'       =>  'between:100,100.201',
+            'xyz'       =>  'between:1,2',
+            'file_001'  =>  'between: 2.125 MB,4MB',
+            'file_002'  =>  'between: 1024     KB,2047KB',
+            'file_003'  =>  'between:2097150,2097151   '
         ]);
 
         $this->assertTrue($validator->failed());
         $this->assertNotEmpty($validator->errors()->all());
         $this->assertNotNull($validator->errors()->first());
-        $this->assertNotNull($validator->errors()->firstOf('b'));
-        $this->assertNotNull($validator->errors()->firstOf('123'));
-        $this->assertNotNull($validator->errors()->firstOf('0'));
-        $this->assertNotNull($validator->errors()->firstOf('-12345'));
+        $this->assertNotNull($validator->errors()->firstOf('abc'));
+        $this->assertNotNull($validator->errors()->firstOf('def'));
+        $this->assertNotNull($validator->errors()->firstOf('ghi'));
+        $this->assertNotNull($validator->errors()->firstOf('jkl'));
+        $this->assertNotNull($validator->errors()->firstOf('xyz'));
         $this->assertNotNull($validator->errors()->firstOf('file_001'));
         $this->assertNotNull($validator->errors()->firstOf('file_002'));
         $this->assertNotNull($validator->errors()->firstOf('file_003'));
-
     }
 }

@@ -88,11 +88,12 @@ class SizeValidationRuleTest extends TestCase
     public function testAssertionsPass(): void
     {
         $validator = validate([
-            'abc' => 123456,
-            'def' => 0,
-            'ghi' => 'abc',
-            'jkl' => 'x',
-            'xyz' => -20,
+            'abc'       =>  123456,
+            'def'       =>  0,
+            'ghi'       =>  'abc',
+            'jkl'       =>  'x',
+            'xyz'       =>  -20,
+            
             ...$this->files
         ], [
             'abc'       =>  'size:123456',
@@ -125,11 +126,12 @@ class SizeValidationRuleTest extends TestCase
     public function testAssertionsFail(): void
     {
         $validator = validate([
-            'abc' => 123456,
-            'def' => 0,
-            'ghi' => 'abc',
-            'jkl' => 'x',
-            'xyz' => -20,
+            'abc'       =>  123456,
+            'def'       =>  0,
+            'ghi'       =>  'abc',
+            'jkl'       =>  'x',
+            'xyz'       =>  -20,
+
             ...$this->files
         ], [
             'abc'       =>  'size:10',

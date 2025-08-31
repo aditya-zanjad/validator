@@ -47,7 +47,7 @@ class Callback extends AbstractRule
             $result = ($this->fn)($field, $value, $this->input);
         } catch (InvalidArgumentException $e) {
             // var_dump($e); exit;
-            throw new Exception("[Developer][Exception]: The field [{$field}] has callback validation rule(s) passed with invalid argument(s).");
+            throw new Exception("[Developer][Exception]: The field [{$field}] has a callback validation rule passed with invalid argument(s).");
         }
 
         if (\is_bool($result)) {
@@ -55,9 +55,9 @@ class Callback extends AbstractRule
         }
 
         if (!\is_string($result)) {
-            throw new Exception("[Developer][Exception]: The field [{$field}] has callback validation that must return either a [BOOLEAN] or a [STRING] value.");
+            throw new Exception("[Developer][Exception]: The field [{$field}] has a callback validation rule which must return either a [BOOLEAN] or a [STRING] value.");
         }
-        
+
         $this->message = $result;
         return false;
     }

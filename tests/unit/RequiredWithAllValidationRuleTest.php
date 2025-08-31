@@ -27,9 +27,9 @@ final class RequiredWithAllValidationRuleTest extends TestCase
     public function testAssertionsPass(): void
     {
         $validator = validate([
-            'abc'   => '123',
-            'def'   => null,
-            'ghi'   => 'abc_def_ghi',
+            'abc'   =>  '123',
+            'def'   =>  null,
+            'ghi'   =>  'abc_def_ghi',
             'jkl'   =>  ['an indexed array'],
             'xyz'   =>  '1234! Get on the dance floor!'
         ], [
