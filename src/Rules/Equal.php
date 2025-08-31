@@ -6,22 +6,25 @@ namespace AdityaZanjad\Validator\Rules;
 
 use AdityaZanjad\Validator\Base\AbstractRule;
 
+use function AdityaZanjad\Validator\Utils\varEvaluateType;
+
 /**
+ * 
  * @version 1.0
  */
 class Equal extends AbstractRule
 {
     /**
-     * @var string $comparingData
+     * @var bool|int|float|string $validValue
      */
-    protected string $comparingData;
+    protected bool|int|float|string $validValue;
 
     /**
-     * @param string $data
+     * @param bool|int|float|string $givenValue
      */
-    public function __construct(string $data)
+    public function __construct(bool|int|float|string $givenValue)
     {
-        $this->comparingData = $data;
+        $this->validValue = varEvaluateType($givenValue);
     }
 
     /**
@@ -29,7 +32,7 @@ class Equal extends AbstractRule
      */
     public function check(string $field, mixed $value): bool
     {
-        return $value == $this->comparingData;
+        return varEvaluateType($value) === $this->validValue;
     }
 
     /**
@@ -37,6 +40,6 @@ class Equal extends AbstractRule
      */
     public function message(): string
     {
-        return "The field :{field} must be equal to {$this->comparingData}.";
+        return "The field :{field} must be equal to {$this->validValue}.";
     }
 }

@@ -74,14 +74,14 @@ final class UuidValidationRuleTest extends TestCase
             'v7'    =>  'f47ac10b-58cc-7372-c567-0e02b2c3d479',
             'v8'    =>  'This is not a UUID at all',
         ], [
-            'v1'   =>  'uuid:v1',
-            'v2'   =>  'uuid:v2',
-            'v3'   =>  'uuid:v3',
-            'v4'   =>  'uuid:v4',
-            'v5'   =>  'uuid:v5',
-            'v6'   =>  'uuid:v6',
-            'v7'   =>  'uuid:v7',
-            'v8'   =>  'uuid:v8',
+            'v1'    =>  'uuid:v1',
+            'v2'    =>  'uuid:v2',
+            'v3'    =>  'uuid:v3',
+            'v4'    =>  'uuid:v4',
+            'v5'    =>  'uuid:v5',
+            'v6'    =>  'uuid:v6',
+            'v7'    =>  'uuid:v7',
+            'v8'    =>  'uuid:v8',
         ]);
 
         $this->assertTrue($validator->failed());

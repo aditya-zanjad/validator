@@ -39,13 +39,7 @@ class NotIn extends AbstractRule
      */
     public function check(string $field, mixed $value): bool
     {
-        foreach ($this->params as $param) {
-            if ($value === $param || $value == $param) {
-                return false;
-            }
-        }
-
-        return true;
+        return !\in_array($value, $this->params);
     }
 
     /**
@@ -53,8 +47,8 @@ class NotIn extends AbstractRule
      */
     public function message(): string
     {
-        $joinedValues = \array_reduce($this->params, fn ($carry, $value) => "{$carry}\"{$value}\", ");
-        $joinedValues = \rtrim($joinedValues, ', ');
+        $joinedValues   =   \array_reduce($this->params, fn ($carry, $value) => "{$carry}\"{$value}\", ");
+        $joinedValues   =   \rtrim($joinedValues, ', ');
 
         return "The field :{field} must not be set to any of these values: {$joinedValues}";
     }

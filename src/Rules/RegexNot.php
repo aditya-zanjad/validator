@@ -10,7 +10,7 @@ use AdityaZanjad\Validator\Base\AbstractRule;
 /**
  * @version 1.0
  */
-class Regex extends AbstractRule
+class RegexNot extends AbstractRule
 {
     /**
      * @var string $regex
@@ -38,7 +38,7 @@ class Regex extends AbstractRule
             throw new Exception("[Developer][Exception]: Error occurred while applying the regex validation on the field [{$field}]. Make sure your regex is correct.");
         }
 
-        return $result > 0;
+        return $result === 0;
     }
 
     /**
@@ -46,6 +46,6 @@ class Regex extends AbstractRule
      */
     public function message(): string
     {
-        return "The field :{field} must match the regular expression: {$this->regex}.";
+        return "The field :{field} must not match with the regular expression: {$this->regex}.";
     }
 }

@@ -23,7 +23,7 @@ function varIsEmpty(mixed $var): bool
         return true;
     }
 
-    if (\is_array($var)) {
+    if (\is_array($var) || $var instanceof ArrayObject || $var instanceof ArrayAccess) {
         if (\count($var) === 0) {
             return true;
         }

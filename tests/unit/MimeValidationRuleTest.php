@@ -5,21 +5,18 @@ declare(strict_types=1);
 use PHPUnit\Framework\TestCase;
 use AdityaZanjad\Validator\Validator;
 use AdityaZanjad\Validator\Managers\Input;
-use AdityaZanjad\Validator\Rules\Required;
-use AdityaZanjad\Validator\Rules\TypeJson;
-use PHPUnit\Framework\Attributes\UsesClass;
+use AdityaZanjad\Validator\Rules\TypeFile;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\CoversFunction;
 
 use function AdityaZanjad\Validator\Presets\validate;
 
-#[UsesClass(Validator::class)]
+#[CoversClass(Validator::class)]
 #[CoversClass(Error::class)]
 #[CoversClass(Input::class)]
-#[CoversClass(Required::class)]
-#[CoversClass(TypeJson::class)]
+#[CoversClass(TypeFile::class)]
 #[CoversFunction('\AdityaZanjad\Validator\Presets\validate')]
-class JsonValidationRuleTest extends TestCase
+final class MimeValidationRuleTest extends TestCase
 {
     protected string $tempDirPath;
 
@@ -44,13 +41,15 @@ class JsonValidationRuleTest extends TestCase
         chmod($this->tempDirPath, 0775);
 
         $this->validFiles = [
-            'file_001'  =>  $this->tempDirPath . DIRECTORY_SEPARATOR . 'valid_001.json'
+            'file_001'  =>  $this->tempDirPath . DIRECTORY_SEPARATOR . 'valid_001.json',
+            'file_002'  =>  $this->tempDirPath . DIRECTORY_SEPARATOR . 'sample.txt',
         ];
 
         file_put_contents($this->validFiles['file_001'], trim($this->makeTestJsonData()));
+        file_put_contents($this->validFiles['file_002'], trim($this->makeTestTextData()));
 
-        $this->validFiles['file_002']   =   fopen($this->validFiles['file_001'], 'r');
-        $this->validFiles['file_003']   =   file_get_contents($this->validFiles['file_001']);
+        $this->validFiles['file_001'] = new SplFileInfo($this->validFiles['file_001']);
+        $this->validFiles['file_002'] = fopen($this->validFiles['file_002'], 'r');
     }
 
     /**
@@ -60,80 +59,54 @@ class JsonValidationRuleTest extends TestCase
      */
     public function tearDown(): void
     {
-        // Clear the fetched contents of the file
-        unset($this->validFiles['file_003']);
-
-        // Clear the 'fopened' file resource
+        unlink($this->validFiles['file_001']->getPathname());
         $streamMetadata = stream_get_meta_data($this->validFiles['file_002']);
         fclose($this->validFiles['file_002']);
         unlink($streamMetadata['uri']);
-
-        // Remove the directory
         rmdir($this->tempDirPath);
     }
 
     /**
-     * Assert that the validation rule 'min:' succeeds.
+     * Assert that the validator fails when the given string is an invalid string.
      *
      * @return void
      */
     public function testAssertionsPass(): void
     {
-        $validJson = array_merge(
-            [ 'json' => '{"name": {"first": "Aditya", "last": "Zanjad"}, "age": 31, "gender": "male", "married": false}'],
-            $this->validFiles
-        );
-
-        $validator = validate($validJson, [
-            'json'      =>  'json',
-            'file_001'  =>  'json',
-            'file_002'  =>  'json',
-            'file_003'  =>  'json',
+        $validator = validate($this->validFiles, [
+            'file_001'  =>  'required|file|mimes:application/json',
+            'file_002'  =>  'mimes:text/plain',
         ]);
 
         $this->assertFalse($validator->failed());
         $this->assertEmpty($validator->errors()->all());
-        $this->assertNull($validator->errors()->first());
-        $this->assertNull($validator->errors()->firstOf('json'));
-        $this->assertNull($validator->errors()->firstOf('file_001'));
-        $this->assertNull($validator->errors()->firstOf('file_002'));
-        $this->assertNull($validator->errors()->firstOf('file_003'));
+        $this->assertEmpty($validator->errors()->firstOf('file_001'));
+        $this->assertEmpty($validator->errors()->firstOf('file_002'));
     }
 
     /**
-     * Assert that the validation rule 'min:' fails.
+     * Assert that the validator succeeds when the given fields are valid.
      *
      * @return void
      */
     public function testAssertionsFail(): void
     {
-        $data = [
-           'json_one'       =>  '{"name": {"first": "Aditya", "last": "Zanjad"}, "age": 31, "gender": "male", "married": false',
-           'json_two'       =>  __DIR__ . '/invalid_directory/invalid_001.json',
-           'json_three'     =>  @fopen(__DIR__ . '/invalid_directory/sample.txt', 'r'),
-           'json_four'      =>  @file_get_contents(__DIR__ . '/invalid_directory/sample.txt')
-        ];
-
-        $rules = [
-            'json_one'      =>  'json',
-            'json_two'      =>  'json',
-            'json_three'    =>  'json',
-            'json_four'     =>  'json',
-        ];
-
-        $validator = validate($data, $rules);
+        $validator = validate([
+            'file_001'  =>  $this->validFiles['file_001'],
+            'file_002'  =>  'This is a test string',
+        ], [
+            'file_001'  =>  'mimes:image/jpeg,image/jpg',
+            'file_002'  =>  'mimes:application/json',
+        ]);
 
         $this->assertTrue($validator->failed());
         $this->assertNotEmpty($validator->errors()->all());
-        $this->assertNotNull($validator->errors()->first());
-        $this->assertNotNull($validator->errors()->firstOf('json_one'));
-        $this->assertNotNull($validator->errors()->firstOf('json_two'));
-        $this->assertNotNull($validator->errors()->firstOf('json_three'));
-        $this->assertNotNull($validator->errors()->firstOf('json_four'));
+        $this->assertNotEmpty($validator->errors()->firstOf('file_001'));
+        $this->assertNotEmpty($validator->errors()->firstOf('file_002'));
     }
 
     /**
-     * Required for testing the assertions.
+     * Required for performing the test assertions.
      *
      * @return string
      */
@@ -170,5 +143,15 @@ class JsonValidationRuleTest extends TestCase
                 "ip_address": "67.76.188.26"
             }]
         ';
+    }
+
+    /**
+     * Required for performing the test assertions.
+     *
+     * @return string
+     */
+    protected function makeTestTextData(): string
+    {
+        return 'Hello World! 1234! Get on the dance floor!';
     }
 }

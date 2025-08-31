@@ -90,10 +90,11 @@ class MaxValidationRuleTest extends TestCase
     public function testAssertionsPass(): void
     {
         $validator = validate([
-            'abc' =>  '3',
-            'def' =>  99,
-            'ghi' =>  '-1',
-            'jkl' =>  -100,
+            'abc'       =>  '3',
+            'def'       =>  99,
+            'ghi'       =>  '-1',
+            'jkl'       =>  -100,
+            
             ...$this->files
         ], [
             'abc'       =>  'lte:4',
@@ -125,16 +126,17 @@ class MaxValidationRuleTest extends TestCase
     public function testAssertionsFail(): void
     {
         $validator = validate([
-            'abc' =>  'Hello World!',
-            'def' =>  101,
-            'ghi' =>  '1',
-            'jkl' =>  12341351,
+            'abc'       =>  'Hello World!',
+            'def'       =>  101,
+            'ghi'       =>  '1',
+            'jkl'       =>  12341351,
+
             ...$this->files
         ], [
-            'abc'   =>  'lte:3',
-            'def'   =>  'lte:100',
-            'ghi'   =>  'lte:0',
-            'jkl'   =>  'lte:1',
+            'abc'       =>  'lte:3',
+            'def'       =>  'lte:100',
+            'ghi'       =>  'lte:0',
+            'jkl'       =>  'lte:1',
             'file_001'  =>  'lte:1MB',
             'file_002'  =>  'lte: 2047.9 KB',
             'file_003'  =>  'lte: 2097151',

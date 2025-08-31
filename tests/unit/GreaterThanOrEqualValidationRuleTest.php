@@ -90,12 +90,13 @@ class GreaterThanOrEqualValidationRuleTest extends TestCase
     public function testAssertionsPass(): void
     {
         $validator = validate([
-              'abc' =>  'b',
-              'def' =>  '101',
-              'ghi' =>  1,
-              'jkl' =>  0,
-              'mno' =>  '1234! Get on the dance floor!',
-              'pqr' =>  100.200,
+              'abc'     =>  'b',
+              'def'     =>  '101',
+              'ghi'     =>  1,
+              'jkl'     =>  0,
+              'mno'     =>  '1234! Get on the dance floor!',
+              'pqr'     =>  100.200,
+
             ...$this->files
         ], [
             'abc'       =>  'gte:    1 ',
@@ -130,11 +131,12 @@ class GreaterThanOrEqualValidationRuleTest extends TestCase
     public function testAssertionsFail(): void
     {
         $validator = validate([
-              'abc' =>  'hi',
-              'def' =>  '100',
-              'ghi' =>  '-1',
-              'jkl' =>  -100,
-              'mno' =>  '1234.32525',
+              'abc'     =>  'hi',
+              'def'     =>  '100',
+              'ghi'     =>  '-1',
+              'jkl'     =>  -100,
+              'mno'     =>  '1234.32525',
+
             ...$this->files
         ], [
             'abc'       =>  'gte:3',

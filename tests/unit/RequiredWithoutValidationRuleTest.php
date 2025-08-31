@@ -27,9 +27,9 @@ final class RequiredWithoutValidationRuleTest extends TestCase
     public function testAssertionsPass(): void
     {
         $validator = validate([
-            'abc'   => '123',
-            'def'   => null,
-            'ghi'   => 21,
+            'abc'   =>  '123',
+            'def'   =>  null,
+            'ghi'   =>  21,
         ], [
             'abc'   =>  'required_without:def|string|min:3',
             'ghi'   =>  'required_without:jkl|numeric|integer|min:12',
