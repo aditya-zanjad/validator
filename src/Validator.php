@@ -67,8 +67,9 @@ class Validator
 
             // For each given rule, loop through input paths array to determine the matching paths.
             foreach ($actualPaths as $actualPath) {
-                $actualPathParams   =   \explode('.', $actualPath);
-                $resolvedPath       =   '';
+                $actualPathParams       =   \explode('.', $actualPath);
+                $resolvedPath           =   '';
+                $resolvedPathIsEmpty    =   true;
 
                 /**
                  * Perform the matching of the wildcard path with each individual input array path. If the 
@@ -79,18 +80,27 @@ class Validator
                 foreach ($fieldParams as $fieldIndex => $fieldParam) {
                     $actualPathParams[$fieldIndex] ??= 0;
 
-                    // If the actual path parameters array is shorter than wildcard parameters path,
-                    // fill up the path with the remaining parameters to complete it.
-                    if (!\in_array($fieldParam, [$actualPathParams[$fieldIndex], '*'])) {
-                        $remainingParts =   \implode('.', \array_slice($fieldParams, $fieldIndex));
-                        $remainingParts =   \str_replace(['*.', '.*.', '.*'], ['0.', '.0.', '.0'], $remainingParts);
-                        $resolvedPath   =   "{$resolvedPath}{$remainingParts}";
+                    if ($fieldParam === '*' || $fieldParam === $actualPathParams[$fieldIndex]) {
+                        $resolvedPath           .=   "{$actualPathParams[$fieldIndex]}.";
+                        $resolvedPathIsEmpty     =   false;
 
-                        break;
+                        continue;
                     }
 
-                    // Replace the wildcard path parameter with its corresponding actual path parameter.
-                    $resolvedPath .= "{$actualPathParams[$fieldIndex]}.";
+                    if ($resolvedPathIsEmpty) {
+                        continue 2;
+                    }
+
+                    /**
+                     * If the actual path parameters array is shorter than wildcard parameters 
+                     * path, fill up the path with the remaining parameters to complete it.
+                     */
+                    $remainingParts         =   \implode('.', \array_slice($fieldParams, $fieldIndex));
+                    $remainingParts         =   \str_replace(['*.', '.*.', '.*'], ['0.', '.0.', '.0'], $remainingParts);
+                    $resolvedPath           =   "{$resolvedPath}{$remainingParts}";
+                    $resolvedPathIsEmpty    =   false;
+
+                    break;
                 }
 
                 // Remove any unneeded characters from the resolved path string.
@@ -153,19 +163,29 @@ class Validator
             $field = (string) $field;
 
             foreach ($rulesGroup as $index => $rule) {
-                $evaluation = match (\gettype($rule)) {
+                $ruleDataType = \gettype($rule);
+
+                $evaluation = match ($ruleDataType) {
                     'string'    =>  $this->evaluateRuleFromString($rule, $field, $index),
                     'object'    =>  $this->evaluateRuleFromObject($rule, $field, $index),
                     default     =>  throw new Exception("[Developer][Exception]: The field [{$field}] has an invalid rule at the index [{$index}].")
                 };
 
-                // If the validation fails
-                if ($evaluation['result'] === false) {
-                    $this->errors->add($field, \str_replace(':{field}', $field, $evaluation['rule']->message()));
-                    
-                    if ($this->stopOnFail) {
-                        break 2;
-                    }
+                // If the validation passes.
+                if ($evaluation['result'] === true) {
+                    continue;
+                }
+
+                // Prepare the validation error message
+                $ruleName   =   $ruleDataType === 'object' ? Rule::keyOf($rule) : $rule;
+                $message    =   !\is_null($ruleName) && isset($this->messages["{$field}.{$ruleName}"]) ? $this->messages["{$field}.{$ruleName}"] : $evaluation['instance']->message();
+                $message    =   \str_replace(':{field}', $field, $message);
+
+                // Add the validation error message.
+                $this->errors->add($field, $message);
+
+                if ($this->stopOnFail) {
+                    break 2;
                 }
             }
         }
@@ -213,9 +233,9 @@ class Validator
         }
 
         /**
-         * The validation will be aborted if both these conditions are true:
+         * The validation will be aborted if both of these conditions are true:
+         * 
          *  [1] The input is equal to NULL.
-         *                  and
          *  [2] The rule to be evaluated is not set to be run mandatorily.
          */
         if ($this->input->isNull($field) && !\in_array(MandatoryRuleInterface::class, \class_implements($ruleClassName))) {
@@ -223,8 +243,8 @@ class Validator
         }
 
         // Prepare the arguments that'll be passed to the rule constructor.
-        $arguments  =   isset($rule[1]) ? \preg_split('/(?<!\\\\),/', $rule[1]) : [];
-        $arguments  =   \array_map(fn($arg) => \str_replace('\\,', ',', $arg), $arguments);
+        $arguments = isset($rule[1]) ? \preg_split('/(?<!\\\\),/', $rule[1]) : [];
+        $arguments = \array_map(fn($arg) => \str_replace('\\,', ',', $arg), $arguments);
 
         // Instantiate the rule class to perform the validation.
         $instance = new $ruleClassName(...$arguments);
@@ -232,7 +252,7 @@ class Validator
         // Perform the actual validation & return its result.
         return [
             'result'    =>  $instance->setInput($this->input)->check($field, $this->input->get($field)),
-            'rule'      =>  $instance
+            'instance'  =>  $instance
         ];
     }
 
@@ -260,7 +280,7 @@ class Validator
 
             return [
                 'result'    =>  $rule->setInput($this->input)->check($field, $this->input->get($field)),
-                'rule'      =>  $rule
+                'instance'  =>  $rule
             ];
         }
 
@@ -280,7 +300,7 @@ class Validator
 
         return [
             'result'    =>  $rule->setInput($this->input)->check($field, $this->input->get($field)),
-            'rule'      =>  $rule
+            'instance'  =>  $rule
         ];
     }
 
