@@ -67,8 +67,9 @@ class Validator
 
             // For each given rule, loop through input paths array to determine the matching paths.
             foreach ($actualPaths as $actualPath) {
-                $actualPathParams   =   \explode('.', $actualPath);
-                $resolvedPath       =   '';
+                $actualPathParams       =   \explode('.', $actualPath);
+                $resolvedPath           =   '';
+                $resolvedPathIsEmpty    =   true;
 
                 /**
                  * Perform the matching of the wildcard path with each individual input array path. If the 
@@ -79,18 +80,27 @@ class Validator
                 foreach ($fieldParams as $fieldIndex => $fieldParam) {
                     $actualPathParams[$fieldIndex] ??= 0;
 
-                    // If the actual path parameters array is shorter than wildcard parameters path,
-                    // fill up the path with the remaining parameters to complete it.
-                    if (!\in_array($fieldParam, [$actualPathParams[$fieldIndex], '*'])) {
-                        $remainingParts =   \implode('.', \array_slice($fieldParams, $fieldIndex));
-                        $remainingParts =   \str_replace(['*.', '.*.', '.*'], ['0.', '.0.', '.0'], $remainingParts);
-                        $resolvedPath   =   "{$resolvedPath}{$remainingParts}";
+                    if ($fieldParam === '*' || $fieldParam === $actualPathParams[$fieldIndex]) {
+                        $resolvedPath           .=   "{$actualPathParams[$fieldIndex]}.";
+                        $resolvedPathIsEmpty     =   false;
 
-                        break;
+                        continue;
                     }
 
-                    // Replace the wildcard path parameter with its corresponding actual path parameter.
-                    $resolvedPath .= "{$actualPathParams[$fieldIndex]}.";
+                    if ($resolvedPathIsEmpty) {
+                        continue 2;
+                    }
+
+                    /**
+                     * If the actual path parameters array is shorter than wildcard parameters 
+                     * path, fill up the path with the remaining parameters to complete it.
+                     */
+                    $remainingParts         =   \implode('.', \array_slice($fieldParams, $fieldIndex));
+                    $remainingParts         =   \str_replace(['*.', '.*.', '.*'], ['0.', '.0.', '.0'], $remainingParts);
+                    $resolvedPath           =   "{$resolvedPath}{$remainingParts}";
+                    $resolvedPathIsEmpty    =   false;
+
+                    break;
                 }
 
                 // Remove any unneeded characters from the resolved path string.
