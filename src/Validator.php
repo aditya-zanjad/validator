@@ -39,27 +39,35 @@ class Validator
      */
     public function __construct(protected InputManagerInterface $input, protected array $rules, protected ErrorManagerInterface $errors, protected array $messages = [])
     {
-        $this->rules = $this->transformRules($this->rules);
+        //
     }
 
     /**
-     * Reorganize/Preprocess the given validation rules before they are actually evaluated.
+     * Perform the validation process.
      *
-     * @param array<int|string, mixed> $givenRules
+     * @throws \Exception
      *
-     * @return array<string, mixed>
+     * @return static
      */
-    protected function transformRules(array $givenRules): array
+    public function validate(): static
     {
+        // Do not allow performing the same validation more than once.
+        if ($this->validated) {
+            throw new Exception("[Developer][Exception]: The validation for this instance has already been done. Create a new validator instance to perform a new validation.");
+        }
+
         $actualPaths = $this->input->paths();
 
-        foreach ($givenRules as $field => $rules) {
+        foreach ($this->rules as $field => $rules) {
             $field  =   (string) $field;
             $rules  =   $this->parseFieldRules($field, $rules);
 
-            // If the field to be validated does not contain any wildcard parameters.
+            if ($this->stopOnFail) {
+                break;
+            }
+
             if (!\str_contains($field, '*')) {
-                $givenRules[$field] = $rules;
+                $this->evaluateFieldRules($field, $rules);
                 continue;
             }
 
@@ -67,15 +75,15 @@ class Validator
 
             // For each given rule, loop through input paths array to determine the matching paths.
             foreach ($actualPaths as $actualPath) {
-                $actualPathParams       =   \explode('.', $actualPath);
                 $resolvedPath           =   '';
+                $actualPathParams       =   \explode('.', $actualPath);
                 $resolvedPathIsEmpty    =   true;
 
                 /**
-                 * Perform the matching of the wildcard path with each individual input array path. If the 
-                 * actual path exceeds input path, strip its exceess to match with the wildcard path. If
-                 * the actual path is lesser than the wildcard path, add necessary parameters to it to
-                 * complete it.
+                 * Perform the matching of the wildcard path with each individual input array path. If 
+                 * the actual path exceeds input path, strip its exceess to match with the wildcard 
+                 * path. If the actual path is lesser than the wildcard path, add necessary 
+                 * parameters to it to complete it.
                  */
                 foreach ($fieldParams as $fieldIndex => $fieldParam) {
                     $actualPathParams[$fieldIndex] ??= 0;
@@ -106,22 +114,13 @@ class Validator
                 // Remove any unneeded characters from the resolved path string.
                 $resolvedPath = \rtrim($resolvedPath, '.');
 
-                // If the resolved path does not exist in the rules array, we're fine to skip to the next iteration.
-                if (!isset($givenRules[$resolvedPath])) {
-                    $givenRules[$resolvedPath] = $rules;
-                    continue;
-                }
-
-                // If the resolved path exists in the array, we need to combine the current rules with its existing rules while avoiding the duplicates.
-                $givenRules[$resolvedPath]  =   $this->parseFieldRules($resolvedPath, $givenRules[$resolvedPath]);
-                $givenRules[$resolvedPath]  =   \array_merge($givenRules[$resolvedPath], $rules);
-                $givenRules[$resolvedPath]  =   \array_unique($givenRules[$resolvedPath]);
+                // Validate the value of the resolved input path.
+                $this->evaluateFieldRules($resolvedPath, $rules);
             }
-
-            unset($givenRules[$field]);
         }
 
-        return $givenRules;
+        $this->validated = true;
+        return $this;
     }
 
     /**
@@ -146,52 +145,41 @@ class Validator
     }
 
     /**
-     * Perform the validation process.
+     * Evaluate the validation rules for the individual
      *
-     * @throws \Exception
-     *
-     * @return static
+     * @param string $field
+     * @param array $rules
+     * @return void
      */
-    public function validate(): static
+    protected function evaluateFieldRules(string $field, array $rules): void
     {
-        // Do not allow performing the same validation more than once.
-        if ($this->validated) {
-            throw new Exception("[Developer][Exception]: The validation for this instance has already been done. Create a new validator instance to perform a new validation.");
-        }
+        foreach ($rules as $index => $rule) {
+            $ruleDataType = \gettype($rule);
 
-        foreach ($this->rules as $field => $rulesGroup) {
-            $field = (string) $field;
+            $evaluation = match ($ruleDataType) {
+                'string'    =>  $this->evaluateRuleFromString($rule, $field, $index),
+                'object'    =>  $this->evaluateRuleFromObject($rule, $field, $index),
+                default     =>  throw new Exception("[Developer][Exception]: The field [{$field}] has an invalid rule at the index [{$index}].")
+            };
 
-            foreach ($rulesGroup as $index => $rule) {
-                $ruleDataType = \gettype($rule);
+            // If the validation passes.
+            if ($evaluation['result'] === true) {
+                continue;
+            }
 
-                $evaluation = match ($ruleDataType) {
-                    'string'    =>  $this->evaluateRuleFromString($rule, $field, $index),
-                    'object'    =>  $this->evaluateRuleFromObject($rule, $field, $index),
-                    default     =>  throw new Exception("[Developer][Exception]: The field [{$field}] has an invalid rule at the index [{$index}].")
-                };
+            // Prepare the validation error message
+            $ruleName   =   $ruleDataType === 'object' ? Rule::keyOf($rule) : $rule;
+            $message    =   !\is_null($ruleName) && isset($this->messages["{$field}.{$ruleName}"]) ? $this->messages["{$field}.{$ruleName}"] : $evaluation['instance']->message();
+            $message    =   \str_replace(':{field}', $field, $message);
 
-                // If the validation passes.
-                if ($evaluation['result'] === true) {
-                    continue;
-                }
+            // Add the validation error message.
+            $this->errors->add($field, $message);
 
-                // Prepare the validation error message
-                $ruleName   =   $ruleDataType === 'object' ? Rule::keyOf($rule) : $rule;
-                $message    =   !\is_null($ruleName) && isset($this->messages["{$field}.{$ruleName}"]) ? $this->messages["{$field}.{$ruleName}"] : $evaluation['instance']->message();
-                $message    =   \str_replace(':{field}', $field, $message);
-
-                // Add the validation error message.
-                $this->errors->add($field, $message);
-
-                if ($this->stopOnFail) {
-                    break 2;
-                }
+            // If the validator is set to stop on the first failure.
+            if ($this->stopOnFail) {
+                break;
             }
         }
-
-        $this->validated = true;
-        return $this;
     }
 
     /**
