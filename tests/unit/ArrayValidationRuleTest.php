@@ -3,13 +3,8 @@
 declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
-use AdityaZanjad\Validator\Validator;
-use AdityaZanjad\Validator\Managers\Input;
 use AdityaZanjad\Validator\Rules\TypeArray;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\CoversFunction;
-
-use function AdityaZanjad\Validator\Presets\validate;
 
 #[CoversClass(TypeArray::class)]
 final class ArrayValidationRuleTest extends TestCase
@@ -30,6 +25,7 @@ final class ArrayValidationRuleTest extends TestCase
             $result =   $rule->check($key, $value); 
 
             $this->assertIsBool($result);
+            $this->assertTrue($result);
             $this->assertEquals($result, true);
         }
     }
@@ -57,7 +53,7 @@ final class ArrayValidationRuleTest extends TestCase
             $result =   $rule->check($key, $value); 
 
             $this->assertIsBool($result);
-            $this->assertEquals($result, false);
+            $this->assertFalse($result);
             $this->assertEquals($rule->message(), 'The field :{field} must be an array.');
         }
 

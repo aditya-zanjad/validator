@@ -32,7 +32,7 @@ final class StringValidationRuleTest extends TestCase
             $result =   $rule->check($key, $value);
 
             $this->assertIsBool($result);
-            $this->assertEquals($result, true);
+            $this->assertTrue($result);
         }
     }
 
@@ -60,6 +60,7 @@ final class StringValidationRuleTest extends TestCase
             $rule   = new TypeString($options['regex']);
             $result = $rule->check($field, $options['value']);
 
+            $this->assertIsBool($result);
             $this->assertTrue($result);
             $this->assertEquals($result, true);
         }
@@ -88,7 +89,7 @@ final class StringValidationRuleTest extends TestCase
             $result =   $rule->check($key, $value);
 
             $this->assertIsBool($result);
-            $this->assertEquals($result, false);
+            $this->assertFalse($result);
             $this->assertEquals($rule->message(), 'The field :{field} must be a string.');
         }
 
@@ -125,8 +126,8 @@ final class StringValidationRuleTest extends TestCase
             $rule   =   new TypeString($options['regex']);
             $result =   $rule->check($field, $options['value']);
 
-            $this->assertTrue($result);
-            $this->assertEquals($result, true);
+            $this->assertIsBool($result);
+            $this->assertFalse($result);
             $this->assertEquals(\in_array($rule->message(), $messages, true), true);
         }
     }
