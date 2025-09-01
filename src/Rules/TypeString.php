@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace AdityaZanjad\Validator\Rules;
 
+use Exception;
+use Throwable;
+use Stringable;
 use AdityaZanjad\Validator\Base\AbstractRule;
 
 /**
@@ -23,13 +26,6 @@ class TypeString extends AbstractRule
     protected string $regex;
 
     /**
-     * The validation error message.
-     * 
-     * @var string $message
-     */
-    protected string $message;
-
-    /**
      * @param string $regex
      */
     public function __construct(string $regex = '')
@@ -42,8 +38,7 @@ class TypeString extends AbstractRule
      */
     public function check(string $field, mixed $value): bool
     {
-        if (!\is_string($value)) {
-            $this->message = "The field {$field} must be a string.";
+        if (!\is_string($value) && !$value instanceof Stringable) {
             return false;
         }
 
@@ -51,14 +46,13 @@ class TypeString extends AbstractRule
             return true;
         }
 
-        
-        if (\function_exists('\\mb_ereg_match') && \mb_ereg_match($this->regex, $value) === false) {
-            $this->message = "The field :{field} must be valid string that matches the regular expression: {$this->regex}.";
-            return false;
+        try {
+            $value = (string) $value;
+        } catch (Throwable $e) {
+            throw new Exception("[Developer][Exception]: Failed to interpret the field [{$field}] as a stringable object. Check its [__toString()] method.");
         }
 
-        if (\preg_match($this->regex, $value) === false) {
-            $this->message = "The field :{field} must be valid string that matches the regular expression: {$this->regex}.";
+        if (\function_exists('\\mb_ereg_match') && \mb_ereg_match($this->regex, $value) === false && \preg_match($this->regex, $value) === false) {
             return false;
         }
 
@@ -70,6 +64,8 @@ class TypeString extends AbstractRule
      */
     public function message(): string
     {
-        return $this->message;
+        return !empty($this->regex) 
+            ? "The field :{field} must match the regular expression: {$this->regex}."
+            : "The field :{field} must be a string.";
     }
 }

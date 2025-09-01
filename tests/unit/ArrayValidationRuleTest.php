@@ -11,79 +11,56 @@ use PHPUnit\Framework\Attributes\CoversFunction;
 
 use function AdityaZanjad\Validator\Presets\validate;
 
-#[CoversClass(Validator::class)]
-#[CoversClass(Error::class)]
-#[CoversClass(Input::class)]
 #[CoversClass(TypeArray::class)]
-#[CoversFunction('\AdityaZanjad\Validator\Presets\validate')]
 final class ArrayValidationRuleTest extends TestCase
 {
     /**
-     * Assert that the validator fails when the given string is an invalid string.
-     *
      * @return void
      */
-    public function testAssertionsPass(): void
+    public function testPasses(): void
     {
-        $validator = validate([
-            'abc'   =>  ['this is a string.'],
-            'def'   =>  ['this is a string!' => 'this is a string !'],
-            'ghi'   =>  [1, 2, 3, 4, 5, 6],
-            'jkl'   =>  [12345682385],
-            'mno'   =>  [[[[57832572.23478235]]]],
-            'pqr'   =>  ['abc' => 1234],
-            'xyz'   =>  new \ArrayObject()
-        ], [
-            'abc'   =>  'array',
-            'def'   =>  'array',
-            'ghi'   =>  'array',
-            'jkl'   =>  'array',
-            'mno'   =>  'array',
-            'pqr'   =>  'array',
-            'xyz'   =>  'array'
-        ]);
+        $data = [
+            'first'     =>  [],
+            'second'    =>  ['1234!', 'Get on the dance floor!'],
+            'third'     =>  new \ArrayObject()
+        ];
 
-        $this->assertFalse($validator->failed());
-        $this->assertEmpty($validator->errors()->all());
-        $this->assertEmpty($validator->errors()->firstOf('abc'));
-        $this->assertEmpty($validator->errors()->firstOf('def'));
-        $this->assertEmpty($validator->errors()->firstOf('ghi'));
-        $this->assertEmpty($validator->errors()->firstOf('jkl'));
-        $this->assertEmpty($validator->errors()->firstOf('mno'));
-        $this->assertEmpty($validator->errors()->firstOf('pqr'));
-        $this->assertEmpty($validator->errors()->firstOf('xyz'));
+        foreach ($data as $key => $value) {
+            $rule   =   new TypeArray();
+            $result =   $rule->check($key, $value); 
+
+            $this->assertIsBool($result);
+            $this->assertEquals($result, true);
+        }
     }
 
     /**
-     * Assert that the validator succeeds when the given fields are valid.
-     *
      * @return void
      */
-    public function testAssertionsFail(): void
+    public function testFails(): void
     {
-        $validator = validate([
-            'abc'   =>  'this is a string.',
-            'def'   =>  -12311,
-            'ghi'   =>  true,
-            'jkl'   =>  new \stdClass(),
-            'mno'   =>  57832572.23478235,
-            'pqr'   =>  1234
-        ], [
-            'abc'   =>  'array',
-            'def'   =>  'array',
-            'ghi'   =>  'array',
-            'jkl'   =>  'array',
-            'mno'   =>  'array',
-            'pqr'   =>  'array'
-        ]);
+        $tmpFile = tmpfile();
+        fwrite($tmpFile, 'This is a temp text inside a temp file!');
 
-        $this->assertTrue($validator->failed());
-        $this->assertNotEmpty($validator->errors()->all());
-        $this->assertNotEmpty($validator->errors()->firstOf('abc'));
-        $this->assertNotEmpty($validator->errors()->firstOf('def'));
-        $this->assertNotEmpty($validator->errors()->firstOf('ghi'));
-        $this->assertNotEmpty($validator->errors()->firstOf('jkl'));
-        $this->assertNotEmpty($validator->errors()->firstOf('mno'));
-        $this->assertNotEmpty($validator->errors()->firstOf('pqr'));
+        $data = [
+            'first'     =>  12345,
+            'second'    =>  4575.123421,
+            'third'     =>  'This is a test string',
+            'fourth'    =>  new \stdClass(),
+            'fifth'     =>  true,
+            'sixth'     =>  $tmpFile,
+            'seventh'   =>  null
+        ];
+
+        foreach ($data as $key => $value) {
+            $rule   =   new TypeArray();
+            $result =   $rule->check($key, $value); 
+
+            $this->assertIsBool($result);
+            $this->assertEquals($result, false);
+            $this->assertEquals($rule->message(), 'The field :{field} must be an array.');
+        }
+
+        fclose($tmpFile);
     }
 }

@@ -57,14 +57,11 @@ class Validator
         }
 
         $actualPaths = $this->input->paths();
-
+ 
         foreach ($this->rules as $field => $rules) {
+            // Parse the input path & its validation rules before evaluating them.
             $field  =   (string) $field;
             $rules  =   $this->parseFieldRules($field, $rules);
-
-            if ($this->stopOnFail) {
-                break;
-            }
 
             if (!\str_contains($field, '*')) {
                 $this->evaluateFieldRules($field, $rules);
@@ -100,8 +97,9 @@ class Validator
                     }
 
                     /**
-                     * If the actual path parameters array is shorter than wildcard parameters 
-                     * path, fill up the path with the remaining parameters to complete it.
+                     * If the actual path parameters array is shorter than wildcard 
+                     * parameters path, fill up the path with the remaining 
+                     * parameters to complete it.
                      */
                     $remainingParts         =   \implode('.', \array_slice($fieldParams, $fieldIndex));
                     $remainingParts         =   \str_replace(['*.', '.*.', '.*'], ['0.', '.0.', '.0'], $remainingParts);
@@ -111,7 +109,7 @@ class Validator
                     break;
                 }
 
-                // Remove any unneeded characters from the resolved path string.
+                // Remove any unnecessary characters from the resolved path string.
                 $resolvedPath = \rtrim($resolvedPath, '.');
 
                 // Validate the value of the resolved input path.
@@ -120,6 +118,7 @@ class Validator
         }
 
         $this->validated = true;
+
         return $this;
     }
 
@@ -147,9 +146,10 @@ class Validator
     /**
      * Evaluate the validation rules for the individual
      *
-     * @param string $field
-     * @param array $rules
-     * @return void
+     * @param   string  $field
+     * @param   array   $rules
+     * 
+     * @return  void
      */
     protected function evaluateFieldRules(string $field, array $rules): void
     {
@@ -162,12 +162,12 @@ class Validator
                 default     =>  throw new Exception("[Developer][Exception]: The field [{$field}] has an invalid rule at the index [{$index}].")
             };
 
-            // If the validation passes.
+            // If the validation succeeds.
             if ($evaluation['result'] === true) {
                 continue;
             }
 
-            // Prepare the validation error message
+            // Prepare the validation error message.
             $ruleName   =   $ruleDataType === 'object' ? Rule::keyOf($rule) : $rule;
             $message    =   !\is_null($ruleName) && isset($this->messages["{$field}.{$ruleName}"]) ? $this->messages["{$field}.{$ruleName}"] : $evaluation['instance']->message();
             $message    =   \str_replace(':{field}', $field, $message);
@@ -175,7 +175,7 @@ class Validator
             // Add the validation error message.
             $this->errors->add($field, $message);
 
-            // If the validator is set to stop on the first failure.
+            // // If the validator is set to stop on the first failure.
             if ($this->stopOnFail) {
                 break;
             }
