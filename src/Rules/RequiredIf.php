@@ -47,7 +47,7 @@ class RequiredIf extends AbstractRule implements MandatoryRuleInterface
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool
+    public function check(mixed $value): bool
     {
         $otherFieldValue = $this->input->get($this->otherField);
 
@@ -60,7 +60,7 @@ class RequiredIf extends AbstractRule implements MandatoryRuleInterface
         }
 
         if (varIsEmpty($value)) {
-            $this->message = "The field {$field} is required when the field {$this->otherField} is equals to: {$otherFieldValue}.";
+            $this->message = "The field :{field} is required when the field {$this->otherField} is equals to: {$otherFieldValue}.";
             return false;
         }
         

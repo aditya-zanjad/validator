@@ -29,7 +29,7 @@ final class StringValidationRuleTest extends TestCase
 
         foreach ($data as $key => $value) {
             $rule   =   new TypeString();
-            $result =   $rule->check($key, $value);
+            $result =   $rule->check($value);
 
             $this->assertIsBool($result);
             $this->assertTrue($result);
@@ -58,7 +58,7 @@ final class StringValidationRuleTest extends TestCase
 
         foreach ($data as $field => $options) {
             $rule   = new TypeString($options['regex']);
-            $result = $rule->check($field, $options['value']);
+            $result = $rule->check($options['value']);
 
             $this->assertIsBool($result);
             $this->assertTrue($result);
@@ -84,9 +84,9 @@ final class StringValidationRuleTest extends TestCase
             'seventh'   =>  null
         ];
 
-        foreach ($data as $key => $value) {
+        foreach ($data as $value) {
             $rule   =   new TypeString();
-            $result =   $rule->check($key, $value);
+            $result =   $rule->check($value);
 
             $this->assertIsBool($result);
             $this->assertFalse($result);
@@ -122,9 +122,9 @@ final class StringValidationRuleTest extends TestCase
             "The field :{field} must match the regular expression: /^[a-z0-9_]+$/.",
         ];
 
-        foreach ($data as $field => $options) {
+        foreach ($data as $options) {
             $rule   =   new TypeString($options['regex']);
-            $result =   $rule->check($field, $options['value']);
+            $result =   $rule->check($options['value']);
 
             $this->assertIsBool($result);
             $this->assertFalse($result);

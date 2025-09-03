@@ -15,7 +15,7 @@ class TypeFile extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool
+    public function check(mixed $value): bool
     {
         return match (\gettype($value)) {
             'string'    =>  \is_file($value),

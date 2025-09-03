@@ -14,11 +14,17 @@ class ULID extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool
+    public function check(mixed $value): bool
     {
-        return \is_string($value)
-            && \strlen($value) === 26
-            && (bool) preg_match('/^[0-9A-HJKMNP-TV-Z]{26}$/', $value);
+        if (!\is_string($value)) {
+            return false;
+        }
+
+        if (\strlen($value) !== 26) {
+            return false;
+        }
+
+        return preg_match('/^[0-9A-HJKMNP-TV-Z]{26}$/', $value) > 0;
     }
 
     /**

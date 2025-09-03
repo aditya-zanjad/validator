@@ -30,7 +30,7 @@ class Equal extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool
+    public function check(mixed $value): bool
     {
         return varEvaluateType($value) === $this->validValue;
     }

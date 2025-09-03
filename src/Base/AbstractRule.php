@@ -19,6 +19,13 @@ abstract class AbstractRule
     protected InputManagerInterface $input;
 
     /**
+     * The name of the input field being validated.
+     *
+     * @var string $field
+     */
+    protected string $field;
+
+    /**
      * Set an instance that'll make all of the input data accessible in the current class.
      *
      * @param \AdityaZanjad\Validator\Interfaces\InputManagerInterface $input
@@ -28,6 +35,19 @@ abstract class AbstractRule
     public function setInput(InputManagerInterface $input): static
     {
         $this->input = $input;
+        return $this;
+    }
+
+    /**
+     * Set the name of the input field being validated.
+     * 
+     * @param string $field
+     *
+     * @return \AdityaZanjad\Validator\Base\AbstractRule
+     */
+    public function setField(string $field): AbstractRule
+    {
+        $this->field = $field;
         return $this;
     }
 
@@ -42,12 +62,11 @@ abstract class AbstractRule
     }
 
     /**
-     * Perform the validation logic on the given input field value.
-     *
-     * @param   string  $field  =>  A dot notation path to the field inside the input data.
-     * @param   mixed   $value  =>  Value of the input field.
-     *
-     * @return  bool
+     * Validate the given data.
+     * 
+     * @param mixed $value
+     * 
+     * @return bool
      */
-    abstract public function check(string $field, mixed $value): bool;
+    abstract public function check(mixed $value): bool;
 }

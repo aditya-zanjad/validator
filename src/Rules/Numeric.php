@@ -14,7 +14,7 @@ class Numeric extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool
+    public function check(mixed $value): bool
     {
         return \extension_loaded('filter')
             ? \filter_var($value, FILTER_VALIDATE_FLOAT) !== false || \filter_var($value, FILTER_VALIDATE_INT) !== false

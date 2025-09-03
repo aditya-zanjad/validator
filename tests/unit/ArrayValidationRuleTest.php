@@ -20,9 +20,9 @@ final class ArrayValidationRuleTest extends TestCase
             'third'     =>  new \ArrayObject()
         ];
 
-        foreach ($data as $key => $value) {
+        foreach ($data as $value) {
             $rule   =   new TypeArray();
-            $result =   $rule->check($key, $value); 
+            $result =   $rule->check($value); 
 
             $this->assertIsBool($result);
             $this->assertTrue($result);
@@ -48,9 +48,9 @@ final class ArrayValidationRuleTest extends TestCase
             'seventh'   =>  null
         ];
 
-        foreach ($data as $key => $value) {
+        foreach ($data as $value) {
             $rule   =   new TypeArray();
-            $result =   $rule->check($key, $value); 
+            $result =   $rule->check($value); 
 
             $this->assertIsBool($result);
             $this->assertFalse($result);

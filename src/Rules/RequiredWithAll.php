@@ -35,7 +35,7 @@ class RequiredWithAll extends AbstractRule implements MandatoryRuleInterface
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool
+    public function check(mixed $value): bool
     {
         $allOtherFieldsArePresent = true;
 
@@ -49,7 +49,8 @@ class RequiredWithAll extends AbstractRule implements MandatoryRuleInterface
         }
 
         if ($allOtherFieldsArePresent && varIsEmpty($value)) {
-            $this->message = "The field {$field} is required when these fields are present: " . \implode(', ', $this->otherFields);
+            $otherFields    =   \implode(', ', $this->otherFields);
+            $this->message  =   "The field :{field} is required when these fields are present: {$otherFields}";
 
             return false;
         }

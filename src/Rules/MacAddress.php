@@ -16,7 +16,7 @@ class MacAddress extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool
+    public function check(mixed $value): bool
     {
         return \is_string($value) && \filter_var($value, FILTER_VALIDATE_MAC) !== false; 
     }

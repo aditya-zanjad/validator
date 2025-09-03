@@ -29,7 +29,7 @@ final class CallbackValidationRuleTest extends TestCase
             'abc' => 'This is a test string!'
         ], [
             'abc' => [
-                function (string $field, mixed $value): bool|string {
+                function (mixed $value): bool|string {
                     if (!\is_string($value)) {
                         return 'The field :{field} must a string.';
                     }
@@ -66,7 +66,7 @@ final class CallbackValidationRuleTest extends TestCase
             'def' => null
         ], [
             'abc' => [
-                function (string $field, mixed $value): bool|string {
+                function (mixed $value): bool|string {
                     if (!\is_string($value)) {
                         return 'The field :{field} must a string.';
                     }
@@ -84,7 +84,7 @@ final class CallbackValidationRuleTest extends TestCase
             ],
 
             'def' => [
-                function (string $field, mixed $value): bool|string {
+                function (mixed $value): bool|string {
                     if (!\is_array($value)) {
                         return 'The field :{field} must be an array.';
                     }

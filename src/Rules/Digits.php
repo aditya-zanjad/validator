@@ -44,7 +44,7 @@ class Digits extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool
+    public function check(mixed $value): bool
     {
         $digits = varDigits($value);
         return !\is_null($digits) && $digits === $this->validDigits;

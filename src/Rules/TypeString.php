@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace AdityaZanjad\Validator\Rules;
 
-use Exception;
-use Throwable;
 use Stringable;
 use AdityaZanjad\Validator\Base\AbstractRule;
 
@@ -43,7 +41,7 @@ class TypeString extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool
+    public function check(mixed $value): bool
     {
         if (!\is_string($value) && !$value instanceof Stringable) {
             $this->message = 'The field :{field} must be a string.';
@@ -52,12 +50,6 @@ class TypeString extends AbstractRule
 
         if (empty($this->regex)) {
             return true;
-        }
-
-        try {
-            $value = (string) $value;
-        } catch (Throwable $e) {
-            throw new Exception("[Developer][Exception]: Failed to interpret the field [{$field}] as a stringable object. Check its [__toString()] method is working correctly.");
         }
 
         if (!\preg_match($this->regex, $value)) {

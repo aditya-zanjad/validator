@@ -63,13 +63,10 @@ class DateBetween extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool
+    public function check(mixed $value): bool
     {
         $givenDateTime = parseDateTime($value);
-
-        return $givenDateTime !== false 
-            && $givenDateTime >= $this->minDate 
-            && $givenDateTime <= $this->maxDate;
+        return $givenDateTime !== false && $givenDateTime >= $this->minDate && $givenDateTime <= $this->maxDate;
     }
 
     /**

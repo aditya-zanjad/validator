@@ -239,7 +239,7 @@ class Validator
 
         // Perform the actual validation & return its result.
         return [
-            'result'    =>  $instance->setInput($this->input)->check($field, $this->input->get($field)),
+            'result'    =>  $instance->setInput($this->input)->setField($field)->check($this->input->get($field)),
             'instance'  =>  $instance
         ];
     }
@@ -267,7 +267,7 @@ class Validator
             $rule = new Callback($rule);
 
             return [
-                'result'    =>  $rule->setInput($this->input)->check($field, $this->input->get($field)),
+                'result'    =>  $rule->setInput($this->input)->setField($field)->check($this->input->get($field)),
                 'instance'  =>  $rule
             ];
         }
@@ -287,7 +287,7 @@ class Validator
         }
 
         return [
-            'result'    =>  $rule->setInput($this->input)->check($field, $this->input->get($field)),
+            'result'    =>  $rule->setInput($this->input)->setField($field)->check($this->input->get($field)),
             'instance'  =>  $rule
         ];
     }

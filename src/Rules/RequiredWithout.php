@@ -39,14 +39,14 @@ class RequiredWithout extends AbstractRule implements MandatoryRuleInterface
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool
+    public function check(mixed $value): bool
     {
         $currentFieldIsPresent = !varIsEmpty($value);
 
         // The current field is required iff any of the dependent fields is not present in the input.
         foreach ($this->otherFields as $otherField) {
             if (!$this->input->isNull($otherField) && $currentFieldIsPresent) {
-                $this->message = "The field {$field} is required without the field {$otherField}.";
+                $this->message = "The field :{field} is required without the field {$otherField}.";
                 return false;
             }
         }

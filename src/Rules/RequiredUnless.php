@@ -26,15 +26,15 @@ class RequiredUnless extends AbstractRule implements MandatoryRuleInterface
     protected string $otherField;
 
     /**
-     * @var array<int, mixed> $otherFieldExpectedValues
+     * @var array<int, mixed> $otherFieldAllowedValues
      */
-    protected array $otherFieldExpectedValues;
+    protected array $otherFieldAllowedValues;
 
     /**
      * @param   string  $otherField
-     * @param   string  ...$otherFieldExpectedValues
+     * @param   string  ...$otherFieldAllowedValues
      */
-    public function __construct(string $otherField, string ...$otherFieldExpectedValues)
+    public function __construct(string $otherField, string ...$otherFieldAllowedValues)
     {
         $this->otherField = $otherField;
 
@@ -45,19 +45,17 @@ class RequiredUnless extends AbstractRule implements MandatoryRuleInterface
          * 'null' gets evaluated NULL, 
          * '123' gets evaluated to integer 123 & so on.
          */
-        $this->otherFieldExpectedValues = \array_map(function ($value) {
-            return varEvaluateType($value);
-        }, \array_values($otherFieldExpectedValues));
+        $this->otherFieldAllowedValues = \array_map(fn ($value) => varEvaluateType($value), \array_values($otherFieldAllowedValues));
     }
 
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool
+    public function check(mixed $value): bool
     {
         $otherFieldValue            =   $this->input->get($this->otherField);
         $currentFieldIsPresent      =   !varIsEmpty($value);
-        $otherFieldHasExpectedValue =   \in_array($otherFieldValue, $this->otherFieldExpectedValues);
+        $otherFieldHasExpectedValue =   \in_array($otherFieldValue, $this->otherFieldAllowedValues);
 
         /**
          * If the other field does not equal to any of the expected values & the current is present [i.e. not missing or not NULL]
@@ -68,9 +66,10 @@ class RequiredUnless extends AbstractRule implements MandatoryRuleInterface
         }
 
         // If any of the expected values is/are NULL, we want to convert them to a string 'NULL' in order to represent them in the error message.
-        $otherFieldExpectedValues = \array_map(fn ($value) => !varIsEmpty($value) ? $value : '[NULL]', $this->otherFieldExpectedValues);
+        $otherFieldAllowedValues    =   \array_map(fn ($value) => !varIsEmpty($value) ? $value : '[NULL]', $this->otherFieldAllowedValues);
+        $otherFieldAllowedValues    =   \implode(', ', $otherFieldAllowedValues);
 
-        $this->message = "The field {$field} is required if the field {$this->otherField} is not equal to any of these values: " . \implode(', ', $otherFieldExpectedValues);
+        $this->message = "The field :{field} is required if the field {$this->otherField} is not equal to any of these values: {$otherFieldAllowedValues}";
         return false;
     }
 

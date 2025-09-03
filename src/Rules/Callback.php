@@ -41,13 +41,13 @@ class Callback extends AbstractRule
      * 
      * @throws \Exception => Whenever the callback function returns an invalid value.
      */
-    public function check(string $field, mixed $value): bool
+    public function check(mixed $value): bool
     {
         try {
-            $result = ($this->fn)($field, $value, $this->input);
+            $result = ($this->fn)($value, $this->field, $this->input);
         } catch (InvalidArgumentException $e) {
             // var_dump($e); exit;
-            throw new Exception("[Developer][Exception]: The field [{$field}] has a callback validation rule passed with invalid argument(s).");
+            throw new Exception("[Developer][Exception]: The field [{$this->field}] has a callback validation rule passed with invalid argument(s).");
         }
 
         if (\is_bool($result)) {
@@ -55,7 +55,7 @@ class Callback extends AbstractRule
         }
 
         if (!\is_string($result)) {
-            throw new Exception("[Developer][Exception]: The field [{$field}] has a callback validation rule which must return either a [BOOLEAN] or a [STRING] value.");
+            throw new Exception("[Developer][Exception]: The field [{$this->field}] has a callback validation rule which must return either a [BOOLEAN] or a [STRING] value.");
         }
 
         $this->message = $result;

@@ -15,7 +15,7 @@ class TypeBoolean extends AbstractRule
     /**
      * @var array<int, string> $validValues
      */
-    protected array $validValues = ['bool', 'int', 'str_bool', 'str_int', 'true/false', '1/0', 'on/off', 'yes/no'];
+    protected array $validValues = ['bool_true/false', 'int_0/1', 'str_true/false', 'str_0/1', 'true/false', 'false/true', '1/0', '0/1', 'on/off', 'off/on', 'yes/no', 'no/yes'];
 
     /**
      * @var array<int, string> $allowedValues
@@ -35,7 +35,7 @@ class TypeBoolean extends AbstractRule
 
         foreach ($allowedValues as $allowedValue) {
             if (!\in_array($allowedValue, $this->validValues)) {
-                throw new Exception('[Developer][Exception]: The validation rule [boolean] considers only these parameters as valid: "bool", "int", "str_bool", "str_int", "on/off", "yes/no".');
+                throw new Exception('[Developer][Exception]: The validation rule [boolean] requires its each parameter to be one of these: "bool_true/false", "int_0/1", "str_true/false", "str_0/1", "on/off", "off/on", "yes/no", "no/yes"');
             }
         }
 
@@ -45,7 +45,7 @@ class TypeBoolean extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool
+    public function check(mixed $value): bool
     {
         if (\is_null($value)) {
             return false;
@@ -57,14 +57,14 @@ class TypeBoolean extends AbstractRule
 
         foreach ($this->allowedValues as $allowedValue) {
             $result = match ($allowedValue) {
-                'bool'          =>  \in_array($value, [true, false], true),
-                'int'           =>  \in_array($value, [0, 1], true),
-                'true/false'    =>  \in_array($value, [true, false], true) || (\is_string($value) && (\strcasecmp($value, 'true') === 0 || \strcasecmp($value, 'false') === 0)),
-                '1/0'           =>  \in_array($value, [0, 1, '0', '1'], true),
-                'on/off'        =>  \is_string($value) && (\strcasecmp($value, 'on') === 0 || \strcasecmp($value, 'off') === 0),
-                'yes/no'        =>  \is_string($value) && (\strcasecmp($value, 'yes') === 0 || \strcasecmp($value, 'no') === 0),
-                'str_bool'      =>  \is_string($value) && (\strcasecmp($value, 'true') === 0 || \strcasecmp($value, 'false') === 0),
-                'str_int'       =>  \in_array($value, ['0', '1'], true),
+                'bool_true/false'           =>  \in_array($value, [true, false], true),
+                'int_0/1'                   =>  \in_array($value, [0, 1], true),
+                'true/false', 'false/true'  =>  \in_array($value, [true, false], true) || (\is_string($value) && (\strcasecmp($value, 'true') === 0 || \strcasecmp($value, 'false') === 0)),
+                '1/0', '0/1'                =>  \in_array($value, [0, 1, '0', '1'], true),
+                'on/off', 'off/on'          =>  \is_string($value) && (\strcasecmp($value, 'on') === 0 || \strcasecmp($value, 'off') === 0),
+                'yes/no', 'no/yes'          =>  \is_string($value) && (\strcasecmp($value, 'yes') === 0 || \strcasecmp($value, 'no') === 0),
+                'str_true/false'            =>  \is_string($value) && (\strcasecmp($value, 'true') === 0 || \strcasecmp($value, 'false') === 0),
+                'str_0/1'                   =>  \in_array($value, ['0', '1'], true),
             };
 
             if ($result) {

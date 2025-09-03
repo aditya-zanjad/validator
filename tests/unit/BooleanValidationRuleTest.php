@@ -37,7 +37,7 @@ final class BooleanValidationRuleTest extends TestCase
 
         foreach ($data as $key => $value) {
             $rule   =   new TypeBoolean();
-            $result =   $rule->check($key, $value);
+            $result =   $rule->check($value);
 
             $this->assertIsBool($result);
             $this->assertTrue($result);
@@ -64,9 +64,9 @@ final class BooleanValidationRuleTest extends TestCase
             'twelfth'   =>  'FAlse',
         ];
 
-        foreach ($data as $field => $value) {
-            $rule   = new TypeBoolean('true/false', '1/0');
-            $result = $rule->check($field, $value);
+        foreach ($data as $value) {
+            $rule   = new TypeBoolean('true/false', '0/1');
+            $result = $rule->check($value);
 
             $this->assertIsBool($result);
             $this->assertTrue($result);
@@ -83,8 +83,8 @@ final class BooleanValidationRuleTest extends TestCase
         ];
 
         foreach ($data as $value) {
-            $rule   = new TypeBoolean('str_bool', 'on/off', 'yes/no');
-            $result = $rule->check($field, $value);
+            $rule   = new TypeBoolean('str_true/false', 'off/on', 'yes/no');
+            $result = $rule->check($value);
 
             $this->assertIsBool($result);
             $this->assertTrue($result);
@@ -108,9 +108,9 @@ final class BooleanValidationRuleTest extends TestCase
             'eight'     =>  '1'
         ];
 
-        foreach ($data as $field => $value) {
-            $rule   = new TypeBoolean('bool', 'int');
-            $result = $rule->check($field, $value);
+        foreach ($data as $value) {
+            $rule   = new TypeBoolean('bool_true/false', 'int_0/1');
+            $result = $rule->check($value);
 
             $this->assertIsBool($result);
             $this->assertFalse($result);
@@ -129,11 +129,11 @@ final class BooleanValidationRuleTest extends TestCase
         ];
 
         $this->expectException(Exception::class);
-        $this->expectExceptionMessage('[Developer][Exception]: The validation rule [boolean] considers only these parameters as valid: "bool", "int", "str_bool", "str_int", "on/off", "yes/no".');
+        $this->expectExceptionMessage('[Developer][Exception]: The validation rule [boolean] requires its each parameter to be one of these: "bool_true/false", "int_0/1", "str_true/false", "str_0/1", "on/off", "off/on", "yes/no", "no/yes"');
 
-        foreach ($data as $field => $value) {
+        foreach ($data as $value) {
             $rule = new TypeBoolean('valid/invalid', 'truth/false');
-            $rule->check($field, $value);
+            $rule->check($value);
         }
     }
 
@@ -159,7 +159,7 @@ final class BooleanValidationRuleTest extends TestCase
 
         foreach ($data as $key => $value) {
             $rule   =   new TypeBoolean();
-            $result =   $rule->check($key, $value);
+            $result =   $rule->check($value);
 
             $this->assertIsBool($result);
             $this->assertFalse($result);

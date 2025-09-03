@@ -50,14 +50,14 @@ class Gt extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool
+    public function check(mixed $value): bool
     {
         if (varSize($value) <= $this->minThreshold) {
             $this->message = match (\gettype($value)) {
-                'array'                                     =>  "The field {$field} must contain more than {$this->minThreshold} elements.",
-                'string'                                    =>  "The field {$field} must contain more than {$this->minThreshold} characters.",
-                'resource', 'float', 'double', 'integer'    =>  "The field {$field} must be more than {$this->minThreshold}.",
-                default                                     =>  "The field {$field} must be more than {$this->minThreshold}."
+                'array'                                     =>  "The field :{field} must contain more than {$this->minThreshold} elements.",
+                'string'                                    =>  "The field :{field} must contain more than {$this->minThreshold} characters.",
+                'resource', 'float', 'double', 'integer'    =>  "The field :{field} must be more than {$this->minThreshold}.",
+                default                                     =>  "The field :{field} must be more than {$this->minThreshold}."
             };
 
             return false;
