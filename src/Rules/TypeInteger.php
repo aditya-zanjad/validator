@@ -16,7 +16,7 @@ class TypeInteger extends AbstractRule
      */
     public function check(mixed $value): bool
     {
-        return filter_var($value, FILTER_VALIDATE_INT) !== false;
+        return !\is_bool($value) && \filter_var($value, FILTER_VALIDATE_INT) !== false;
     }
 
     /**

@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
-use AdityaZanjad\Validator\Rules\TypeBoolean;
 use PHPUnit\Framework\Attributes\CoversClass;
+use AdityaZanjad\Validator\Rules\TypeBoolean;
 
 #[CoversClass(TypeBoolean::class)]
 final class BooleanValidationRuleTest extends TestCase
