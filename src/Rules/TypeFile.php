@@ -19,7 +19,7 @@ class TypeFile extends AbstractRule
     {
         return match (\gettype($value)) {
             'string'    =>  \is_file($value),
-            'array'     =>  (isset($value['error']) && $value['error'] === UPLOAD_ERR_OK) && isset($value['tmp_name']) && is_uploaded_file($value['tmp_name']),
+            'array'     =>  isset($value['error']) && $value['error'] === UPLOAD_ERR_OK && isset($value['tmp_name']) && is_uploaded_file($value['tmp_name']),
             'object'    =>  \extension_loaded('SPL') && \class_exists(SplFileInfo::class) && $value instanceof SplFileInfo && $value->isFile(),
             'resource'  =>  $this->validateFromResource($value),
             default     =>  false
@@ -31,7 +31,7 @@ class TypeFile extends AbstractRule
      */
     public function message(): string
     {
-        return 'The field :{field} must be a valid file.';
+        return 'The field :{field} must be a file.';
     }
 
     /**
