@@ -148,15 +148,26 @@ function varStrSize(string $var): bool|int
  */
 function varDigits(mixed $var): ?int
 {
+    if (\is_null($var)) {
+        return null;
+    }
+
+    if (\is_bool($var)) {
+        return null;
+    }
+
     if (\filter_var($var, FILTER_VALIDATE_FLOAT) === false) {
         return null;
     }
 
-    if (((int) $var) === 0) {
-        return 1;
-    }
+    $var = (int) $var;
+    $var = \abs($var);
 
-    return (int) (\log((float) $var, 10) + 1);
+    if ($var !== 0) {
+        return (int) (\log((float) $var, 10) + 1);
+    }
+    
+    return 1;
 }
 
 /**
