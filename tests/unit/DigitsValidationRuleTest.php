@@ -107,4 +107,18 @@ class DigitsValidationRuleTest extends TestCase
             $this->assertEquals($rule->message(), "The field :{field} must contain exactly {$num['digits']} digits.");
         }
     }
+
+    /**
+     * @return void
+     */
+    public function testAbortsOnInvalidParameters(): void
+    {
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('[Developer][Exception]: The parameter passed to the validation rule [digits] must be a valid integer.');
+        new Digits('string-1234');
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage("[Developer][Exception]: The parameter passed to the validation rule [digits] must be greater than 0.");
+        new Digits('-23');
+    }
 }

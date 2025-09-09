@@ -16,8 +16,6 @@ final class StringValidationRuleTest extends TestCase
      */
     public function testPasses(): void
     {
-        require_once dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'shared' . DIRECTORY_SEPARATOR . 'StringableImplementor.php';
-
         $data = [
             'first'     =>  '',
             'second'    =>  '1234! Get on the dance floor!',
@@ -130,5 +128,20 @@ final class StringValidationRuleTest extends TestCase
             $this->assertFalse($result);
             $this->assertEquals(\in_array($rule->message(), $messages, true), true);
         }
+    }
+}
+
+class StringableImplementor implements Stringable
+{
+    private string $value;
+
+    public function __construct(string $value)
+    {
+        $this->value = $value;
+    }
+
+    public function __toString(): string
+    {
+        return "Stringable: " . $this->value;
     }
 }

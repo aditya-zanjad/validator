@@ -20,9 +20,9 @@ class Validator
     /**
      * Useful in deciding whether or not to stop the validator on first failure.
      *
-     * @var bool $stopOnFail
+     * @var bool $abortIfFails
      */
-    protected bool $stopOnFail = false;
+    protected bool $abortIfFails = false;
 
     /**
      * To check whether the validation has been already performed or not.
@@ -35,11 +35,15 @@ class Validator
      * @param   \AdityaZanjad\Validator\Interfaces\InputManagerInterface                                                                                                                                                $input
      * @param   array<string, mixed>  $rules
      * @param   \AdityaZanjad\Validator\Interfaces\ErrorManagerInterface                                                                                                                                                $errors
-     * @param   array<string, string>                                                                                                                                                                                   $messages
+     * @param   array<string, string>  
+     * 
+     * @throws  \Exception                                                                                                                                                                                 $messages
      */
     public function __construct(protected InputManagerInterface $input, protected array $rules, protected ErrorManagerInterface $errors, protected array $messages = [])
     {
-        //
+        if (empty($this->rules)) {
+            throw new Exception("[Developer][Exception]: The parameter [rules] must not be empty. You must provide at least one validation rule.");
+        }
     }
 
     /**
@@ -56,7 +60,7 @@ class Validator
             throw new Exception("[Developer][Exception]: The validation for this instance has already been done. Create a new validator instance to perform a new validation.");
         }
 
-        $actualPaths = $this->input->paths();
+        $actuals = $this->input->paths();
 
         foreach ($this->rules as $field => $rules) {
             // Parse the input path & its validation rules before evaluating them.
@@ -67,20 +71,22 @@ class Validator
             }
 
             if (!\is_array($rules)) {
-                throw new Exception("[Developer][Exception]: The field [{$field}] must have validation rules specified either as a [STRING] or [INDEXED ARRAY].");
+                throw new Exception("[Developer][Exception]: The field [{$field}] must have validation rules specified in [STRING] or [ARRAY] format.");
             }
 
+            // TODO => Use 'preg_match()' to avoid matching with the espaced '*' & '.' characters.
             if (!\str_contains($field, '*')) {
                 $this->evaluateFieldRules($field, $rules);
                 continue;
             }
 
+            // TODO => Add logic to handle the espaced '*' & '.' characters in the input path.
             $fieldParams = \explode('.', $field);
 
             // For each given rule, loop through input paths array to determine the matching paths.
-            foreach ($actualPaths as $actualPath) {
+            foreach ($actuals as $actual) {
                 $resolvedPath           =   '';
-                $actualPathParams       =   \explode('.', $actualPath);
+                $actualParams           =   \explode('.', $actual);
                 $resolvedPathIsEmpty    =   true;
 
                 /**
@@ -90,10 +96,10 @@ class Validator
                  * parameters to it to complete it.
                  */
                 foreach ($fieldParams as $fieldIndex => $fieldParam) {
-                    $actualPathParams[$fieldIndex] ??= 0;
+                    $actualParams[$fieldIndex] ??= 0;
 
-                    if ($fieldParam === '*' || $fieldParam === $actualPathParams[$fieldIndex]) {
-                        $resolvedPath .= "{$actualPathParams[$fieldIndex]}.";
+                    if ($fieldParam === '*' || $fieldParam === $actualParams[$fieldIndex]) {
+                        $resolvedPath .= "{$actualParams[$fieldIndex]}.";
                         $resolvedPathIsEmpty = false;
                         continue;
                     }
@@ -107,11 +113,11 @@ class Validator
                      * parameters path, fill up the path with the remaining 
                      * parameters to complete it.
                      */
-                    $remainingParts = \implode('.', \array_slice($fieldParams, $fieldIndex));
-                    $remainingParts = \str_replace(['*.', '.*.', '.*'], ['0.', '.0.', '.0'], $remainingParts);
+                    $remainingParts         =   \implode('.', \array_slice($fieldParams, $fieldIndex));
+                    $remainingParts         =   \str_replace(['*.', '.*.', '.*'], ['0.', '.0.', '.0'], $remainingParts);
+                    $resolvedPathIsEmpty    =   false;
 
                     $resolvedPath .= "{$remainingParts}";
-                    $resolvedPathIsEmpty = false;
                     break;
                 }
 
@@ -170,7 +176,7 @@ class Validator
             $this->errors->add($field, $message);
 
             // // If the validator is set to stop on the first failure.
-            if ($this->stopOnFail) {
+            if ($this->abortIfFails) {
                 break;
             }
         }
@@ -179,13 +185,13 @@ class Validator
     /**
      * Stop the validation process immediately on the first validation failure.
      *
-     * @param bool $stopOnFail
+     * @param bool $abortIfFails
      *
      * @return static
      */
-    public function abortOnFail(bool $stopOnFail = true): static
+    public function abortOnFail(bool $abortIfFails = true): static
     {
-        $this->stopOnFail = $stopOnFail;
+        $this->abortIfFails = $abortIfFails;
         return $this;
     }
 

@@ -28,8 +28,12 @@ class Digits extends AbstractRule
      */
     public function __construct(mixed $validDigits)
     {
-        if (\filter_var($validDigits, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) === false) {
-            throw new Exception("[Developer][Exception]: The parameter passed to the validation rule [digits] must be an integer greater than 0.");
+        if (\filter_var($validDigits, FILTER_VALIDATE_INT) === false) {
+            throw new Exception("[Developer][Exception]: The parameter passed to the validation rule [digits] must be a valid integer.");
+        }
+
+        if ($validDigits < 1) {
+            throw new Exception("[Developer][Exception]: The parameter passed to the validation rule [digits] must be greater than 0.");
         }
 
         $this->validDigits = (int) $validDigits;

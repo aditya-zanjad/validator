@@ -28,8 +28,12 @@ class DigitsLt extends AbstractRule
      */
     public function __construct($maxThreshold)
     {
-        if (!filter_var($maxThreshold, FILTER_VALIDATE_INT)) {
-            throw new Exception("[Developer][Exception]: The parameter passed to the validation rule [digits_lt] must be the valid integer.");
+        if (filter_var($maxThreshold, FILTER_VALIDATE_INT) === false) {
+            throw new Exception("[Developer][Exception]: The parameter passed to the validation rule [digits_lt] must be a valid integer.");
+        }
+
+        if ($maxThreshold < 2) {
+            throw new Exception("[Developer][Exception]: The value of the parameter passed to the validation rule [digits_lt] must not be less than 2.");
         }
 
         $this->maxThreshold = (int) $maxThreshold;
@@ -41,7 +45,12 @@ class DigitsLt extends AbstractRule
     public function check(mixed $value): bool
     {
         $digits = varDigits($value);
-        return !\is_null($digits) && $digits < $this->maxThreshold;
+
+        if (\is_null($digits)) {
+            return false;
+        }
+
+        return $digits < $this->maxThreshold;
     }
 
     /**
