@@ -32,7 +32,7 @@ class Same extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool
+    public function check(mixed $value): bool
     {
         if ($value !== $this->input->get($this->comparingField)) {
             $this->message = "The value of the field :{field} must be the same as that of the field {$this->comparingField}.";

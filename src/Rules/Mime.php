@@ -38,7 +38,7 @@ class Mime extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool
+    public function check(mixed $value): bool
     {
         $mime = match (\gettype($value)) {
             'string'    =>  $this->obtainMimeFromString($value),

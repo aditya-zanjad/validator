@@ -39,7 +39,7 @@ class RequiredWithoutAll extends AbstractRule implements MandatoryRuleInterface
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool
+    public function check(mixed $value): bool
     {
         $currentFieldIsPresent = !varIsEmpty($value);
 
@@ -48,12 +48,12 @@ class RequiredWithoutAll extends AbstractRule implements MandatoryRuleInterface
         }, true);
 
         if ($allOtherFieldsArePresent && $currentFieldIsPresent) {
-            $this->message = "The field {$field} is required without all these fields: " . \implode(', ', $this->otherFields);
+            $this->message = "The field :{field} is required without all these fields: " . \implode(', ', $this->otherFields);
             return false;
         }
 
         if (!$allOtherFieldsArePresent && !$currentFieldIsPresent) {
-            $this->message = "The field {$field} is required when these fields are missing: " . \implode(', ', $this->otherFields);
+            $this->message = "The field :{field} is required when all these fields are missing: " . \implode(', ', $this->otherFields);
             return false;
         }
 

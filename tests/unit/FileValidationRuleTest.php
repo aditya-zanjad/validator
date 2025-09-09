@@ -3,21 +3,17 @@
 declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
-use AdityaZanjad\Validator\Validator;
-use AdityaZanjad\Validator\Managers\Input;
 use AdityaZanjad\Validator\Rules\TypeFile;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\CoversFunction;
 
-use function AdityaZanjad\Validator\Presets\validate;
-
-#[CoversClass(Validator::class)]
-#[CoversClass(Error::class)]
-#[CoversClass(Input::class)]
 #[CoversClass(TypeFile::class)]
-#[CoversFunction('\AdityaZanjad\Validator\Presets\validate')]
 final class FileValidationRuleTest extends TestCase
 {
+    /**
+     * Directory path to a temporary directory.
+     *
+     * @var string $tempDirPath
+     */
     protected string $tempDirPath;
 
     /**
@@ -41,14 +37,16 @@ final class FileValidationRuleTest extends TestCase
         chmod($this->tempDirPath, 0775);
 
         $this->validFiles = [
-            'file_001'  =>  $this->tempDirPath . DIRECTORY_SEPARATOR . 'valid_001.json',
-            'file_002'  =>  $this->tempDirPath . DIRECTORY_SEPARATOR . 'sample.txt',
+            'file_path' => $this->tempDirPath . DIRECTORY_SEPARATOR . 'valid_001.json',
         ];
 
-        file_put_contents($this->validFiles['file_001'], trim($this->makeTestJsonData()));
-        file_put_contents($this->validFiles['file_002'], trim($this->makeTestTextData()));
+        file_put_contents($this->validFiles['file_path'], trim($this->makeTestJsonData()));
 
-        $this->validFiles['file_002'] = fopen($this->validFiles['file_002'], 'r');
+        $this->validFiles['file_resource'] = fopen($this->validFiles['file_path'], 'r');
+
+        if (\extension_loaded('SPL') && \class_exists(SplFileInfo::class)) {
+            $this->validFiles['file_object'] = new SplFileInfo($this->validFiles['file_path']);
+        }
     }
 
     /**
@@ -58,10 +56,10 @@ final class FileValidationRuleTest extends TestCase
      */
     public function tearDown(): void
     {
-        unlink($this->validFiles['file_001']);
-        $streamMetadata = stream_get_meta_data($this->validFiles['file_002']);
-        fclose($this->validFiles['file_002']);
-        unlink($streamMetadata['uri']);
+        unset($this->validFiles['file_object']);
+        fclose($this->validFiles['file_resource']);
+        unlink($this->validFiles['file_path']);
+        unset($this->validFiles['file_path']);
         rmdir($this->tempDirPath);
     }
 
@@ -70,17 +68,15 @@ final class FileValidationRuleTest extends TestCase
      *
      * @return void
      */
-    public function testAssertionsPass(): void
+    public function testPasses(): void
     {
-        $validator = validate($this->validFiles, [
-            'file_001' => 'file',
-            'file_002' => 'file',
-        ]);
+        foreach ($this->validFiles as $file) {
+            $rule   =   new TypeFile();
+            $result =   $rule->check($file);
 
-        $this->assertFalse($validator->failed());
-        $this->assertEmpty($validator->errors()->all());
-        $this->assertEmpty($validator->errors()->firstOf('file_001'));
-        $this->assertEmpty($validator->errors()->firstOf('file_002'));
+            $this->assertIsBool($result);
+            $this->assertTrue($result);
+        }
     }
 
     /**
@@ -88,26 +84,33 @@ final class FileValidationRuleTest extends TestCase
      *
      * @return void
      */
-    public function testAssertionsFail(): void
+    public function testFails(): void
     {
-        $validator = validate([
-            'file_002'  =>  '/invalid_directory/invalid_file.json',
-            'file_003'  =>  'This is a test string',
-            'file_004'  =>  @fopen('/path/to/invalid/file.txt', 'r'),
-            'file_005'  =>  @file_get_contents('/path/to/invalid/file.txt')
-        ], [
-            'file_002'  =>  'file',
-            'file_003'  =>  'file',
-            'file_004'  =>  'file',
-            'file_005'  =>  'file',
-        ]);
+        $data = [
+            '/invalid_directory/invalid_file.json',
+            'This is a test string',
+            new ArrayObject(),
+            new stdClass(),
+            true,
+            false,
+            'true',
+            'false',
+            123123,
+            12312.123123
+            -123123,
+            -683454393,
+            ['this is a test string inside a test array!'],
+            '1234! Get on the dance floor!'
+        ];
 
-        $this->assertTrue($validator->failed());
-        $this->assertNotEmpty($validator->errors()->all());
-        $this->assertNotEmpty($validator->errors()->firstOf('file_002'));
-        $this->assertNotEmpty($validator->errors()->firstOf('file_003'));
-        $this->assertNotEmpty($validator->errors()->firstOf('file_004'));
-        $this->assertNotEmpty($validator->errors()->firstOf('file_005'));
+        foreach ($data as $file) {
+            $rule   =   new TypeFile();
+            $result =   $rule->check($file);
+
+            $this->assertIsBool($result);
+            $this->assertFalse($result);
+            $this->assertEquals($rule->message(), 'The field :{field} must be a file.');
+        }
     }
 
     /**
@@ -148,15 +151,5 @@ final class FileValidationRuleTest extends TestCase
                 "ip_address": "67.76.188.26"
             }]
         ';
-    }
-
-    /**
-     * Required for performing the test assertions.
-     *
-     * @return string
-     */
-    protected function makeTestTextData(): string
-    {
-        return 'Hello World! 1234! Get on the dance floor!';
     }
 }

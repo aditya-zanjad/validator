@@ -20,9 +20,9 @@ class Validator
     /**
      * Useful in deciding whether or not to stop the validator on first failure.
      *
-     * @var bool $stopOnFail
+     * @var bool $abortIfFails
      */
-    protected bool $stopOnFail = false;
+    protected bool $abortIfFails = false;
 
     /**
      * To check whether the validation has been already performed or not.
@@ -35,114 +35,15 @@ class Validator
      * @param   \AdityaZanjad\Validator\Interfaces\InputManagerInterface                                                                                                                                                $input
      * @param   array<string, mixed>  $rules
      * @param   \AdityaZanjad\Validator\Interfaces\ErrorManagerInterface                                                                                                                                                $errors
-     * @param   array<string, string>                                                                                                                                                                                   $messages
+     * @param   array<string, string>  
+     * 
+     * @throws  \Exception                                                                                                                                                                                 $messages
      */
     public function __construct(protected InputManagerInterface $input, protected array $rules, protected ErrorManagerInterface $errors, protected array $messages = [])
     {
-        $this->rules = $this->transformRules($this->rules);
-    }
-
-    /**
-     * Reorganize/Preprocess the given validation rules before they are actually evaluated.
-     *
-     * @param array<int|string, mixed> $givenRules
-     *
-     * @return array<string, mixed>
-     */
-    protected function transformRules(array $givenRules): array
-    {
-        $actualPaths = $this->input->paths();
-
-        foreach ($givenRules as $field => $rules) {
-            $field  =   (string) $field;
-            $rules  =   $this->parseFieldRules($field, $rules);
-
-            // If the field to be validated does not contain any wildcard parameters.
-            if (!\str_contains($field, '*')) {
-                $givenRules[$field] = $rules;
-                continue;
-            }
-
-            $fieldParams = \explode('.', $field);
-
-            // For each given rule, loop through input paths array to determine the matching paths.
-            foreach ($actualPaths as $actualPath) {
-                $actualPathParams       =   \explode('.', $actualPath);
-                $resolvedPath           =   '';
-                $resolvedPathIsEmpty    =   true;
-
-                /**
-                 * Perform the matching of the wildcard path with each individual input array path. If the 
-                 * actual path exceeds input path, strip its exceess to match with the wildcard path. If
-                 * the actual path is lesser than the wildcard path, add necessary parameters to it to
-                 * complete it.
-                 */
-                foreach ($fieldParams as $fieldIndex => $fieldParam) {
-                    $actualPathParams[$fieldIndex] ??= 0;
-
-                    if ($fieldParam === '*' || $fieldParam === $actualPathParams[$fieldIndex]) {
-                        $resolvedPath           .=   "{$actualPathParams[$fieldIndex]}.";
-                        $resolvedPathIsEmpty     =   false;
-
-                        continue;
-                    }
-
-                    if ($resolvedPathIsEmpty) {
-                        continue 2;
-                    }
-
-                    /**
-                     * If the actual path parameters array is shorter than wildcard parameters 
-                     * path, fill up the path with the remaining parameters to complete it.
-                     */
-                    $remainingParts         =   \implode('.', \array_slice($fieldParams, $fieldIndex));
-                    $remainingParts         =   \str_replace(['*.', '.*.', '.*'], ['0.', '.0.', '.0'], $remainingParts);
-                    $resolvedPath           =   "{$resolvedPath}{$remainingParts}";
-                    $resolvedPathIsEmpty    =   false;
-
-                    break;
-                }
-
-                // Remove any unneeded characters from the resolved path string.
-                $resolvedPath = \rtrim($resolvedPath, '.');
-
-                // If the resolved path does not exist in the rules array, we're fine to skip to the next iteration.
-                if (!isset($givenRules[$resolvedPath])) {
-                    $givenRules[$resolvedPath] = $rules;
-                    continue;
-                }
-
-                // If the resolved path exists in the array, we need to combine the current rules with its existing rules while avoiding the duplicates.
-                $givenRules[$resolvedPath]  =   $this->parseFieldRules($resolvedPath, $givenRules[$resolvedPath]);
-                $givenRules[$resolvedPath]  =   \array_merge($givenRules[$resolvedPath], $rules);
-                $givenRules[$resolvedPath]  =   \array_unique($givenRules[$resolvedPath]);
-            }
-
-            unset($givenRules[$field]);
+        if (empty($this->rules)) {
+            throw new Exception("[Developer][Exception]: The parameter [rules] must not be empty. You must provide at least one validation rule.");
         }
-
-        return $givenRules;
-    }
-
-    /**
-     * Transform the given field rules if necessary.
-     *
-     * @param   string  $field
-     * @param   mixed   $rules
-     * 
-     * @return  array
-     */
-    protected function parseFieldRules(string $field, mixed $rules): array
-    {
-        if (\is_string($rules)) {
-            $rules = \explode('|', $rules);
-        }
-
-        if (!\is_array($rules)) {
-            throw new Exception("[Developer][Exception]: The field [{$field}] must have validation rules specified either as a [STRING] or [INDEXED ARRAY].");
-        }
-
-        return $rules;
     }
 
     /**
@@ -159,34 +60,81 @@ class Validator
             throw new Exception("[Developer][Exception]: The validation for this instance has already been done. Create a new validator instance to perform a new validation.");
         }
 
-        foreach ($this->rules as $field => $rulesGroup) {
+        $actuals = $this->input->paths();
+
+        foreach ($this->rules as $field => $rules) {
+            // Parse the input path & its validation rules before evaluating them.
             $field = (string) $field;
 
-            foreach ($rulesGroup as $index => $rule) {
-                $ruleDataType = \gettype($rule);
+            if (\is_string($rules)) {
+                $rules = \explode('|', $rules);
+            }
 
-                $evaluation = match ($ruleDataType) {
-                    'string'    =>  $this->evaluateRuleFromString($rule, $field, $index),
-                    'object'    =>  $this->evaluateRuleFromObject($rule, $field, $index),
-                    default     =>  throw new Exception("[Developer][Exception]: The field [{$field}] has an invalid rule at the index [{$index}].")
-                };
+            if (!\is_array($rules)) {
+                throw new Exception("[Developer][Exception]: The field [{$field}] must have validation rules specified in [STRING] or [ARRAY] format.");
+            }
 
-                // If the validation passes.
-                if ($evaluation['result'] === true) {
-                    continue;
+            // TODO => Use 'preg_match()' to avoid matching with the espaced '*' & '.' characters.
+            if (!\str_contains($field, '*')) {
+                $this->evaluateFieldRules($field, $rules);
+                continue;
+            }
+
+            // TODO => Add logic to handle the espaced '*' & '.' characters in the input path.
+            $fieldParams = \explode('.', $field);
+
+            // For each given rule, loop through input paths array to determine the matching paths.
+            foreach ($actuals as $actual) {
+                $resolvedPath           =   '';
+                $actualParams           =   \explode('.', $actual);
+                $resolvedPathIsEmpty    =   true;
+
+                /**
+                 * Perform the matching of the wildcard path with each individual input array path. If 
+                 * the actual path exceeds input path, strip its exceess to match with the wildcard 
+                 * path. If the actual path is lesser than the wildcard path, add necessary 
+                 * parameters to it to complete it.
+                 */
+                foreach ($fieldParams as $fieldIndex => $fieldParam) {
+                    $actualParams[$fieldIndex] ??= 0;
+
+                    if ($fieldParam === '*' || $fieldParam === $actualParams[$fieldIndex]) {
+                        $resolvedPath .= "{$actualParams[$fieldIndex]}.";
+                        $resolvedPathIsEmpty = false;
+                        continue;
+                    }
+
+                    if ($resolvedPathIsEmpty) {
+                        continue 2;
+                    }
+
+                    /**
+                     * If the actual path parameters array is shorter than wildcard 
+                     * parameters path, fill up the path with the remaining 
+                     * parameters to complete it.
+                     */
+                    $remainingParts         =   \implode('.', \array_slice($fieldParams, $fieldIndex));
+                    $remainingParts         =   \str_replace(['*.', '.*.', '.*'], ['0.', '.0.', '.0'], $remainingParts);
+                    $resolvedPathIsEmpty    =   false;
+
+                    $resolvedPath .= "{$remainingParts}";
+                    break;
                 }
 
-                // Prepare the validation error message
-                $ruleName   =   $ruleDataType === 'object' ? Rule::keyOf($rule) : $rule;
-                $message    =   !\is_null($ruleName) && isset($this->messages["{$field}.{$ruleName}"]) ? $this->messages["{$field}.{$ruleName}"] : $evaluation['instance']->message();
-                $message    =   \str_replace(':{field}', $field, $message);
+                // Remove any unnecessary characters from the resolved path string.
+                $resolvedPath = \rtrim($resolvedPath, '.');
 
-                // Add the validation error message.
-                $this->errors->add($field, $message);
+                // Collect the custom error meessages bound to the validation rules of the given input array path if any.
+                $customErrors = [];
 
-                if ($this->stopOnFail) {
-                    break 2;
+                foreach ($rules as $rule) {
+                    if (\is_string($rule) && isset($this->messages["{$field}.{$rule}"])) {
+                        $customErrors["{$resolvedPath}.{$rule}"] = $this->messages["{$field}.{$rule}"];
+                    }
                 }
+
+                // Validate the value of the resolved input path.
+                $this->evaluateFieldRules($resolvedPath, $rules, $customErrors);
             }
         }
 
@@ -195,15 +143,55 @@ class Validator
     }
 
     /**
+     * Evaluate the validation rules for the individual
+     *
+     * @param   string  $field
+     * @param   array   $rules
+     * @param   array   $customErrors
+     * 
+     * @return  void
+     */
+    protected function evaluateFieldRules(string $field, array $rules, array $customErrors = []): void
+    {
+        foreach ($rules as $index => $rule) {
+            $ruleDataType = \gettype($rule);
+
+            $evaluation = match ($ruleDataType) {
+                'string'    =>  $this->evaluateRuleFromString($rule, $field, $index),
+                'object'    =>  $this->evaluateRuleFromObject($rule, $field, $index),
+                default     =>  throw new Exception("[Developer][Exception]: The field [{$field}] has an invalid rule at the index [{$index}].")
+            };
+
+            // If the validation succeeds.
+            if ($evaluation['result'] === true) {
+                continue;
+            }
+
+            // Prepare the validation error message.
+            $ruleName   =   $ruleDataType === 'object' ? Rule::keyOf($rule) : $rule;
+            $message    =   $customErrors["{$field}.{$ruleName}"] ?? $this->messages["{$field}.{$ruleName}"] ?? $evaluation['instance']->message();
+            $message    =   \str_replace([':{field}', '\:{field}'], [$field, ':{field}'], $message);
+
+            // Add the validation error message.
+            $this->errors->add($field, $message);
+
+            // // If the validator is set to stop on the first failure.
+            if ($this->abortIfFails) {
+                break;
+            }
+        }
+    }
+
+    /**
      * Stop the validation process immediately on the first validation failure.
      *
-     * @param bool $stopOnFail
+     * @param bool $abortIfFails
      *
      * @return static
      */
-    public function abortOnFail(bool $stopOnFail = true): static
+    public function abortOnFail(bool $abortIfFails = true): static
     {
-        $this->stopOnFail = $stopOnFail;
+        $this->abortIfFails = $abortIfFails;
         return $this;
     }
 
@@ -251,7 +239,7 @@ class Validator
 
         // Perform the actual validation & return its result.
         return [
-            'result'    =>  $instance->setInput($this->input)->check($field, $this->input->get($field)),
+            'result'    =>  $instance->setInput($this->input)->setField($field)->check($this->input->get($field)),
             'instance'  =>  $instance
         ];
     }
@@ -279,7 +267,7 @@ class Validator
             $rule = new Callback($rule);
 
             return [
-                'result'    =>  $rule->setInput($this->input)->check($field, $this->input->get($field)),
+                'result'    =>  $rule->setInput($this->input)->setField($field)->check($this->input->get($field)),
                 'instance'  =>  $rule
             ];
         }
@@ -299,7 +287,7 @@ class Validator
         }
 
         return [
-            'result'    =>  $rule->setInput($this->input)->check($field, $this->input->get($field)),
+            'result'    =>  $rule->setInput($this->input)->setField($field)->check($this->input->get($field)),
             'instance'  =>  $rule
         ];
     }

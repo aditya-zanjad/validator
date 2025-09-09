@@ -50,14 +50,14 @@ class Gte extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool
+    public function check(mixed $value): bool
     {
         if (varSize($value) < $this->minSize) {
             $this->message = match (\gettype($value)) {
-                'array'                                     =>  "The field {$field} must contain at least {$this->minSize} elements.",
-                'string'                                    =>  "The field {$field} must contain at least {$this->minSize} characters.",
-                'resource', 'float', 'double', 'integer'    =>  "The field {$field} must be at least {$this->minSize}.",
-                default                                     =>  "The field {$field} must be at least {$this->minSize}."
+                'array'                                     =>  "The field :{field} must contain at least {$this->minSize} elements.",
+                'string'                                    =>  "The field :{field} must contain at least {$this->minSize} characters.",
+                'resource', 'float', 'double', 'integer'    =>  "The field :{field} must be at least {$this->minSize}.",
+                default                                     =>  "The field :{field} must be at least {$this->minSize}."
             };
 
             return false;

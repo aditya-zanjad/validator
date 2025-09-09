@@ -31,10 +31,15 @@ class Date extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool
+    public function check(mixed $value): bool
     {
         $givenDateTime = parseDateTime($value, $this->format);
-        return $givenDateTime !== false ? true : false;
+
+        if ($givenDateTime === false) {
+            return false;
+        }
+
+        return true;
     }
 
     /**

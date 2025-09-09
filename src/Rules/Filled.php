@@ -23,7 +23,7 @@ class Filled extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool
+    public function check(mixed $value): bool
     {
         if (\is_bool($value) || \filter_var($value, FILTER_VALIDATE_FLOAT) !== false) {
             return true;

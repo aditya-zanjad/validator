@@ -26,28 +26,25 @@ class Digits extends AbstractRule
      *
      * @throws \Exception
      */
-    public function __construct(int|string $validDigits)
+    public function __construct(mixed $validDigits)
     {
-        if (!\filter_var($validDigits, FILTER_VALIDATE_INT)) {
+        if (\filter_var($validDigits, FILTER_VALIDATE_INT) === false) {
             throw new Exception("[Developer][Exception]: The parameter passed to the validation rule [digits] must be a valid integer.");
         }
 
-        $validDigits = (int) $validDigits;
-
-        if ($validDigits < 0) {
-            throw new Exception("[Developer][Exception]: The parameter passed to the validation rule [digits] must not be a positive integer.");
+        if ($validDigits < 1) {
+            throw new Exception("[Developer][Exception]: The parameter passed to the validation rule [digits] must be greater than 0.");
         }
 
-        $this->validDigits = $validDigits;
+        $this->validDigits = (int) $validDigits;
     }
 
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool
+    public function check(mixed $value): bool
     {
-        $digits = varDigits($value);
-        return !\is_null($digits) && $digits === $this->validDigits;
+        return varDigits($value) === $this->validDigits;
     }
 
     /**

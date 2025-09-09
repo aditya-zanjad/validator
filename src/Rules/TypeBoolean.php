@@ -13,56 +13,66 @@ use AdityaZanjad\Validator\Base\AbstractRule;
 class TypeBoolean extends AbstractRule
 {
     /**
-     * All of the valid boolean values.
-     * 
-     * @var array<int, bool|int|string> $validBooleans
+     * @var array<int, string> $validValues
      */
-    protected array $validBooleans = [true, false, 0, 1, 'true', 'false', '1', '0', 'on', 'off', 'no', 'yes'];
+    protected array $validValues = ['bool_true/false', 'int_0/1', 'str_true/false', 'str_0/1', 'true/false', 'false/true', '1/0', '0/1', 'on/off', 'off/on', 'yes/no', 'no/yes'];
 
     /**
-     * It includes only those parameters that are expected for the value.
-     *
-     * @var array<int, bool|int|string> $expectedBooleans
+     * @var array<int, string> $allowedValues
      */
-    protected array $expectedBooleans = [];
+    protected array $allowedValues = [];
 
     /**
-     * @param   bool|int|string ...$expectedBooleans
+     * @param   string ...$allowedValues
      * 
      * @throws  \Exception
      */
-    public function __construct(bool|int|string ...$expectedBooleans)
+    public function __construct(string ...$allowedValues)
     {
-        if (empty($expectedBooleans)) {
-            $this->expectedBooleans = $this->validBooleans;
+        if (empty($allowedValues)) {
             return;
         }
 
-        foreach ($expectedBooleans as $expectedBoolean) {
-            if (\is_string($expectedBoolean)) {
-                $expectedBoolean = \strtolower($expectedBoolean);
+        foreach ($allowedValues as $allowedValue) {
+            if (!\in_array($allowedValue, $this->validValues)) {
+                throw new Exception('[Developer][Exception]: The validation rule [boolean] requires its each parameter to be one of these: "bool_true/false", "int_0/1", "str_true/false", "str_0/1", "on/off", "off/on", "yes/no", "no/yes"');
             }
-
-            if (!\in_array($expectedBoolean, $this->validBooleans)) {
-                throw new Exception("[Developer][Exception]: The validation rule [boolean] considers only these arguments as valid: [(bool) true], [(bool) false], [(string) true], [(string) false], [(int) 1], [(int) 0], [(string) 1], [(string) 0], [(string) on], [(string) off].");
-            }
-
-            $this->expectedBooleans[] = $expectedBoolean;
         }
+
+        $this->allowedValues = \array_unique($allowedValues);
     }
 
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool
+    public function check(mixed $value): bool
     {
-        $transformedValue = \is_string($value) ? \strtolower($value) : $value;
-
-        if (!\in_array($transformedValue, $this->expectedBooleans, true)) {
+        if (\is_null($value)) {
             return false;
         }
 
-        return true;
+        if (empty($this->allowedValues)) {
+            return \filter_var($value, FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE) !== null;
+        }
+
+        foreach ($this->allowedValues as $allowedValue) {
+            $result = match ($allowedValue) {
+                'bool_true/false'           =>  \in_array($value, [true, false], true),
+                'int_0/1'                   =>  \in_array($value, [0, 1], true),
+                'true/false', 'false/true'  =>  \in_array($value, [true, false], true) || (\is_string($value) && (\strcasecmp($value, 'true') === 0 || \strcasecmp($value, 'false') === 0)),
+                '1/0', '0/1'                =>  \in_array($value, [0, 1, '0', '1'], true),
+                'on/off', 'off/on'          =>  \is_string($value) && (\strcasecmp($value, 'on') === 0 || \strcasecmp($value, 'off') === 0),
+                'yes/no', 'no/yes'          =>  \is_string($value) && (\strcasecmp($value, 'yes') === 0 || \strcasecmp($value, 'no') === 0),
+                'str_true/false'            =>  \is_string($value) && (\strcasecmp($value, 'true') === 0 || \strcasecmp($value, 'false') === 0),
+                'str_0/1'                   =>  \in_array($value, ['0', '1'], true),
+            };
+
+            if ($result) {
+                return true;
+            } 
+        }
+
+        return false;
     }
 
     /**
@@ -70,6 +80,6 @@ class TypeBoolean extends AbstractRule
      */
     public function message(): string
     {
-        return "The field :{field} must be one of these boolean values: " . \implode(', ', $this->expectedBooleans);
+        return 'The field :{field} must be a boolean value.';
     }
 }

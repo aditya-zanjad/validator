@@ -16,9 +16,21 @@ class TypeArray extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool
+    public function check(mixed $value): bool
     {
-        return \is_array($value) || $value instanceof ArrayObject || $value instanceof ArrayAccess;
+        if (\is_array($value)) {
+            return true;
+        }
+
+        if ($value instanceof ArrayObject) {
+            return true;
+        }
+
+        if ($value instanceof ArrayAccess) {
+            return true;
+        }
+
+        return false;
     }
 
     /**

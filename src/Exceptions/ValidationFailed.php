@@ -20,8 +20,8 @@ class ValidationFailed extends Exception
 
     /**
      * @param   string                      $message
-     * @param   int                         $code
      * @param   array<int|string, mixed>    $errors
+     * @param   int                         $code
      */
     public function __construct(string $message = 'Validation Errors', array $errors = [], int $code = 422)
     {

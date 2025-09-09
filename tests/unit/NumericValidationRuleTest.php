@@ -3,88 +3,68 @@
 declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
-use AdityaZanjad\Validator\Validator;
-use AdityaZanjad\Validator\Managers\Input;
 use AdityaZanjad\Validator\Rules\Numeric;
-use AdityaZanjad\Validator\Rules\Required;
-use PHPUnit\Framework\Attributes\UsesClass;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\CoversFunction;
 
-use function AdityaZanjad\Validator\Presets\validate;
-
-#[UsesClass(Validator::class)]
-#[CoversClass(Error::class)]
-#[CoversClass(Input::class)]
 #[CoversClass(Numeric::class)]
-#[CoversClass(Required::class)]
-#[CoversFunction('\AdityaZanjad\Validator\Presets\validate')]
 class NumericValidationRuleTest extends TestCase
 {
     /**
-     * Assert that the validation rule 'min:' succeeds.
-     *
      * @return void
      */
-    public function testAssertionsPass(): void
+    public function testPasses(): void
     {
-        $validator = validate([
-            'abc'   =>  123,
-            'def'   =>  0.12311551,
-            'xyz'   =>  -10000.24512,
-            'pqr'   =>  358234.21178412,
-            'ghi'   =>  '12478125.1231245757',
-            'axz'   =>  '-12345',
-            'mno'   =>  -124712123
-        ], [
-            'abc'   =>  'integer',
-            'def'   =>  'numeric',
-            'pqr'   =>  'numeric',
-            'xyz'   =>  'numeric',
-            'ghi'   =>  'numeric',
-            'axz'   =>  'numeric',
-            'mno'   =>  'numeric'
-        ]);
+        $data = [
+            0,
+            0.0,
+            1.0,
+            1.01,
+            121247918,
+            -121247918,
+            '0',
+            '0.0',
+            '1.0',
+            '1.01',
+            '121247918',
+            '-121247918',
+            124124.12312412,
+            '124124.12312412'
+        ];
 
-        $this->assertFalse($validator->failed());
-        $this->assertEmpty($validator->errors()->all());
-        $this->assertNull($validator->errors()->first());
-        $this->assertNull($validator->errors()->firstOf('abc'));
-        $this->assertNull($validator->errors()->firstOf('def'));
-        $this->assertNull($validator->errors()->firstOf('pqr'));
-        $this->assertNull($validator->errors()->firstOf('xyz'));
-        $this->assertNull($validator->errors()->firstOf('ghi'));
-        $this->assertNull($validator->errors()->firstOf('axz'));
-        $this->assertNull($validator->errors()->firstOf('mno'));
+        foreach ($data as $value) {
+            $rule   = new Numeric();
+            $result = $rule->check($value);
+
+            $this->assertIsBool($result);
+            $this->assertTrue($result);
+        }
     }
 
     /**
-     * Assert that the validation rule 'min:' fails.
-     *
      * @return void
      */
-    public function testAssertionsFail(): void
+    public function testFails(): void
     {
-        $validator = validate([
-            'abc'   =>  'abcdefghi',
-            'def'   =>  '-1abc',
-            'ghi'   =>  'abc',
-            'jkl'   =>  ['key' => 'value'],
-            'xyz'   =>  (object) [],
-        ], [
-            'abc'   =>  'integer',
-            'def'   =>  'numeric',
-            'ghi'   =>  'numeric',
-            'jkl'   =>  'numeric',
-            'xyz'   =>  'numeric'
-        ]);
+        $data = [
+            'This is a test string!',
+            '1234! Get on the dance floor!',
+            new ArrayObject(),
+            true,
+            false,
+            'true',
+            'FALSE',
+            '0.1.234',
+            ['This is a test element of a test array'],
+            new stdClass()
+        ];
 
-        $this->assertTrue($validator->failed());
-        $this->assertNotEmpty($validator->errors()->all());
-        $this->assertNotNull($validator->errors()->first());
-        $this->assertNotNull($validator->errors()->firstOf('abc'));
-        $this->assertNotNull($validator->errors()->firstOf('def'));
-        $this->assertNotNull($validator->errors()->firstOf('ghi'));
-        $this->assertNotNull($validator->errors()->firstOf('jkl'));
+        foreach ($data as $value) {
+            $rule   =   new Numeric();
+            $result =   $rule->check($value);
+
+            $this->assertIsBool($result);
+            $this->assertFalse($result);
+            $this->assertEquals($rule->message(), 'The field :{field} must be a valid number.');
+        }
     }
 }

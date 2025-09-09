@@ -16,24 +16,23 @@ use function AdityaZanjad\Validator\Utils\varFilterSize;
 class Between extends AbstractRule
 {
     /**
-     * @var int|float|string $givenMinSize
+     * @var array<string, int|float|string> $min
      */
-    protected $givenMinSize;
+    protected array $min = [
+        'given'     =>  null,
+        'actual'    =>  null
+    ];
 
     /**
-     * @var int|float|string $givenMaxSize
+     * @var array<string, int|float|string> $max 
      */
-    protected $givenMaxSize;
-
     /**
-     * @var int|float $minSize
+     * @var array<string, int|float|string> $min
      */
-    protected int|float $minSize;
-
-    /**
-     * @var int|float $maxSize
-     */
-    protected int|float $maxSize;
+    protected array $max = [
+        'given'     =>  null,
+        'actual'    =>  null
+    ];
 
     /**
      * @var string $message
@@ -47,21 +46,21 @@ class Between extends AbstractRule
      */
     public function __construct(mixed $givenMinSize, mixed $givenMaxSize)
     {
-        $this->givenMinSize =   $givenMinSize;
-        $this->minSize      =   varFilterSize($givenMinSize);
+        $this->min['given']     =   $givenMinSize;
+        $this->min['actual']    =   varFilterSize($givenMinSize);
 
-        if (\is_null($this->minSize)) {
+        if (\is_null($this->min['actual'])) {
             throw new Exception("[Developer][Exception]: The parameters passed to the validation rule [between] must be either [INTEGER] or [FLOAT].");
         }
 
-        $this->givenMaxSize =   $givenMaxSize;
-        $this->maxSize      =   varFilterSize($givenMaxSize);
+        $this->min['given']     =   $givenMaxSize;
+        $this->max['actual']    =   varFilterSize($givenMaxSize);
 
-        if (\is_null($this->minSize)) {
+        if (\is_null($this->min['actual'])) {
             throw new Exception("[Developer][Exception]: The parameters passed to the validation rule [between] must be either [INTEGER] or [FLOAT].");
         }
 
-        if ($this->maxSize < $this->minSize) {
+        if ($this->max['actual'] < $this->min['actual']) {
             throw new Exception("[Developer][Exception]: The validation rule [between] requires that the max size parameter be greater than or equal to the min size parameter.");
         }
     }
@@ -69,29 +68,21 @@ class Between extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool
+    public function check(mixed $value): bool
     {
         $size = varSize($value); 
 
-        if ($size < $this->minSize || $size > $this->maxSize) {
+        if ($size < $this->min['actual'] || $size > $this->max['actual']) {
             $this->message = match (\gettype($value)) {
-                'array'                                     =>  "The field {$field} must contain elemeents between the range {$this->minSize} and {$this->maxSize}.",
-                'string'                                    =>  "The field {$field} must contain characters between the range {$this->minSize} and {$this->maxSize}.",
-                'resource', 'float', 'double', 'integer'    =>  "The field {$field} must be between the range {$this->minSize} and {$this->maxSize}.",
-                default                                     =>  "The field {$field} must be between the range {$this->minSize} and {$this->maxSize}."
+                'array'                                     =>  "The field :{field} must contain elements between the range {$this->min['given']} and {$this->max['given']}.",
+                'string'                                    =>  "The field :{field} must contain characters between the range {$this->min['given']} and {$this->max['given']}.",
+                'resource', 'float', 'double', 'integer'    =>  "The field :{field} must be between the range {$this->min['given']} and {$this->max['given']}.",
+                default                                     =>  "The field :{field} must be between the range {$this->min['given']} and {$this->max['given']}."
             };
 
             return false;
         };
 
         return true;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function message(): string
-    {
-        return $this->message;
     }
 }

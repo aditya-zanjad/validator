@@ -30,12 +30,12 @@ class RegexNot extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool
+    public function check(mixed $value): bool
     {
         $result = \preg_match($this->regex, (string) $value);
 
         if ($result === false) {
-            throw new Exception("[Developer][Exception]: Error occurred while applying the regex validation on the field [{$field}]. Make sure your regex is correct.");
+            throw new Exception("[Developer][Exception]: The validation rule [regex_not] is passed with an invalid regular expression for the field [{field}] at index [{index}].");
         }
 
         return $result === 0;

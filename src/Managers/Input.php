@@ -22,13 +22,6 @@ class Input implements InputManagerInterface
     protected array $data;
 
     /**
-     * To hold the dot-notation input field paths for repeated usage.
-     *
-     * @var array<int, string> $paths
-     */
-    protected array $paths;
-
-    /**
      * Inject and initialize the necessary data.
      *
      * @param array<int|string, mixed> $data
@@ -65,10 +58,6 @@ class Input implements InputManagerInterface
      */
     public function paths(): array
     {
-        if (isset($this->paths)) {
-            return $this->paths;
-        }
-
         $arr        =   new RecursiveArrayIterator($this->data);
         $arr        =   new RecursiveIteratorIterator($arr, RecursiveIteratorIterator::SELF_FIRST);
         $result     =   [];

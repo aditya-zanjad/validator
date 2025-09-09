@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AdityaZanjad\Validator\Rules;
 
+use Stringable;
 use AdityaZanjad\Validator\Base\AbstractRule;
 
 /**
@@ -23,8 +24,8 @@ class TypeString extends AbstractRule
     protected string $regex;
 
     /**
-     * The validation error message.
-     * 
+     * To contain the validation error message.
+     *
      * @var string $message
      */
     protected string $message;
@@ -40,10 +41,10 @@ class TypeString extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool
+    public function check(mixed $value): bool
     {
-        if (!\is_string($value)) {
-            $this->message = "The field {$field} must be a string.";
+        if (!\is_string($value) && !$value instanceof Stringable) {
+            $this->message = 'The field :{field} must be a string.';
             return false;
         }
 
@@ -51,14 +52,8 @@ class TypeString extends AbstractRule
             return true;
         }
 
-        
-        if (\function_exists('\\mb_ereg_match') && \mb_ereg_match($this->regex, $value) === false) {
-            $this->message = "The field :{field} must be valid string that matches the regular expression: {$this->regex}.";
-            return false;
-        }
-
-        if (\preg_match($this->regex, $value) === false) {
-            $this->message = "The field :{field} must be valid string that matches the regular expression: {$this->regex}.";
+        if (!\preg_match($this->regex, $value)) {
+            $this->message = "The field :{field} must match the regular expression: {$this->regex}.";
             return false;
         }
 

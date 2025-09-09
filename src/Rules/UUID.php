@@ -30,9 +30,13 @@ class UUID extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool
+    public function check(mixed $value): bool
     {
-        return \is_string($value) && (bool) \preg_match($this->makeRegex($this->version), $value);
+        if (!\is_string($value)) {
+            return false;
+        }
+
+        return \preg_match($this->makeRegex($this->version), $value) > 0;
     }
 
     /**

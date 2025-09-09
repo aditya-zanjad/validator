@@ -3,71 +3,102 @@
 declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
-use AdityaZanjad\Validator\Validator;
-use AdityaZanjad\Validator\Managers\Input;
 use AdityaZanjad\Validator\Rules\DigitsLt;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\CoversFunction;
 
-use function AdityaZanjad\Validator\Presets\validate;
-
-#[CoversClass(Validator::class)]
-#[CoversClass(Error::class)]
-#[CoversClass(Input::class)]
 #[CoversClass(DigitsLt::class)]
-#[CoversFunction('\AdityaZanjad\Validator\Presets\validate')]
-final class DigitsLessThanValidationRuleTest extends TestCase
+class DigitsLessThanValidationRuleTest extends TestCase
 {
     /**
-     * Assert that the validation rule 'digits_lt:5' succeeds.
-     *
      * @return void
      */
-    public function testAssertionsPass(): void
+    public function testPasses(): void
     {
-        $validator = validate([
-            'code'  =>  '1234',   // Shorter length
-            'pin'   =>  123,      // Shorter length
-            'abc'   =>  '1231.12312312312'
-        ], [
-            'code'  =>  'digits_lt:5',
-            'pin'   =>  'digits_lt:5',
-            'abc'   =>  'digits_lt:5'
-        ]);
+        $data = [
+            [
+                'num'       =>  0,
+                'digits'    =>  2
+            ],
+            [
+                'num'       =>  '123123.213',
+                'digits'    =>  7,
+            ],
+            [
+                'num'       =>  545789453.234234,
+                'digits'    =>  10,
+            ],
+            [
+                'num'       =>  '12359234432432',
+                'digits'    =>  15
+            ],
+            [
+                'num'       =>  352342392348234,
+                'digits'    =>  16
+            ]
+        ];
 
-        $this->assertFalse($validator->failed());
-        $this->assertEmpty($validator->errors()->all());
-        $this->assertNull($validator->errors()->first());
-        $this->assertNull($validator->errors()->firstOf('code'));
-        $this->assertNull($validator->errors()->firstOf('pin'));
-        $this->assertNull($validator->errors()->firstOf('abc'));
+        foreach ($data as $option) {
+            $rule   =   new DigitsLt($option['digits']);
+            $result =   $rule->check($option['num']);
+
+            $this->assertIsBool($result);
+            $this->assertTrue($result);
+        }
     }
 
     /**
-     * Assert that the validation rule 'digits_lt:5' fails.
-     *
      * @return void
      */
-    public function testAssertionsFail(): void
+    public function testFails(): void
     {
-        $validator = validate([
-            'code'  =>  '12345',  // Fails: length is equal
-            'pin'   =>  '123456', // Fails: too long
-            'num'   =>  12345678910,
-            'abc'   =>  12347141.123123123123
-        ], [
-            'code'  =>  'digits_lt:5',
-            'pin'   =>  'digits_lt:5',
-            'num'   =>  'digits_lt:5',
-            'abc'   =>  'digits_lt:5',
-        ]);
+        $data = [
+            [
+                'num'       =>  'dafadfw3578934',
+                'digits'    =>  2
+            ],
+            [
+                'num'       =>  '3247829349234',
+                'digits'    =>  2
+            ],
+            [
+                'num'       =>  123123123,
+                'digits'    =>  5
+            ],
+            [
+                'num'       =>  1234,
+                'digits'    =>  4
+            ],
+            [
+                'num'       =>  ['This is a test string inside a test array!'],
+                'digits'    =>  4
+            ],
+            [
+                'num'       =>  true,
+                'digits'    =>  2,
+            ],
+        ];
 
-        $this->assertTrue($validator->failed());
-        $this->assertNotEmpty($validator->errors()->all());
-        $this->assertNotNull($validator->errors()->first());
-        $this->assertNotNull($validator->errors()->firstOf('code'));
-        $this->assertNotNull($validator->errors()->firstOf('pin'));
-        $this->assertNotNull($validator->errors()->firstOf('num'));
-        $this->assertNotNull($validator->errors()->firstOf('abc'));
+        foreach ($data as $option) {
+            $rule   =   new DigitsLt($option['digits']);
+            $result =   $rule->check($option['num']);
+
+            $this->assertIsBool($result);
+            $this->assertFalse($result);
+            $this->assertEquals($rule->message(), "The field :{field} must contain less than {$option['digits']} digits.");
+        }
+    }
+
+    /**
+     * @return void
+     */
+    public function testAbortsOnInvalidParameter(): void
+    {
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('[Developer][Exception]: The parameter passed to the validation rule [digits_lt] must be a valid integer.');
+        new DigitsLt('string-1234');
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage("[Developer][Exception]: The value of the parameter passed to the validation rule [digits_lt] must not be less than 2.");
+        new DigitsLt('-23');
     }
 }

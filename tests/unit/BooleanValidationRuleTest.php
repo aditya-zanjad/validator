@@ -3,105 +3,169 @@
 declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
-use AdityaZanjad\Validator\Validator;
-use AdityaZanjad\Validator\Managers\Input;
-use AdityaZanjad\Validator\Rules\TypeBoolean;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\CoversFunction;
+use AdityaZanjad\Validator\Rules\TypeBoolean;
 
-use function AdityaZanjad\Validator\Presets\validate;
-
-#[CoversClass(Validator::class)]
-#[CoversClass(Error::class)]
-#[CoversClass(Input::class)]
 #[CoversClass(TypeBoolean::class)]
-#[CoversFunction('\AdityaZanjad\Validator\Presets\validate')]
 final class BooleanValidationRuleTest extends TestCase
 {
     /**
-     * Assert that the validator fails when the given string is an invalid string.
-     *
      * @return void
      */
-    public function testAssertionsPass(): void
+    public function testPasses(): void
     {
-        $validator = validate([
-            'abc'   =>  false,
-            'def'   =>  true,
-            'ghi'   =>  1,
-            'jkl'   =>  0,
-            'mno'   =>  'false',
-            'pqr'   =>  'true',
-            'uvw'   =>  '1',
-            'xyz'   =>  '0',
-            'zyx'   =>  'on',
-            'wvu'   =>  'off',
-            'rqp'   =>  'yes',
-            'onm'   =>  'no'
-        ], [
-            'abc'   =>  'boolean',
-            'def'   =>  'boolean',
-            'ghi'   =>  'boolean',
-            'jkl'   =>  'boolean',
-            'mno'   =>  'boolean',
-            'pqr'   =>  'boolean',
-            'uvw'   =>  'boolean',
-            'xyz'   =>  'boolean',
-            'zyx'   =>  'boolean',
-            'wvu'   =>  'boolean',
-            'rqp'   =>  'boolean',
-            'onm'   =>  'boolean'
-        ]);
+        $data = [
+            'first'         =>  true,
+            'second'        =>  false,
+            'third'         =>  'true',
+            'fourth'        =>  'false',
+            'fifth'         =>  'no',
+            'sixth'         =>  'yes',
+            'seventh'       =>  'on',
+            'eight'         =>  'off',
+            'ninth'         =>  0,
+            'tenth'         =>  1,
+            'eleventh'      =>  '0',
+            'twelth'        =>  '1',
+            'thirteenth'    =>  'TRUE',
+            'fourteenth'    =>  'FALSE',
+            'sixteenth'     =>  'ON',
+            'seventeenth'   =>  'OFF',
+            'eighteenth'    =>  'NO',
+            'ninteenth'     =>  'YES'
+        ];
 
-        $this->assertFalse($validator->failed());
-        $this->assertEmpty($validator->errors()->all());
-        $this->assertEmpty($validator->errors()->firstOf('abc'));
-        $this->assertEmpty($validator->errors()->firstOf('def'));
-        $this->assertEmpty($validator->errors()->firstOf('ghi'));
-        $this->assertEmpty($validator->errors()->firstOf('jkl'));
-        $this->assertEmpty($validator->errors()->firstOf('mno'));
-        $this->assertEmpty($validator->errors()->firstOf('pqr'));
-        $this->assertEmpty($validator->errors()->firstOf('uvw'));
-        $this->assertEmpty($validator->errors()->firstOf('xyz'));
-        $this->assertEmpty($validator->errors()->firstOf('zyx'));
-        $this->assertEmpty($validator->errors()->firstOf('wvu'));
-        $this->assertEmpty($validator->errors()->firstOf('rqp'));
-        $this->assertEmpty($validator->errors()->firstOf('onm'));
+        foreach ($data as $key => $value) {
+            $rule   =   new TypeBoolean();
+            $result =   $rule->check($value);
+
+            $this->assertIsBool($result);
+            $this->assertTrue($result);
+        }
     }
 
     /**
-     * Assert that the validator succeeds when the given fields are valid.
-     *
      * @return void
      */
-    public function testAssertionsFail(): void
+    public function testAllowedValuesPass(): void
     {
-        $validator = validate([
-            'abc'   =>  'this is a string.',
-            'def'   =>  -12311,
-            'ghi'   =>  'truth',
-            'jkl'   =>  new \stdClass(),
-            'mno'   =>  57832572.23478235,
-            'pqr'   =>  1234,
-            'xyz'   =>  'null'
-        ], [
-            'abc'   =>  'boolean',
-            'def'   =>  'boolean',
-            'ghi'   =>  'boolean',
-            'jkl'   =>  'boolean',
-            'mno'   =>  'boolean',
-            'pqr'   =>  'boolean',
-            'xyz'   =>  'boolean'
-        ]);
+        $data = [
+            'first'     =>  true,
+            'second'    =>  false,
+            'third'     =>  0,
+            'fourth'    =>  1,
+            'fifth'     =>  'true',
+            'sixth'     =>  'false',
+            'seventh'   =>  '0',
+            'eighth'    =>  '1',
+            'ninth'     =>  'TRUE',
+            'tenth'     =>  'FALSE',
+            'eleventh'  =>  'TrUe',
+            'twelfth'   =>  'FAlse',
+        ];
 
-        $this->assertTrue($validator->failed());
-        $this->assertNotEmpty($validator->errors()->all());
-        $this->assertNotEmpty($validator->errors()->firstOf('abc'));
-        $this->assertNotEmpty($validator->errors()->firstOf('def'));
-        $this->assertNotEmpty($validator->errors()->firstOf('ghi'));
-        $this->assertNotEmpty($validator->errors()->firstOf('jkl'));
-        $this->assertNotEmpty($validator->errors()->firstOf('mno'));
-        $this->assertNotEmpty($validator->errors()->firstOf('pqr'));
-        $this->assertNotEmpty($validator->errors()->firstOf('xyz'));
+        foreach ($data as $value) {
+            $rule   = new TypeBoolean('true/false', '0/1');
+            $result = $rule->check($value);
+
+            $this->assertIsBool($result);
+            $this->assertTrue($result);
+            $this->assertEquals($result, true);
+        }
+
+        $data = [
+            'first'     =>  'on',
+            'second'    =>  'OfF',
+            'third'     =>  'true',
+            'fourth'    =>  'FALSE',
+            'fifth'     =>  'no',
+            'sixth'     =>  'YES'
+        ];
+
+        foreach ($data as $value) {
+            $rule   = new TypeBoolean('str_true/false', 'off/on', 'yes/no');
+            $result = $rule->check($value);
+
+            $this->assertIsBool($result);
+            $this->assertTrue($result);
+            $this->assertEquals($result, true);
+        }
+    }
+
+    /**
+     * @return void
+     */
+    public function testNotAllowedValuesFail(): void
+    {
+        $data = [
+            'first'     =>  'on',
+            'second'    =>  'off',
+            'third'     =>  'no',
+            'fourth'    =>  'yes',
+            'fifth'     =>  'true',
+            'sixth'     =>  'false',
+            'seventh'   =>  '0',
+            'eight'     =>  '1'
+        ];
+
+        foreach ($data as $value) {
+            $rule   = new TypeBoolean('bool_true/false', 'int_0/1');
+            $result = $rule->check($value);
+
+            $this->assertIsBool($result);
+            $this->assertFalse($result);
+            $this->assertEquals($rule->message(), 'The field :{field} must be a boolean value.');
+        }
+    }
+    
+    /**
+     * @return void
+     */
+    public function testFailsOnInvalidParameters(): void
+    {
+        $data = [
+            'first'     =>  true,
+            'second'    =>  false
+        ];
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('[Developer][Exception]: The validation rule [boolean] requires its each parameter to be one of these: "bool_true/false", "int_0/1", "str_true/false", "str_0/1", "on/off", "off/on", "yes/no", "no/yes"');
+
+        foreach ($data as $value) {
+            $rule = new TypeBoolean('valid/invalid', 'truth/false');
+            $rule->check($value);
+        }
+    }
+
+    /**
+     * @return void
+     */
+    public function testFails(): void
+    {
+        $tmpFile = tmpfile();
+        fwrite($tmpFile, 'This is a temp text inside a temp file!');
+
+        $data = [
+            'first'         =>  12345,
+            'second'        =>  4575.123421,
+            'third'         =>  ['This is a test string'],
+            'fourth'        =>  new \stdClass(),
+            'fifth'         =>  '23456',
+            'sixth'         =>  '12152135.sdfad',
+            'seventh'       =>  'This is a test string',
+            'tenth'         =>  $tmpFile,
+            'eleventh'      =>  null,
+        ];
+
+        foreach ($data as $key => $value) {
+            $rule   =   new TypeBoolean();
+            $result =   $rule->check($value);
+
+            $this->assertIsBool($result);
+            $this->assertFalse($result);
+            $this->assertEquals($rule->message(), 'The field :{field} must be a boolean value.');
+        }
+
+        fclose($tmpFile);
     }
 }

@@ -37,7 +37,7 @@ class In extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool
+    public function check(mixed $value): bool
     {
         return \in_array($value, $this->params);
     }

@@ -50,14 +50,14 @@ class Lt extends AbstractRule
     /**
      * @inheritDoc
      */
-    public function check(string $field, mixed $value): bool
+    public function check(mixed $value): bool
     {
         if (varSize($value) >= $this->maxThreshold) {
             $this->message = match (\gettype($value)) {
-                'array'                                     =>  "The field {$field} must contain less than {$this->maxThreshold} elements.",
-                'string'                                    =>  "The field {$field} must contain less than {$this->maxThreshold} characters.",
-                'resource', 'float', 'double', 'integer'    =>  "The field {$field} must be less than {$this->maxThreshold}.",
-                default                                     =>  "The field {$field} must be less than {$this->maxThreshold}."
+                'array'                                     =>  "The field :{field} must contain less than {$this->maxThreshold} elements.",
+                'string'                                    =>  "The field :{field} must contain less than {$this->maxThreshold} characters.",
+                'resource', 'float', 'double', 'integer'    =>  "The field :{field} must be less than {$this->maxThreshold}.",
+                default                                     =>  "The field :{field} must be less than {$this->maxThreshold}."
             };
 
             return false;
