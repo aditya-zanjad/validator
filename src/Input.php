@@ -68,4 +68,21 @@ class Input
 
         return $ref[$lastKey] ?? null;
     }
+
+    public function isset(string $path): bool
+    {
+        $ref        =   &$this->input;
+        $keys       =   \explode('.', $path);
+        $lastKey    =   \array_pop($keys);
+
+        foreach ($keys as $key) {
+            if (!isset($ref[$key]) || !\is_array($ref[$key])) {
+                return false;
+            }
+
+            $ref = &$ref[$key];
+        }
+
+        return isset($ref[$lastKey]);
+    }
 }
