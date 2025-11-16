@@ -29,7 +29,7 @@ class DateRange extends AbstractRule
             throw new Exception("[Developer][Exception]: The parameters supplied to the validation rule date_range [{$currentClassName}] must be valid dates.");
         }
 
-        $this->error            =   "The field :{field} must be in the date range [{$minDate} - {$maxDate}].";
+        $this->error            =   "The field :{field} must be a date in the allowed date range [{$minDate} - {$maxDate}].";
         $this->minDateInstance  =   $minDateInstance;
     }
 
@@ -42,7 +42,7 @@ class DateRange extends AbstractRule
             return false;
         }
 
-        if ($givenDateTimeInstance < $this->minDateInstance) {
+        if ($givenDateTimeInstance < $this->minDateInstance || $givenDateTimeInstance > $this->maxDateInstance) {
             return false;
         }
 
