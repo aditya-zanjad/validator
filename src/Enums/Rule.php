@@ -5,6 +5,12 @@ declare(strict_types=1);
 namespace AdityaZanjad\Validator\Enums;
 
 use AdityaZanjad\Validator\Rules\Arr;
+use AdityaZanjad\Validator\Rules\ArrBetween;
+use AdityaZanjad\Validator\Rules\ArrGt;
+use AdityaZanjad\Validator\Rules\ArrLt;
+use AdityaZanjad\Validator\Rules\ArrMax;
+use AdityaZanjad\Validator\Rules\ArrMin;
+use AdityaZanjad\Validator\Rules\ArrRange;
 use AdityaZanjad\Validator\Rules\Boolean;
 use AdityaZanjad\Validator\Rules\Date;
 use AdityaZanjad\Validator\Rules\DateBetween;
@@ -16,8 +22,7 @@ use AdityaZanjad\Validator\Rules\DateRange;
 use AdityaZanjad\Validator\Rules\Email;
 use AdityaZanjad\Validator\Rules\Integer;
 use AdityaZanjad\Validator\Rules\Json;
-use AdityaZanjad\Validator\Rules\Num;
-use AdityaZanjad\Validator\Rules\Numeric;
+use AdityaZanjad\Validator\Rules\Number;
 use AdityaZanjad\Validator\Rules\Required;
 use AdityaZanjad\Validator\Rules\RequiredWith;
 use AdityaZanjad\Validator\Rules\RequiredWithAll;
@@ -25,9 +30,11 @@ use AdityaZanjad\Validator\Rules\RequiredWithout;
 use AdityaZanjad\Validator\Rules\RequiredWithoutAll;
 use AdityaZanjad\Validator\Rules\Str;
 use AdityaZanjad\Validator\Rules\StrBetween;
+use AdityaZanjad\Validator\Rules\StrLower;
 use AdityaZanjad\Validator\Rules\StrMax;
 use AdityaZanjad\Validator\Rules\StrMin;
 use AdityaZanjad\Validator\Rules\StrRange;
+use AdityaZanjad\Validator\Rules\StrUpper;
 use AdityaZanjad\Validator\Rules\Url;
 
 class Rule
@@ -37,7 +44,7 @@ class Rule
     PUBLIC const URL                =   Url::class;
     public const BOOL               =   Boolean::class;
     public const INT                =   Integer::class;
-    public const NUM                =   Num::class;
+    public const NUM                =   Number::class;
     public const JSON               =   Json::class;
     public const EMAIL              =   Email::class;
     public const REQ                =   Required::class;
@@ -56,6 +63,14 @@ class Rule
     public const STR_RANGE          =   StrRange::class;
     public const DATE_BT            =   DateBetween::class;
     public const STR_BT             =   StrBetween::class;
+    public const STR_UP             =   StrUpper::class;
+    public const STR_LOW            =   StrLower::class;
+    public const ARR_MIN            =   ArrMin::class;
+    public const ARR_MAX            =   ArrMax::class;
+    public const ARR_LT             =   ArrLt::class;
+    public const ARR_GT             =   ArrGt::class;
+    public const ARR_RANGE          =   ArrRange::class;
+    public const ARR_BETWEEN        =   ArrBetween::class;   
 
 
     public static function valueOf(string $name): null|string

@@ -34,7 +34,7 @@ class StrBetween extends AbstractRule
         $currentValueLength = \strlen($value);
 
         if ($currentValueLength < $this->minInvalidLength || $currentValueLength > $this->maxInvalidLength) {
-            $this->error = "The field :{field} must contain the characters between [{$this->minInvalidLength} - {$this->maxInvalidLength}] characters.";
+            $this->error = "The field :{field} must contain characters between the [{$this->minInvalidLength} - {$this->maxInvalidLength}] characters.";
             return false;
         }
 
