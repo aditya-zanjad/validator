@@ -10,7 +10,7 @@ class Integer extends AbstractRule
 {
     public function validate(mixed $value): bool
     {
-        return \filter_var($value, FILTER_VALIDATE_INT);
+        return \filter_var($value, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE) !== null;
     }
 
     public function error(): string

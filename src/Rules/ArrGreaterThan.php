@@ -7,15 +7,15 @@ namespace AdityaZanjad\Validator\Rules;
 use Exception;
 use AdityaZanjad\Validator\Base\AbstractRule;
 
-class ArrLt extends AbstractRule
+class ArrGreaterThan extends AbstractRule
 {
     protected string $error = 'The field :{field} must be valid.';
 
-    public function __construct(protected int $maxInvalidLength)
+    public function __construct(protected int $minInvalidLength)
     {
-        if ($maxInvalidLength < 0) {
+        if ($minInvalidLength < 0) {
             $currentClassName = static::class;
-            throw new Exception("[Developer][Exception]: The parameter supplied to the validation rule arr_lt [{$currentClassName}] must be valid.");
+            throw new Exception("[Developer][Exception]: The parameter supplied to the validation rule arr_gt [{$currentClassName}] must be valid.");
         }
     }
 
@@ -26,8 +26,8 @@ class ArrLt extends AbstractRule
             return false;
         }
 
-        if (\count($value) <= $this->maxInvalidLength) {
-            $this->error = "The field :{field} must not contain more than {$this->maxInvalidLength} elements.";
+        if (\count($value) <= $this->minInvalidLength) {
+            $this->error = "The field :{field} must contain more than {$this->minInvalidLength} elements.";
             return false;
         }
 

@@ -6,7 +6,9 @@ namespace AdityaZanjad\Validator\Enums;
 
 use AdityaZanjad\Validator\Rules\Arr;
 use AdityaZanjad\Validator\Rules\ArrBetween;
+use AdityaZanjad\Validator\Rules\ArrGreaterThan;
 use AdityaZanjad\Validator\Rules\ArrGt;
+use AdityaZanjad\Validator\Rules\ArrLessThan;
 use AdityaZanjad\Validator\Rules\ArrLt;
 use AdityaZanjad\Validator\Rules\ArrMax;
 use AdityaZanjad\Validator\Rules\ArrMin;
@@ -67,11 +69,10 @@ class Rule
     public const STR_LOW            =   StrLower::class;
     public const ARR_MIN            =   ArrMin::class;
     public const ARR_MAX            =   ArrMax::class;
-    public const ARR_LT             =   ArrLt::class;
-    public const ARR_GT             =   ArrGt::class;
+    public const ARR_LT             =   ArrLessThan::class;
+    public const ARR_GT             =   ArrGreaterThan::class;
     public const ARR_RANGE          =   ArrRange::class;
     public const ARR_BETWEEN        =   ArrBetween::class;   
-
 
     public static function valueOf(string $name): null|string
     {
