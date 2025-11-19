@@ -14,6 +14,11 @@ class Input
         //        
     }
 
+    public function all(): array
+    {
+        return $this->input;
+    }
+
     public function dotPaths(): array
     {
         $path       =   [];

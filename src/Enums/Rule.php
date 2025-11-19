@@ -7,9 +7,7 @@ namespace AdityaZanjad\Validator\Enums;
 use AdityaZanjad\Validator\Rules\Arr;
 use AdityaZanjad\Validator\Rules\ArrBetween;
 use AdityaZanjad\Validator\Rules\ArrGreaterThan;
-use AdityaZanjad\Validator\Rules\ArrGt;
 use AdityaZanjad\Validator\Rules\ArrLessThan;
-use AdityaZanjad\Validator\Rules\ArrLt;
 use AdityaZanjad\Validator\Rules\ArrMax;
 use AdityaZanjad\Validator\Rules\ArrMin;
 use AdityaZanjad\Validator\Rules\ArrRange;
@@ -32,10 +30,12 @@ use AdityaZanjad\Validator\Rules\RequiredWithout;
 use AdityaZanjad\Validator\Rules\RequiredWithoutAll;
 use AdityaZanjad\Validator\Rules\Str;
 use AdityaZanjad\Validator\Rules\StrBetween;
+use AdityaZanjad\Validator\Rules\StrFilled;
 use AdityaZanjad\Validator\Rules\StrLower;
 use AdityaZanjad\Validator\Rules\StrMax;
 use AdityaZanjad\Validator\Rules\StrMin;
 use AdityaZanjad\Validator\Rules\StrRange;
+use AdityaZanjad\Validator\Rules\StrRegex;
 use AdityaZanjad\Validator\Rules\StrUpper;
 use AdityaZanjad\Validator\Rules\Url;
 
@@ -72,7 +72,9 @@ class Rule
     public const ARR_LT             =   ArrLessThan::class;
     public const ARR_GT             =   ArrGreaterThan::class;
     public const ARR_RANGE          =   ArrRange::class;
-    public const ARR_BETWEEN        =   ArrBetween::class;   
+    public const ARR_BETWEEN        =   ArrBetween::class;
+    public const STR_REGEX          =   StrRegex::class;
+    public const STR_FILLED         =   StrFilled::class;
 
     public static function valueOf(string $name): null|string
     {
