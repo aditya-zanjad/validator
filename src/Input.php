@@ -90,4 +90,21 @@ class Input
 
         return isset($ref[$lastKey]);
     }
+
+    public function isMissingOrNull(string $path): bool
+    {
+        $ref        =   &$this->input;
+        $keys       =   \explode('.', $path);
+        $lastKey    =   \array_pop($keys);
+
+        foreach ($keys as $key) {
+            if (!isset($ref[$key]) || !\is_array($ref[$key])) {
+                return true;
+            }
+
+            $ref = &$ref[$key];
+        }
+
+        return !isset($ref[$lastKey]) || \is_null($ref[$lastKey]);
+    }
 }

@@ -49,6 +49,10 @@ class Validator
                 throw new Exception("[Developer][Exception]: The validation rules for the field [{$field}] must be in the form of an INDEXED ARRAY.");
             }
 
+            if (\in_array('nullable', $rules) && $this->input->isMissingOrNull($field)) {
+                continue;
+            }
+
             foreach ($rules as $index => $rule) {
                 $ruleInstance = null;
 

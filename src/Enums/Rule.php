@@ -6,6 +6,7 @@ namespace AdityaZanjad\Validator\Enums;
 
 use AdityaZanjad\Validator\Rules\Arr;
 use AdityaZanjad\Validator\Rules\ArrBetween;
+use AdityaZanjad\Validator\Rules\ArrFilled;
 use AdityaZanjad\Validator\Rules\ArrGreaterThan;
 use AdityaZanjad\Validator\Rules\ArrLessThan;
 use AdityaZanjad\Validator\Rules\ArrMax;
@@ -75,6 +76,7 @@ class Rule
     public const ARR_BETWEEN        =   ArrBetween::class;
     public const STR_REGEX          =   StrRegex::class;
     public const STR_FILLED         =   StrFilled::class;
+    public const ARR_FILLED         =   ArrFilled::class;
 
     public static function valueOf(string $name): null|string
     {
