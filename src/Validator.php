@@ -15,7 +15,7 @@ class Validator
 
     protected bool $stopOnFail = false;
 
-    protected bool $validationAlreadyPerformed = false;
+    protected bool $alreadyValidated = false;
 
     public function __construct(protected Input $input, protected array $rules)
     {
@@ -30,7 +30,7 @@ class Validator
 
     public function validate(): void
     {
-        if ($this->validationAlreadyPerformed) {
+        if ($this->alreadyValidated) {
             throw new Exception("[Developer][Exception]: The validation has already been performed for this instance. Instead, create a new instance to perform the new validation.");
         }
 
@@ -61,10 +61,10 @@ class Validator
                 }
 
                 if (\is_string($rule)) {
-                    $ruleInstance = $this->makeRuleFromName($rule);
+                    $ruleInstance = $this->makeRuleInstanceFromRuleName($rule);
                 }
 
-                if (\is_null($ruleInstance) || !$ruleInstance instanceof ValidationRule) {
+                if (!$ruleInstance instanceof ValidationRule) {
                     throw new Exception("[Developer][Exception]: The field [{$field}] has an invalid validation rule at the index [{$index}].");
                 }
 
@@ -87,7 +87,7 @@ class Validator
         }
     }
 
-    protected function makeRuleFromName(string $rule)
+    protected function makeRuleInstanceFromRuleName(string $rule)
     {
         $rule       =   \explode(':', $rule);
         $ruleClass  =   Rule::valueOf($rule[0]);
