@@ -29,7 +29,17 @@ class Uuid extends AbstractRule
      */
     public function validate(mixed $value): bool
     {
-        return \is_string($value) && !\in_array(\preg_match($this->makeRegex($this->version), $value), [false, 0]);
+        if (!\is_string($value)) {
+            return false;
+        }
+        
+        $result = \preg_match($this->makeRegex($this->version), $value);
+
+        if ($result === false) {
+            throw new Exception("[Developer][Exception]: [INTERNAL DEVELOPMENT ERROR]: The validation rule [uuid] might be using an invalid regex for validating the data.");
+        }
+
+        return $result > 0;
     }
 
     /**
