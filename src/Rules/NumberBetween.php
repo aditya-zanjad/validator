@@ -6,7 +6,7 @@ namespace AdityaZanjad\Validator\Rules;
 
 use AdityaZanjad\Validator\Base\AbstractRule;
 
-class NumBetween extends AbstractRule
+class NumberBetween extends AbstractRule
 {
     protected string $error = 'The field :{field} is invalid.';
 

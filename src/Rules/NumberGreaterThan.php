@@ -6,7 +6,7 @@ namespace AdityaZanjad\Validator\Rules;
 
 use AdityaZanjad\Validator\Base\AbstractRule;
 
-class NumGreaterThan extends AbstractRule
+class NumberGreaterThan extends AbstractRule
 {
     protected string $error = 'The field :{field} is invalid.';
 
