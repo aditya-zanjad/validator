@@ -10,7 +10,7 @@ class Email extends AbstractRule
 {
     public function validate(mixed $value): bool
     {
-        return \filter_var($value, FILTER_VALIDATE_EMAIL);
+        return \filter_var($value, FILTER_VALIDATE_EMAIL) !== false;
     }
 
     public function error(): string

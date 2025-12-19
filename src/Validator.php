@@ -8,6 +8,8 @@ use Exception;
 use AdityaZanjad\Validator\Enums\Rule;
 use AdityaZanjad\Validator\Rules\Callback;
 use AdityaZanjad\Validator\Interfaces\ValidationRule;
+use AlwaysValidates;
+use MandatoryRule;
 
 class Validator
 {
@@ -30,6 +32,8 @@ class Validator
 
     public function validate(): void
     {
+        $this->errors ??= new Error();
+
         if ($this->alreadyValidated) {
             throw new Exception("[Developer][Exception]: The validation has already been performed for this instance. Instead, create a new instance to perform the new validation.");
         }
@@ -68,6 +72,10 @@ class Validator
                     throw new Exception("[Developer][Exception]: The field [{$field}] has an invalid validation rule at the index [{$index}].");
                 }
 
+                if (!$ruleInstance instanceof MandatoryRule && $this->input->isMissingOrNull($field)) {
+                    continue;
+                }
+
                 $validationSucceeded = $ruleInstance
                     ->setFieldName($field)
                     ->setInputInstance($this->input)
@@ -93,19 +101,24 @@ class Validator
         $ruleClass  =   Rule::valueOf($rule[0]);
 
         if (\is_null($ruleClass)) {
-            throw new Exception("[Developer][Exception]: The validation rule [{$ruleClass}] does not exist.");
+            throw new Exception("[Developer][Exception]: The validation rule [{$rule[0]}] either does not exist OR is invalid.");
         }
 
         $ruleParams = isset($rule[1]) ? \explode(',', $rule[1]) : [];
         return new $ruleClass(...$ruleParams);
     }
 
-    protected function errors(): Error
+    public function errors(): Error
     {
         return $this->errors;
     }
 
-    protected function failed(): bool
+    public function passed(): bool
+    {
+        return $this->errors->isEmpty();
+    }
+
+    public function failed(): bool
     {
         return !$this->errors->isEmpty();
     }

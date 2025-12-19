@@ -129,6 +129,6 @@ class Rule
             return null;
         }
 
-        return "{$currentClassName}::{$name}";
+        return constant("{$currentClassName}::{$name}");
     }
 }
