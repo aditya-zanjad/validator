@@ -9,6 +9,8 @@ use RecursiveIteratorIterator;
 
 class Input
 {
+    protected array $dotPaths;
+
     public function __construct(protected array $input)
     {
         //        
@@ -21,8 +23,11 @@ class Input
 
     public function dotPaths(): array
     {
+        if (isset($this->dotPaths)) {
+            return $this->dotPaths;
+        }
+
         $path       =   [];
-        $result     =   [];
         $iterator   =   new RecursiveArrayIterator($this->input);
         $iterator   =   new RecursiveIteratorIterator($iterator, RecursiveIteratorIterator::SELF_FIRST);
 
@@ -30,13 +35,13 @@ class Input
             $path[$iterator->getDepth()] = $key;
 
             if (!\is_array($value)) {
-                $finalPath          =   \array_slice($path, 0, $iterator->getDepth() + 1);
-                $finalPath          =   \implode('.', $finalPath);
-                $result[$finalPath] =   $value;
+                $finalPath                  =   \array_slice($path, 0, $iterator->getDepth() + 1);
+                $finalPath                  =   \implode('.', $finalPath);
+                $this->dotPaths[$finalPath] =   $value;
             }
         }
 
-        return $result;
+        return $this->dotPaths;
     }
 
     public function set(string $path, mixed $value): static

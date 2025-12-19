@@ -5,3 +5,5 @@
 /validate.php
 /tests/test-files
 todo.md
+composer.lock
+/.github
