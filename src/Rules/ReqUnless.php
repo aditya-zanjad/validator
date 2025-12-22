@@ -7,7 +7,7 @@ namespace AdityaZanjad\Validator\Rules;
 use Exception;
 use AdityaZanjad\Validator\Base\AbstractRule;
 
-class RequiredIf extends AbstractRule
+class ReqUnless extends AbstractRule
 {
     protected array $dependencyValues = [];
 
@@ -34,7 +34,7 @@ class RequiredIf extends AbstractRule
         $valueIsNull = \is_null($value);
 
         foreach ($this->dependencyValues as $dependencyValue) {
-            if ($dependencyActualValue === $dependencyValue && $valueIsNull) {
+            if ($dependencyActualValue === $dependencyValue && !$valueIsNull) {
                 $this->error = "The field :{field} is required when the field {$this->dependency} is set.";
                 return false;
             }

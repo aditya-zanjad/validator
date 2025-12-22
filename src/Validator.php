@@ -7,9 +7,8 @@ namespace AdityaZanjad\Validator;
 use Exception;
 use AdityaZanjad\Validator\Enums\Rule;
 use AdityaZanjad\Validator\Rules\Callback;
+use AdityaZanjad\Validator\Interfaces\MandatoryRule;
 use AdityaZanjad\Validator\Interfaces\ValidationRule;
-use AlwaysValidates;
-use MandatoryRule;
 
 class Validator
 {
@@ -76,16 +75,18 @@ class Validator
                     continue;
                 }
 
-                $validationSucceeded = $ruleInstance
+                $validationSuccessful = $ruleInstance
                     ->setFieldName($field)
                     ->setInputInstance($this->input)
                     ->validate($this->input->get($field));
 
-                if ($validationSucceeded) {
+                if ($validationSuccessful) {
                     continue;
                 }
 
-                $error = \str_replace(':{field}', $field, $ruleInstance->error());
+                $error  =   $ruleInstance->error();
+                $error  =   \str_replace(':{field}', $field, $error);
+
                 $this->errors->add($field, $error);
     
                 if ($this->stopOnFail === true) {
@@ -93,6 +94,8 @@ class Validator
                 }
             }
         }
+
+        $this->alreadyValidated = true;
     }
 
     protected function makeRuleInstanceFromRuleName(string $rule)
@@ -115,11 +118,19 @@ class Validator
 
     public function passed(): bool
     {
+        if (!$this->alreadyValidated) {
+            throw new Exception("[Developer][Exception]: You must perform the validation before calling this method.");
+        }
+
         return $this->errors->isEmpty();
     }
 
     public function failed(): bool
     {
+        if (!$this->alreadyValidated) {
+            throw new Exception("[Developer][Exception]: You must perform the validation before calling this method.");
+        }
+
         return !$this->errors->isEmpty();
     }
 }

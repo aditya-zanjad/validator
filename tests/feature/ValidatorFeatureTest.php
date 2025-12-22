@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 use AdityaZanjad\Validator\Error;
 use AdityaZanjad\Validator\Input;
 use AdityaZanjad\Validator\Rules\Email;
+use AdityaZanjad\Validator\Rules\Req;
 use AdityaZanjad\Validator\Rules\Required;
 use AdityaZanjad\Validator\Rules\Same;
 use AdityaZanjad\Validator\Rules\StrMin;
@@ -16,7 +17,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 #[CoversClass(Input::class)]
 #[CoversClass(Validator::class)]
 #[CoversClass(StrMin::class)]
-#[CoversClass(Required::class)]
+#[CoversClass(Req::class)]
 #[CoversClass(Same::class)]
 #[CoversClass(Email::class)]
 final class ValidatorFeatureTest extends TestCase

@@ -6,11 +6,11 @@ namespace AdityaZanjad\Validator\Rules;
 
 use AdityaZanjad\Validator\Base\AbstractRule;
 
-class NumberMax extends AbstractRule
+class NumGreaterThan extends AbstractRule
 {
     protected string $error = 'The field :{field} is invalid.';
 
-    public function __construct(protected int|float $maxAllowedValue)
+    public function __construct(protected int|float $minInvalidValue)
     {
         //
     }
@@ -22,8 +22,8 @@ class NumberMax extends AbstractRule
             return false;
         }
 
-        if ($value > $this->maxAllowedValue) {
-            $this->error = "The field :{field} must not be greater than {$this->maxAllowedValue}.";
+        if ($value <= $this->minInvalidValue) {
+            $this->error = "The field :{field} must be greater than {$this->minInvalidValue}.";
             return false;
         }
 

@@ -6,7 +6,7 @@ namespace AdityaZanjad\Validator\Rules;
 
 use AdityaZanjad\Validator\Base\AbstractRule;
 
-class Required extends AbstractRule
+class Req extends AbstractRule
 {
     public function validate(mixed $value): bool
     {

@@ -8,7 +8,7 @@ use Closure;
 use Exception;
 use AdityaZanjad\Validator\Base\AbstractRule;
 
-class RequiredCallback extends AbstractRule
+class ReqFn extends AbstractRule
 {
     protected string $error = 'The field :{field} is invalid';
 

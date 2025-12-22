@@ -7,7 +7,7 @@ namespace AdityaZanjad\Validator\Rules;
 use Exception;
 use AdityaZanjad\Validator\Base\AbstractRule;
 
-class RequiredWithoutAll extends AbstractRule
+class ReqWithoutAll extends AbstractRule
 {
     protected array $dependencyFields = [];
 

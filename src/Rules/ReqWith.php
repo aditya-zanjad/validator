@@ -7,7 +7,7 @@ namespace AdityaZanjad\Validator\Rules;
 use Exception;
 use AdityaZanjad\Validator\Base\AbstractRule;
 
-class RequiredWithout extends AbstractRule
+class ReqWith extends AbstractRule
 {
     protected array $dependencyFields = [];
 
@@ -29,13 +29,9 @@ class RequiredWithout extends AbstractRule
 
         foreach ($this->dependencyFields as $field) {
             if ($this->input->isset($field) && $valueIsNull) {
-                return true;
+                $this->error = "The field :{field} is required with the field {$field}";
+                return false;
             }
-        }
-
-        if (\is_null($value)) {
-            $this->error = "The field :{field} is required without the field {$field}";
-            return false;
         }
 
         return true;

@@ -6,11 +6,11 @@ namespace AdityaZanjad\Validator\Rules;
 
 use AdityaZanjad\Validator\Base\AbstractRule;
 
-class NumberGreaterThan extends AbstractRule
+class NumBetween extends AbstractRule
 {
     protected string $error = 'The field :{field} is invalid.';
 
-    public function __construct(protected int|float $minInvalidValue)
+    public function __construct(protected int|float $minInvalidValue, protected int|float $maxInvalidValue)
     {
         //
     }
@@ -22,8 +22,8 @@ class NumberGreaterThan extends AbstractRule
             return false;
         }
 
-        if ($value <= $this->minInvalidValue) {
-            $this->error = "The field :{field} must be greater than {$this->minInvalidValue}.";
+        if ($value <= $this->minInvalidValue || $value >= $this->maxInvalidValue) {
+            $this->error = "The field :{field} must be between the values [{$this->minInvalidValue} - {$this->maxInvalidValue}]";
             return false;
         }
 
