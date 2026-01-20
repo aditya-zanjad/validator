@@ -15,6 +15,6 @@ class Str extends AbstractRule
 
     public function error(): string
     {
-        return "The field :{field} must be a string.";
+        return "The field :{field} must be a string";
     }
 }

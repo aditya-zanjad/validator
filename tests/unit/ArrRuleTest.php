@@ -9,7 +9,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 
 #[CoversClass(Arr::class)]
 #[CoversClass(AbstractRule::class)]
-final class ArrValidationRuleTest extends TestCase
+final class ArrRuleTest extends TestCase
 {
     public function testPasses()
     {
