@@ -10,11 +10,11 @@ class Boolean extends AbstractRule
 {
     public function validate(mixed $value): bool
     {
-        if (\is_string($value) && empty($value)) {
+        if (\is_string($value) && \strlen($value) === 0) {
             return false;
         }
 
-        return \filter_var($value, FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE) !== null;
+        return !\is_null(\filter_var($value, FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE));
     }
 
     public function error(): string
