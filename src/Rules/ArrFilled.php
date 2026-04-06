@@ -18,7 +18,7 @@ class ArrFilled extends AbstractRule
         }
 
         if (\count($value) < 1) {
-            $this->error = 'The field :{field} must contain at least one element.';
+            $this->error = 'The field :{field} must not be an empty array.';
             return false;
         }
 
@@ -27,6 +27,6 @@ class ArrFilled extends AbstractRule
 
     public function error(): string
     {
-        return 'The field :{field} must be an array.';
+        return $this->error;
     }
 }

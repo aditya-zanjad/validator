@@ -14,18 +14,15 @@ class ArrBetween extends AbstractRule
     public function __construct(protected int $minRequiredLength, protected int $maxAllowedLength)
     {
         if ($minRequiredLength < 0) {
-            $currentClassName = static::class;
-            throw new Exception("[Developer][Exception]: The parameter supplied to the validation rule arr_between [{$currentClassName}] must be valid.");
+            throw new Exception("[Developer][Exception]: The parameter [min_length] supplied to the validation rule [arr_between] must be valid.");
         }
 
         if ($maxAllowedLength < 0) {
-            $currentClassName = static::class;
-            throw new Exception("[Developer][Exception]: The parameter supplied to the validation rule arr_between [{$currentClassName}] must be valid.");
+            throw new Exception("[Developer][Exception]: The parameter [max_length] supplied to the validation rule [arr_between] must be valid.");
         }
 
         if ($minRequiredLength >= $maxAllowedLength) {
-            $currentClassName = static::class;
-            throw new Exception("[Developer][Exception]: The parameter max length supplied to the validation rule arr_between [{$currentClassName}] must be greater than the parameter max length.");
+            throw new Exception("[Developer][Exception]: The parameter [max_length] supplied to the validation rule [arr_between] must be greater than the parameter [max_length].");
         }
     }
 
@@ -39,7 +36,7 @@ class ArrBetween extends AbstractRule
         $currentArrLength = \count($value);
 
         if ($currentArrLength <= $this->minRequiredLength || $currentArrLength >= $this->maxAllowedLength) {
-            $this->error = "The field :{field} must contain number of elements between [{$this->minRequiredLength} - {$this->maxAllowedLength}].";
+            $this->error = "The field :{field} must contain elements between the limit {$this->minRequiredLength} to {$this->maxAllowedLength}.";
             return false;
         }
 

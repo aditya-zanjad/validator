@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
+use PHPUnit\Framework\TestCase;
 use AdityaZanjad\Validator\Input;
 use AdityaZanjad\Validator\Rules\Req;
 use AdityaZanjad\Validator\Validator;
-use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\UsesClass;
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 #[UsesClass(Input::class)]
 #[UsesClass(Validator::class)]
