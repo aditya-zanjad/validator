@@ -20,11 +20,11 @@ class Date extends AbstractRule
 
     public function validate(mixed $value): bool
     {
-        if (empty($this->format)) {
+        if (!empty($this->format)) {
             $this->error = "The field :{field} must be a valid date with the format {$this->format}";
             return $this->isDateTimeWithFormatParsable($value, $this->format);
         }
-
+        
         return $this->IsValidDateTime($value);
     }
 

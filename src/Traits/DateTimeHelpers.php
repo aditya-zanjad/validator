@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AdityaZanjad\Validator\Traits;
 
 use DateTime;
+use DateTimeInterface;
 use DateMalformedStringException;
 
 trait DateTimeHelpers
@@ -90,18 +91,37 @@ trait DateTimeHelpers
 
     protected function IsValidDateTime(mixed $givenDateTime): bool
     {
+        if ($givenDateTime instanceof DateTimeInterface) {
+            return true;
+        }
+
         if (!\is_string($givenDateTime)) {
             return false;
         }
 
-        try {
-            new DateTime($givenDateTime);
-            return true;
-        } catch (DateMalformedStringException $e) {
-            // var_dump($e); exit;
+        $givenDateTime = \trim($givenDateTime);
+
+        if (empty($givenDateTime)) {
+            return false;
         }
 
-        return false;
+        $parsedDateTime = \date_parse($givenDateTime);
+
+        if ($parsedDateTime['error_count'] > 0 || $parsedDateTime['warning_count'] > 0) {
+            return false;
+        }
+
+        $parsedDateIsInvalid = in_array(false, [$parsedDateTime['year'], $parsedDateTime['month'], $parsedDateTime['day']], true);
+
+        if ($parsedDateIsInvalid) {
+            return false;
+        }
+
+        if (!\checkdate($parsedDateTime['month'], $parsedDateTime['day'], $parsedDateTime['year'])) {
+            return false;
+        }
+
+        return (bool) date_create($givenDateTime);
     }
 
     protected function isDateTimeParsable(mixed $givenDateTime): bool
