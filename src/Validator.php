@@ -20,7 +20,7 @@ class Validator
 
     public function __construct(protected Input $input, protected array $rules)
     {
-        //
+        $this->errors ??= new Error();
     }
 
     protected function stopOnFirstFailure(bool $decision = true): static
@@ -31,8 +31,6 @@ class Validator
 
     public function validate(): void
     {
-        $this->errors ??= new Error();
-
         if ($this->alreadyValidated) {
             throw new Exception("[Developer][Exception]: The validation has already been performed for this instance. Instead, create a new instance to perform the new validation.");
         }

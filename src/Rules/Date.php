@@ -11,7 +11,7 @@ class Date extends AbstractRule
 {
     use DateTimeHelpers;
 
-    protected string $error = 'The field :{field} must be a valid date.';
+    protected string $error;
 
     public function __construct(protected string $format = '')
     {
@@ -20,16 +20,15 @@ class Date extends AbstractRule
 
     public function validate(mixed $value): bool
     {
-        if (!empty($this->format)) {
-            $this->error = "The field :{field} must be a valid date with the format {$this->format}";
-            return $this->isDateTimeWithFormatParsable($value, $this->format);
-        }
-        
-        return $this->IsValidDateTime($value);
+        return empty($this->format)
+            ? $this->IsValidDateTime($value)
+            : $this->isDateTimeWithFormatParsable($value, $this->format);
     }
 
     public function error(): string
     {
-        return $this->error;
+        return empty($this->format)
+            ? 'The field :{field} must be a valid date.'
+            : 'The field :{field} must be a valid date with the format {$this->format}';
     }
 }

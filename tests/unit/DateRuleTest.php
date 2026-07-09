@@ -116,6 +116,7 @@ class DateRuleTest extends TestCase
 
             $this->assertIsBool($result);
             $this->assertFalse($result);
+            $this->assertEquals($dateValidator->error(), 'The field :{field} must be a valid date.');
         }
     }
 }

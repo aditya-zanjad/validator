@@ -20,5 +20,8 @@
         "friendsofphp/php-cs-fixer": "dev-master",
         "phpstan/phpstan": "2.1.x-dev",
         "vimeo/psalm": "^6.5"
+    },
+    "suggest": {
+        "league/uri": "Provides RFC 3986-compliant URL validation with internationalized domain name (IDN) support."
     }
 }
