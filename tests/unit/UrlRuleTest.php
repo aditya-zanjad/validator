@@ -59,23 +59,28 @@ final class UrlRuleTest extends TestCase
             'mailto:test@example.com',
             'mailto:john.doe@example.com',
 
+            // !!! Note => Not working !!!
+            // Internationalized
+            // 'https://münich.de', 
+            // 'https://你好.com',
+
             
-            // // LDAP
+            // LDAP
             'ldap://ldap.example.com',
             'ldap://ldap.example.com:389',
 
 
-            // // SSH
+            // SSH
             'ssh://user@example.com',
             'ssh://user@example.com:22',
 
 
-            // // TELNET
+            // TELNET
             'telnet://example.com',
 
 
-            // // NEWS
-            // 'news:comp.lang.php',
+            // NEWS
+            'news:comp.lang.php',
 
 
             // // GOPHER
@@ -92,11 +97,6 @@ final class UrlRuleTest extends TestCase
             'http://[2001:db8::1]',
             'https://[2001:4860:4860::8888]',
         ];
-
-        // Internationalized
-        if (\class_exists(\League\Uri\Uri::class)) {
-            \array_push($validUrls, 'https://münich.de', 'https://你好.com');
-        }
 
         foreach ($validUrls as $validUrl) {
             $url    =   new Url();

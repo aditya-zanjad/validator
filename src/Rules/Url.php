@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace AdityaZanjad\Validator\Rules;
 
-use Throwable;
 use Exception;
 use AdityaZanjad\Validator\Base\AbstractRule;
 
@@ -39,65 +38,19 @@ class Url extends AbstractRule
             return false;
         }
 
-        $value = \trim($value);
-
-        if (empty($value)) {
+        if (empty(\trim($value))) {
             return false;
         }
 
-        return $this->validateWithCorePhp($value);
-
-        return \class_exists(\League\Uri\Uri::class)
-            ? $this->validateWithLeagueUriPackage($value)
-            : $this->validateWithCorePhp($value);
-    }
-
-    protected function validateWithCorePhp(string $value): bool
-    {
         if (empty($this->suppliedOptions)) {
             return \filter_var($value, FILTER_VALIDATE_URL) !== false;
         }
 
-        if (\in_array($this->validOptions['path'], $this->suppliedOptions) && \filter_var($value, FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED) === false) {
+        if ($this->isUrlPathValidIfProvided($value)) {
             return false;
         }
 
-        if (\in_array($this->validOptions['query'], $this->suppliedOptions) && \filter_var($value, FILTER_VALIDATE_URL, FILTER_FLAG_QUERY_REQUIRED) === false) {
-            return false;
-        }
-
-        return true;
-    }
-
-    protected function validateWithLeagueUriPackage(string $value): bool
-    {
-        try {
-            if (!\is_null(\League\Uri\Urn::parse($value))) {
-                return true;
-            }
-
-            $uri = \League\Uri\Uri::new($value);
-
-            if (empty($uri->getScheme())) {
-                return false;
-            }
-
-            if (empty($uri->getHost())) {
-                return false;
-            }
-
-            if (\in_array($this->validOptions['path'], $this->suppliedOptions) && empty($uri->getPath())) {
-                return false;
-            }
-
-            if (\in_array($this->validOptions['query'], $this->suppliedOptions) && empty($uri->getQuery())) {
-                return false;
-            }
-        } catch (\League\Uri\Exceptions\SyntaxError $err) {
-            // var_dump($err); exit;
-            return false;
-        } catch (Throwable $err) {
-            // var_dump($err); exit;
+        if ($this->isUrlQueryValidIfProvided($value)) {
             return false;
         }
 
@@ -107,5 +60,15 @@ class Url extends AbstractRule
     public function error(): string
     {
         return 'The field :{field} must be a valid URL.';
+    }
+
+    protected function isUrlPathValidIfProvided(string $url): bool
+    {
+        return \in_array($this->validOptions['path'], $this->suppliedOptions) && \filter_var($url, FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED) === false;
+    }
+
+    protected function isUrlQueryValidIfProvided(string $url): bool
+    {
+        return \in_array($this->validOptions['query'], $this->suppliedOptions) && \filter_var($url, FILTER_VALIDATE_URL, FILTER_FLAG_QUERY_REQUIRED) === false;
     }
 }
