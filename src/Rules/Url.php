@@ -24,37 +24,39 @@ class Url extends AbstractRule
             throw new Exception("[Developer][Exception]: The validation rule [" . static::class . "] accepts only two parameters.");
         }
 
-        if (!empty($options) && !empty(\array_diff($options, $this->validOptions))) {
-            $validOptions = \implode(', ', $this->validOptions);
-            throw new Exception("[Developer][Exception]: The validation rule [" . static::class . "] accepts only these options: {$validOptions}");
+        $options = \array_values($options);
+
+        if ($options !== \array_unique($options)) {
+            throw new Exception("[Developer][Exception]: The validation rule [" . static::class . "] must not be supplied with duplicated parameters.");
         }
 
         $this->suppliedOptions = $options;
+
+        if (empty($options)) {
+            return;
+        }
+
+        $invalidOptions = \array_diff($options, $this->validOptions);
+
+        if (!empty($invalidOptions)) {
+            $validOptions = \implode(', ', $this->validOptions);
+            throw new Exception("[Developer][Exception]: The validation rule [" . static::class . "] accepts only these options: {$validOptions}");
+        }
     }
 
     public function validate(mixed $value): bool
     {
-        if (!\is_string($value)) {
-            return false;
+        $options = 0;
+
+        if ($this->shouldValidateUrlPath()) {
+            $options |= FILTER_FLAG_PATH_REQUIRED;
         }
 
-        if (empty(\trim($value))) {
-            return false;
+        if ($this->shouldValidateUrlQuery()) {
+            $options |= FILTER_FLAG_QUERY_REQUIRED;
         }
 
-        if (empty($this->suppliedOptions)) {
-            return \filter_var($value, FILTER_VALIDATE_URL) !== false;
-        }
-
-        if ($this->isUrlPathValidIfProvided($value)) {
-            return false;
-        }
-
-        if ($this->isUrlQueryValidIfProvided($value)) {
-            return false;
-        }
-
-        return true;
+        return \filter_var($value, FILTER_VALIDATE_URL, $options) !== false;
     }
 
     public function error(): string
@@ -62,13 +64,13 @@ class Url extends AbstractRule
         return 'The field :{field} must be a valid URL.';
     }
 
-    protected function isUrlPathValidIfProvided(string $url): bool
+    protected function shouldValidateUrlPath(): bool
     {
-        return \in_array($this->validOptions['path'], $this->suppliedOptions) && \filter_var($url, FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED) === false;
+        return \in_array($this->validOptions['path'], $this->suppliedOptions);
     }
 
-    protected function isUrlQueryValidIfProvided(string $url): bool
+    protected function shouldValidateUrlQuery(): bool
     {
-        return \in_array($this->validOptions['query'], $this->suppliedOptions) && \filter_var($url, FILTER_VALIDATE_URL, FILTER_FLAG_QUERY_REQUIRED) === false;
+        return \in_array($this->validOptions['query'], $this->suppliedOptions);
     }
 }

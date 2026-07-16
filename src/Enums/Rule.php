@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace AdityaZanjad\Validator\Enums;
 
 use AdityaZanjad\Validator\Rules\Arr;
-use AdityaZanjad\Validator\Rules\ArrBetween;
-use AdityaZanjad\Validator\Rules\ArrFilled;
-use AdityaZanjad\Validator\Rules\ArrGreaterThan;
-use AdityaZanjad\Validator\Rules\ArrLessThan;
 use AdityaZanjad\Validator\Rules\ArrMax;
 use AdityaZanjad\Validator\Rules\ArrMin;
+use AdityaZanjad\Validator\Rules\ArrFilled;
+use AdityaZanjad\Validator\Rules\ArrBetween;
+use AdityaZanjad\Validator\Rules\ArrGreaterThan;
+use AdityaZanjad\Validator\Rules\ArrLessThan;
 use AdityaZanjad\Validator\Rules\ArrRange;
 use AdityaZanjad\Validator\Rules\Boolean;
 use AdityaZanjad\Validator\Rules\Date;
@@ -122,15 +122,10 @@ class Rule
     public const STR_LT             =   StrLessThan::class;
     public const STR_SIZE           =   StrSize::class;
 
-    public static function valueOf(string $name): null|string
+
+    public static function valueOf(string $name): ?string
     {
-        $name               =   \strtoupper($name);
-        $currentClassName   =   static::class;
-
-        if (!\defined("{$currentClassName}::{$name}")) {
-            return null;
-        }
-
-        return constant("{$currentClassName}::{$name}");
+        $classConstant = static::class . '::' . \strtoupper($name);
+        return \defined($classConstant) ? \constant($classConstant) : null;
     }
 }
