@@ -13,14 +13,14 @@ class NumEq extends AbstractRule
 
     public function __construct(protected int|float|string $allowedValue)
     {
-        if (\filter_var($allowedValue, FILTER_VALIDATE_FLOAT) === false || \filter_var($allowedValue, FILTER_VALIDATE_INT) === false) {
+        if (\filter_var($allowedValue, FILTER_VALIDATE_FLOAT) === false && \filter_var($allowedValue, FILTER_VALIDATE_INT) === false) {
             throw new Exception("[Developer][Exception]: The parameter supplied to the validation rule num_eq is invalid.");
         }
     }
 
     public function validate(mixed $value): bool
     {
-        if (\filter_var($value, FILTER_VALIDATE_FLOAT) === false || \filter_var($value, FILTER_VALIDATE_INT) === false) {
+        if (\is_bool($value) || (\filter_var($value, FILTER_VALIDATE_FLOAT) === false && \filter_var($value, FILTER_VALIDATE_INT) === false)) {
             $this->error = 'The field :{field} must be a valid number';
             return false;
         }

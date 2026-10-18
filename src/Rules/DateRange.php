@@ -31,6 +31,7 @@ class DateRange extends AbstractRule
 
         $this->error            =   "The field :{field} must be a date in the allowed date range [{$minDate} - {$maxDate}].";
         $this->minDateInstance  =   $minDateInstance;
+        $this->maxDateInstance  =   $maxDateInstance;
     }
 
     public function validate(mixed $value): bool

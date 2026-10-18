@@ -18,12 +18,12 @@ class StrLower extends AbstractRule
         }
 
         if (\function_exists('\\mb_strtolower') && mb_strtolower($value) !== $value) {
-            $this->error = 'The field :{field} must contain only the uppercase letters.';
+            $this->error = 'The field :{field} must contain only the lowercase letters.';
             return false;
         }
 
         if (\strtolower($value) !== $value) {
-            $this->error = 'The field :{field} must contain only the uppercase letters.';
+            $this->error = 'The field :{field} must contain only the lowercase letters.';
             return false;
         }
 

@@ -7,8 +7,9 @@ namespace AdityaZanjad\Validator\Rules;
 use Closure;
 use Exception;
 use AdityaZanjad\Validator\Base\AbstractRule;
+use AdityaZanjad\Validator\Interfaces\MandatoryRule;
 
-class ReqFn extends AbstractRule
+class ReqFn extends AbstractRule implements MandatoryRule
 {
     protected string $error = 'The field :{field} is invalid';
 

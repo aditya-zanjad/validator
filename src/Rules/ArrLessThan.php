@@ -26,8 +26,8 @@ class ArrLessThan extends AbstractRule
             return false;
         }
 
-        if (\count($value) <= $this->maxInvalidLength) {
-            $this->error = "The field :{field} must not contain more than {$this->maxInvalidLength} elements.";
+        if (\count($value) >= $this->maxInvalidLength) {
+            $this->error = "The field :{field} must contain less than {$this->maxInvalidLength} elements.";
             return false;
         }
 
@@ -36,6 +36,6 @@ class ArrLessThan extends AbstractRule
 
     public function error(): string
     {
-        return 'The field :{field} must be an array.';
+        return $this->error;
     }
 }

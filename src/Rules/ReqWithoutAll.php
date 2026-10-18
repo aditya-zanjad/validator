@@ -6,8 +6,9 @@ namespace AdityaZanjad\Validator\Rules;
 
 use Exception;
 use AdityaZanjad\Validator\Base\AbstractRule;
+use AdityaZanjad\Validator\Interfaces\MandatoryRule;
 
-class ReqWithoutAll extends AbstractRule
+class ReqWithoutAll extends AbstractRule implements MandatoryRule
 {
     protected array $dependencyFields = [];
 
@@ -17,7 +18,7 @@ class ReqWithoutAll extends AbstractRule
     {
         if (empty($dependencyFields)) {
             $currentClassName = static::class;
-            throw new Exception("[Developer][Exception]: The rule required_with [{$currentClassName}] requires at least one parameter.");
+            throw new Exception("[Developer][Exception]: The rule required_without_all [{$currentClassName}] requires at least one parameter.");
         }
 
         $this->dependencyFields = $dependencyFields;
@@ -26,14 +27,14 @@ class ReqWithoutAll extends AbstractRule
     public function validate(mixed $value): bool
     {
         foreach ($this->dependencyFields as $field) {
-            if (!$this->input->isset($field)) {
+            if ($this->input->isset($field)) {
                 return true;
             }
         }
 
-        if (!\is_null($value)) {
-            $dependencyFieldsJoined =   \implode(', ', $this->dependencyFields);
-            $this->error            =   "The field :{field} must not be present when these fields are present: {$dependencyFieldsJoined}";
+        if (\is_null($value)) {
+            $dependencyFieldsJoined = \implode(', ', $this->dependencyFields);
+            $this->error            = "The field :{field} is required when none of {$dependencyFieldsJoined} are present.";
 
             return false;
         }

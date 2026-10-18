@@ -25,7 +25,7 @@ class File extends AbstractRule
 
         if (\is_array($value)) {
             return isset($value['error'])
-                && $value['error'] !== UPLOAD_ERR_OK
+                && $value['error'] === UPLOAD_ERR_OK
                 && isset($value['tmp_name'])
                 && \is_uploaded_file($value['tmp_name']);
         }

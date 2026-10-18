@@ -18,12 +18,12 @@ class FileLessThan extends AbstractRule
 
     public function __construct(int|float|string $maxInvalidSize)
     {
-        $this->error    =   "The file :{field} must be greater than the size {$maxInvalidSize}.";
+        $this->error    =   "The file :{field} must be less than the size {$maxInvalidSize}.";
         $maxInvalidSize =   $this->getFilteredFileSize($maxInvalidSize);
 
         if (\is_null($maxInvalidSize)) {
             $currentClass = static::class;
-            throw new Exception("[Developer][Exception]: The parameter max invalid size passed to the validation rule file_min [{$currentClass}] is invalid.");
+            throw new Exception("[Developer][Exception]: The parameter max invalid size passed to the validation rule file_lt [{$currentClass}] is invalid.");
         }
 
         $this->maxInvalidSize = $maxInvalidSize;

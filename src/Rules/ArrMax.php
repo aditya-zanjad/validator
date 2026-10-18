@@ -27,7 +27,7 @@ class ArrMax extends AbstractRule
         }
 
         if (\count($value) > $this->maxAllowedLength) {
-            $this->error = "The field :{field} must contain at least {$this->maxAllowedLength} elements.";
+            $this->error = "The field :{field} must not contain more than {$this->maxAllowedLength} elements.";
             return false;
         }
 
@@ -36,6 +36,6 @@ class ArrMax extends AbstractRule
 
     public function error(): string
     {
-        return 'The field :{field} must be an array.';
+        return $this->error;
     }
 }

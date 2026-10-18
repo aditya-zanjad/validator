@@ -18,7 +18,7 @@ class StrFilled extends AbstractRule
             return false;
         }
 
-        if (\strlen($value)) {
+        if (\strlen($value) < 1) {
             return false;
         }
 

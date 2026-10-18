@@ -17,7 +17,7 @@ class NumGreaterThan extends AbstractRule
 
     public function validate(mixed $value): bool
     {
-        if (\filter_var($value, FILTER_VALIDATE_FLOAT) !== false) {
+        if (\is_bool($value) || \filter_var($value, FILTER_VALIDATE_FLOAT) === false) {
             $this->error = 'The field :{field} must be a valid number.';
             return false;
         }

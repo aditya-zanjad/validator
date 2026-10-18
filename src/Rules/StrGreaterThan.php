@@ -22,7 +22,7 @@ class StrGreaterThan extends AbstractRule
             return false;
         }
 
-        if (\strlen($value) > $this->minInvalidLength) {
+        if (\strlen($value) <= $this->minInvalidLength) {
             $this->error = "The field :{field} must contain more than {$this->minInvalidLength} characters.";
             return false;
         }

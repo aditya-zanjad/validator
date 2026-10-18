@@ -6,8 +6,9 @@ namespace AdityaZanjad\Validator\Rules;
 
 use Exception;
 use AdityaZanjad\Validator\Base\AbstractRule;
+use AdityaZanjad\Validator\Interfaces\MandatoryRule;
 
-class ReqWith extends AbstractRule
+class ReqWith extends AbstractRule implements MandatoryRule
 {
     protected array $dependencyFields = [];
 

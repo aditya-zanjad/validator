@@ -48,6 +48,6 @@ class ArrRange extends AbstractRule
 
     public function error(): string
     {
-        return 'The field :{field} must be an array.';
+        return $this->error;
     }
 }

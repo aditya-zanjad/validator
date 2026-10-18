@@ -10,7 +10,7 @@ class Url extends AbstractRule
 {
     public function validate(mixed $value): bool
     {
-        return \filter_var($value, FILTER_VALIDATE_URL);
+        return \filter_var($value, FILTER_VALIDATE_URL) !== false;
     }
 
     public function error(): string

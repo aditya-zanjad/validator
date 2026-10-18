@@ -15,12 +15,12 @@ class StrBetween extends AbstractRule
     {
         if ($minInvalidLength < 0 || $maxInvalidLength < 0) {
             $currentClassName = static::class;
-            throw new Exception("[Developer][Exception]: The parameters passed to the validation rule str_range [{$currentClassName}] are invalid.");
+            throw new Exception("[Developer][Exception]: The parameters passed to the validation rule str_between [{$currentClassName}] are invalid.");
         }
 
         if ($minInvalidLength >= $maxInvalidLength) {
             $currentClassName = static::class;
-            throw new Exception("[Developer][Exception]: The min length parameter passed to the validation rule str_range [{$currentClassName}] must be less than the max length parameter..");
+            throw new Exception("[Developer][Exception]: The min length parameter passed to the validation rule str_between [{$currentClassName}] must be less than the max length parameter..");
         }
     }
 
@@ -33,7 +33,7 @@ class StrBetween extends AbstractRule
 
         $currentValueLength = \strlen($value);
 
-        if ($currentValueLength < $this->minInvalidLength || $currentValueLength > $this->maxInvalidLength) {
+        if ($currentValueLength <= $this->minInvalidLength || $currentValueLength >= $this->maxInvalidLength) {
             $this->error = "The field :{field} must contain characters between the [{$this->minInvalidLength} - {$this->maxInvalidLength}] characters.";
             return false;
         }

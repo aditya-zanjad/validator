@@ -33,7 +33,7 @@ class StrRange extends AbstractRule
 
         $currentValueLength = \strlen($value);
 
-        if ($currentValueLength <= $this->minValidLength || $currentValueLength >= $this->maxValidLength) {
+        if ($currentValueLength < $this->minValidLength || $currentValueLength > $this->maxValidLength) {
             $this->error = "The field :{field} must contain characters in the allowed range [{$this->minValidLength} - {$this->maxValidLength}].";
             return false;
         }

@@ -6,8 +6,9 @@ namespace AdityaZanjad\Validator\Rules;
 
 use Exception;
 use AdityaZanjad\Validator\Base\AbstractRule;
+use AdityaZanjad\Validator\Interfaces\MandatoryRule;
 
-class ReqWithout extends AbstractRule
+class ReqWithout extends AbstractRule implements MandatoryRule
 {
     protected array $dependencyFields = [];
 
@@ -17,7 +18,7 @@ class ReqWithout extends AbstractRule
     {
         if (empty($dependencyFields)) {
             $currentClassName = static::class;
-            throw new Exception("[Developer][Exception]: The rule required_with [{$currentClassName}] requires at least one parameter.");
+            throw new Exception("[Developer][Exception]: The rule required_without [{$currentClassName}] requires at least one parameter.");
         }
 
         $this->dependencyFields = $dependencyFields;
@@ -28,14 +29,10 @@ class ReqWithout extends AbstractRule
         $valueIsNull = \is_null($value);
 
         foreach ($this->dependencyFields as $field) {
-            if ($this->input->isset($field) && $valueIsNull) {
-                return true;
+            if (!$this->input->isset($field) && $valueIsNull) {
+                $this->error = "The field :{field} is required without the field {$field}";
+                return false;
             }
-        }
-
-        if (\is_null($value)) {
-            $this->error = "The field :{field} is required without the field {$field}";
-            return false;
         }
 
         return true;

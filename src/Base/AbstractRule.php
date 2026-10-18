@@ -25,8 +25,10 @@ abstract class AbstractRule implements ValidationRule
         return $this;
     }
 
+    protected string $error = "The field :{field} is invalid.";
+
     public function error(): string
     {
-        return "The field :{field} is invalid.";
+        return $this->error;
     }
 }

@@ -32,8 +32,12 @@ class Json extends AbstractRule
         return 'The field :{field} must be a valid JSON.';
     }
 
-    protected function isJson(mixed $content)
+    protected function isJson(mixed $content): bool
     {
+        if (!\is_string($content)) {
+            return false;
+        }
+
         if (\function_exists('\\json_validate')) {
             return \json_validate($content);
         }

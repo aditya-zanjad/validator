@@ -13,11 +13,11 @@ class NumRange extends AbstractRule
 
     public function __construct(protected int|float|string $minAllowedValue, protected int|float|string $maxAllowedValue)
     {
-        if (\filter_var($minAllowedValue, FILTER_VALIDATE_FLOAT) === false || \filter_var($minAllowedValue, FILTER_VALIDATE_INT) === false) {
+        if (\filter_var($minAllowedValue, FILTER_VALIDATE_FLOAT) === false && \filter_var($minAllowedValue, FILTER_VALIDATE_INT) === false) {
             throw new Exception("[Developer][Exception]: The parameter min allowed value passed to the validation rule num_range is invalid.");
         }
 
-        if (\filter_var($maxAllowedValue, FILTER_VALIDATE_FLOAT) === false || \filter_var($maxAllowedValue, FILTER_VALIDATE_INT) === false) {
+        if (\filter_var($maxAllowedValue, FILTER_VALIDATE_FLOAT) === false && \filter_var($maxAllowedValue, FILTER_VALIDATE_INT) === false) {
             throw new Exception("[Developer][Exception]: The parameter max allowed value passed to the validation rule num_range is invalid.");
         }
 
@@ -28,7 +28,7 @@ class NumRange extends AbstractRule
 
     public function validate(mixed $value): bool
     {
-        if (\filter_var($value, FILTER_VALIDATE_FLOAT) !== false || \filter_var($value, FILTER_VALIDATE_INT) !== false) {
+        if (\is_bool($value) || (\filter_var($value, FILTER_VALIDATE_FLOAT) === false && \filter_var($value, FILTER_VALIDATE_INT) === false)) {
             $this->error = 'The field :{field} must be a valid number.';
             return false;
         }
