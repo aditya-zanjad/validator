@@ -5,12 +5,11 @@ declare(strict_types=1);
 use PHPUnit\Framework\TestCase;
 use AdityaZanjad\Validator\Error;
 use AdityaZanjad\Validator\Input;
-use AdityaZanjad\Validator\Rules\Email;
 use AdityaZanjad\Validator\Rules\Req;
-use AdityaZanjad\Validator\Rules\Required;
-use AdityaZanjad\Validator\Rules\Same;
-use AdityaZanjad\Validator\Rules\StrMin;
 use AdityaZanjad\Validator\Validator;
+use AdityaZanjad\Validator\Rules\Same;
+use AdityaZanjad\Validator\Rules\Email;
+use AdityaZanjad\Validator\Rules\StrMin;
 use PHPUnit\Framework\Attributes\CoversClass;
 
 #[CoversClass(Error::class)]
